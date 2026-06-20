@@ -3,6 +3,8 @@
 **CatalogKit** is a lightweight, modular toolkit for building data catalog and
 lineage systems.
 
+**Status:** CatalogKit is in early development (0.x). It works and is usable today, but the artifact contract is still stabilizing and may change before 1.0. Pin versions for anything you depend on.
+
 Many catalog tools are expensive, platform-heavy, or more than a small team
 needs. CatalogKit takes a simpler approach: headless, deterministic primitives
 that extract structure from the SQL and analytics code you already have, then
@@ -27,15 +29,14 @@ cleanly.
   merge, and validation
 - `catalogkit-query` - single-statement SQL structure mapping that preserves the
   `QueryMap` contract
+- `catalogkit-lineage` - project-level SQL lineage for dbt manifests and SQL
+  folders
 - `catalogkit` - thin meta-package for convenience installs
 
 ## Install
 
-Install only the query tool and shared core:
-
-```bash
-python -m pip install catalogkit-query
-```
+Install individual CatalogKit modules directly when you only want a subset of
+the suite.
 
 Install the current CatalogKit module set:
 
@@ -48,6 +49,7 @@ Import from the shared namespace:
 ```python
 from catalogkit.core import Node, Edge, Evidence
 from catalogkit.query import build_query_map
+from catalogkit.lineage import build_lineage_map
 ```
 
 ## Repository Layout
@@ -57,6 +59,7 @@ CatalogKit/
   packages/
     catalogkit-core/
     catalogkit-query/
+    catalogkit-lineage/
     catalogkit/
   docs/
   .github/workflows/
@@ -79,11 +82,12 @@ CatalogKit/
 
 ## Local Development
 
-Install both current packages in editable mode:
+Install the current packages in editable mode:
 
 ```bash
 python -m pip install -e packages/catalogkit-core
 python -m pip install -e "packages/catalogkit-query[dev,release]"
+python -m pip install -e "packages/catalogkit-lineage[dev,release]"
 ```
 
 Build the meta-package when you want to validate the convenience install path:
@@ -103,6 +107,7 @@ Build a package locally:
 ```bash
 python -m build packages/catalogkit-core
 python -m build packages/catalogkit-query
+python -m build packages/catalogkit-lineage
 python -m build packages/catalogkit
 ```
 
@@ -110,12 +115,7 @@ python -m build packages/catalogkit
 
 - [`packages/catalogkit-core/docs/contract.md`](packages/catalogkit-core/docs/contract.md)
 - [`packages/catalogkit-query/docs/limitations.md`](packages/catalogkit-query/docs/limitations.md)
-
-## Release Notes
-
-- `catalogkit-query` is the active query tool distribution.
-- `querymap` should be maintained only as a deprecated pointer package during
-  the migration window and must not receive new functionality.
+- [`packages/catalogkit-lineage/docs/limitations.md`](packages/catalogkit-lineage/docs/limitations.md)
 
 ## License
 

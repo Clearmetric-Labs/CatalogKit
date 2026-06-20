@@ -33,7 +33,9 @@ def normalize_identifier(value: str) -> str:
 
 def normalize_identifier_parts(parts: Iterable[str]) -> str:
     """Normalize already separated identifier parts into canonical dotted form."""
-    normalized_parts = [normalize_identifier_part(part) for part in parts if str(part).strip()]
+    normalized_parts = [
+        normalize_identifier_part(part) for part in parts if str(part).strip()
+    ]
     if not normalized_parts:
         raise CanonicalIdError("Identifier must contain at least one non-empty part.")
     return ".".join(normalized_parts)

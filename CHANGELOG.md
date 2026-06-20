@@ -2,23 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.1.0 - Unreleased
-
-Initial public OSS release candidate.
+## 0.1.2 - 2026-06-20
 
 ### Changed
 
-- migrated the repo to the `CatalogKit` namespace-package monorepo layout
-- renamed the shared distribution to `catalogkit-core`
-- renamed the query tool distribution to `catalogkit-query`
-- added the thin `catalogkit` meta-package for convenience installs
+- aligned `catalogkit-lineage` package exports, README examples, and local development instructions with the existing CatalogKit module conventions
+- grouped OpenLineage export inputs by output column instead of emitting one export row per lineage edge
+- made lineage traversal selections and manifest compiled-path handling fail loudly on invalid input
+- tightened release metadata so the coordinated `0.1.2` package set resolves to the freshly published module versions
+- added publish-time version checks so package tags cannot drift from source versions
 
 ### Added
 
-- deterministic relation extraction for supported single-statement SQL inputs
-- canonical `QueryMap` artifact with stable top-level shape
-- CLI text and JSON output modes
-- contract docs, governance files, and release validation workflow
+- first PyPI release of `catalogkit-lineage` for project-level SQL lineage from dbt manifests and SQL folders
+- focused lineage regression coverage for grouped OpenLineage export, unknown traversal selections, manifest path escapes, and duplicate SQL-folder dataset names
 
 ### Supported
 

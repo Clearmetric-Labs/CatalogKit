@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from catalogkit.query import build_query_map
 from catalogkit.query.errors import QueryMapContractError
 
@@ -44,4 +43,6 @@ def test_insert_select_is_supported():
 
 def test_unsupported_statement_fails_loudly():
     with pytest.raises(QueryMapContractError):
-        build_query_map("UPDATE analytics.orders SET status = 'closed'", dialect="postgres")
+        build_query_map(
+            "UPDATE analytics.orders SET status = 'closed'", dialect="postgres"
+        )

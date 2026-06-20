@@ -3,6 +3,10 @@
 `catalogkit-core` owns the serialized artifact contract used by CatalogKit tools
 and downstream consumers.
 
+This artifact schema is pre-1.0 and may change. Breaking changes will bump the
+schema `version` field and the package minor version while in 0.x. The contract
+will stabilize at 1.0.
+
 ## Artifact Version
 
 - `version` means artifact schema version only.

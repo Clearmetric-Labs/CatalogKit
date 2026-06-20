@@ -1,6 +1,11 @@
 import pytest
-
-from catalogkit.core import CanonicalIdError, column_id, cte_id, normalize_identifier, table_id
+from catalogkit.core import (
+    CanonicalIdError,
+    column_id,
+    cte_id,
+    normalize_identifier,
+    table_id,
+)
 
 
 def test_qualified_identifier_normalizes_case_and_quotes():

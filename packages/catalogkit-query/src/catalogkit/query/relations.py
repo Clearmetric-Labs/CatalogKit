@@ -5,10 +5,19 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from catalogkit.core import Node, cte_id, leaf_name, normalize_identifier, normalize_identifier_part, schema_name, table_id
+from catalogkit.core import (
+    Node,
+    cte_id,
+    leaf_name,
+    normalize_identifier,
+    normalize_identifier_part,
+    schema_name,
+    table_id,
+)
 from sqlglot import exp
 
 from .ast_utils import (
+    SqlglotExpression,
     cte_name,
     has_join_ancestor,
     iter_ctes,
@@ -39,7 +48,9 @@ class RelationExtraction:
     relation_by_id: dict[str, Relation]
 
 
-def extract_relations(root_expression: exp.Expression, *, dialect: str) -> RelationExtraction:
+def extract_relations(
+    root_expression: SqlglotExpression, *, dialect: str
+) -> RelationExtraction:
     """Extract canonical table and CTE nodes plus usage evidence."""
     cte_nodes = _extract_cte_nodes(root_expression)
     cte_relations = _extract_cte_relations(root_expression)
@@ -64,7 +75,9 @@ def extract_relations(root_expression: exp.Expression, *, dialect: str) -> Relat
                 _build_usage(
                     relation_id=node.id,
                     table=table,
-                    context="join" if has_join_ancestor(table, stop_node=cte.this) else "cte_body",
+                    context="join"
+                    if has_join_ancestor(table, stop_node=cte.this)
+                    else "cte_body",
                     dialect=dialect,
                 )
             )
@@ -83,12 +96,16 @@ def extract_relations(root_expression: exp.Expression, *, dialect: str) -> Relat
             _build_usage(
                 relation_id=node.id,
                 table=table,
-                context="join" if has_join_ancestor(table, stop_node=root_expression) else "from",
+                context="join"
+                if has_join_ancestor(table, stop_node=root_expression)
+                else "from",
                 dialect=dialect,
             )
         )
 
-    nodes = sorted([*table_nodes.values(), *cte_nodes.values()], key=lambda node: node.id)
+    nodes = sorted(
+        [*table_nodes.values(), *cte_nodes.values()], key=lambda node: node.id
+    )
     relations = sorted(relation_by_id.values(), key=lambda relation: relation.id)
     return RelationExtraction(
         nodes=nodes,
@@ -100,7 +117,7 @@ def extract_relations(root_expression: exp.Expression, *, dialect: str) -> Relat
     )
 
 
-def _extract_cte_nodes(root_expression: exp.Expression) -> dict[str, Node]:
+def _extract_cte_nodes(root_expression: SqlglotExpression) -> dict[str, Node]:
     nodes: dict[str, Node] = {}
     for cte in iter_ctes(root_expression):
         raw_name = cte_name(cte)
@@ -116,7 +133,9 @@ def _extract_cte_nodes(root_expression: exp.Expression) -> dict[str, Node]:
     return nodes
 
 
-def _extract_cte_relations(root_expression: exp.Expression) -> dict[str, Relation]:
+def _extract_cte_relations(
+    root_expression: SqlglotExpression,
+) -> dict[str, Relation]:
     relations: dict[str, Relation] = {}
     for cte in iter_ctes(root_expression):
         raw_name = cte_name(cte)

@@ -5,6 +5,34 @@ on:
   pull_request:
 
 jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install quality dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff pyright
+          python -m pip install -e packages/catalogkit-core
+          python -m pip install -e "packages/catalogkit-query[dev]"
+          python -m pip install -e "packages/catalogkit-lineage[dev]"
+
+      - name: Run Ruff lint checks
+        run: python -m ruff check --select E,F,I --ignore E501 --target-version py310 --extend-exclude .pkgmeta --extend-exclude .pkgsmoke --extend-exclude .pkgtest .
+
+      - name: Run Ruff format check
+        run: python -m ruff format --check --target-version py310 --exclude .pkgmeta --exclude .pkgsmoke --exclude .pkgtest .
+
+      - name: Run Pyright
+        run: pyright
+
   package-tests:
     runs-on: ubuntu-latest
     strategy:
@@ -15,6 +43,8 @@ jobs:
             path: packages/catalogkit-core
           - name: catalogkit-query
             path: packages/catalogkit-query
+          - name: catalogkit-lineage
+            path: packages/catalogkit-lineage
         python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
@@ -33,7 +63,7 @@ jobs:
 
       - name: Install package dependencies
         run: |
-          if [ "${{ matrix.package.name }}" = "catalogkit-query" ]; then
+          if [ "${{ matrix.package.name }}" = "catalogkit-query" ] || [ "${{ matrix.package.name }}" = "catalogkit-lineage" ]; then
             python -m pip install -e packages/catalogkit-core
           fi
           python -m pip install -e "${{ matrix.package.path }}[dev,release]"
@@ -44,7 +74,7 @@ jobs:
       - name: Build distribution artifacts
         run: |
           python -m build ${{ matrix.package.path }}
-          if [ "${{ matrix.package.name }}" = "catalogkit-query" ]; then
+          if [ "${{ matrix.package.name }}" = "catalogkit-query" ] || [ "${{ matrix.package.name }}" = "catalogkit-lineage" ]; then
             python -m build packages/catalogkit-core
           fi
 
@@ -59,6 +89,13 @@ jobs:
           if [ "${{ matrix.package.name }}" = "catalogkit-core" ]; then
             python -m pip install ${{ matrix.package.path }}/dist/*.whl
             python -c "import catalogkit.core as core; print(core.__version__)"
+          elif [ "${{ matrix.package.name }}" = "catalogkit-lineage" ]; then
+            python -m pip install packages/catalogkit-core/dist/*.whl
+            python -m pip install ${{ matrix.package.path }}/dist/*.whl
+            catalogkit-lineage --dialect postgres packages/catalogkit-lineage/examples/jaffle_shop/manifest.json
+            catalogkit-lineage --dialect postgres --downstream orders_base.amount packages/catalogkit-lineage/examples/sql_folder
+            python -m catalogkit.lineage --dialect postgres packages/catalogkit-lineage/examples/jaffle_shop/manifest.json
+            python -c "import catalogkit.core; import catalogkit.lineage"
           else
             python -m pip install packages/catalogkit-core/dist/*.whl
             python -m pip install ${{ matrix.package.path }}/dist/*.whl
@@ -83,6 +120,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -e packages/catalogkit-core
           python -m pip install -e "packages/catalogkit-query[dev]"
+          python -m pip install -e "packages/catalogkit-lineage[dev]"
 
       - name: Run repository boundary checks
         run: python -m pytest -v tests/test_repository_boundaries.py
@@ -107,12 +145,14 @@ jobs:
         run: |
           python -m build packages/catalogkit-core
           python -m build packages/catalogkit-query
+          python -m build packages/catalogkit-lineage
           python -m build packages/catalogkit
 
       - name: Validate package metadata
         run: |
           python -m twine check packages/catalogkit-core/dist/*
           python -m twine check packages/catalogkit-query/dist/*
+          python -m twine check packages/catalogkit-lineage/dist/*
           python -m twine check packages/catalogkit/dist/*
 
       - name: Smoke test namespace package install
@@ -122,5 +162,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install packages/catalogkit-core/dist/*.whl
           python -m pip install packages/catalogkit-query/dist/*.whl
+          python -m pip install packages/catalogkit-lineage/dist/*.whl
           python -m pip install --no-deps packages/catalogkit/dist/*.whl
-          python -c "import catalogkit.core; import catalogkit.query"
+          python -c "import catalogkit.core; import catalogkit.query; import catalogkit.lineage"

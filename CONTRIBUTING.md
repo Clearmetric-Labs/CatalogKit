@@ -11,12 +11,29 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e packages/catalogkit-core
 python -m pip install -e "packages/catalogkit-query[dev,release]"
+python -m pip install -e "packages/catalogkit-lineage[dev,release]"
 ```
 
 The `catalogkit` meta-package is dependency metadata only. Do not create a
 `catalogkit/__init__.py` file or any other namespace-root Python module.
 
 ## Run The Checks
+
+Run the centralized repo quality checks before opening a pull request:
+
+```bash
+python -m pip install ruff pyright
+python -m ruff check .
+python -m ruff format --check .
+pyright
+```
+
+Use Ruff to apply the repo's shared formatting and import-order rules:
+
+```bash
+python -m ruff check . --fix
+python -m ruff format .
+```
 
 Run the local test suite:
 
@@ -29,9 +46,11 @@ Build and validate packages before release-facing changes:
 ```bash
 python -m build packages/catalogkit-core
 python -m build packages/catalogkit-query
+python -m build packages/catalogkit-lineage
 python -m build packages/catalogkit
 python -m twine check packages/catalogkit-core/dist/*
 python -m twine check packages/catalogkit-query/dist/*
+python -m twine check packages/catalogkit-lineage/dist/*
 python -m twine check packages/catalogkit/dist/*
 ```
 
@@ -42,17 +61,25 @@ PyPI Trusted Publishing should point at `.github/workflows/publish.yml`.
 - workflow file: `publish.yml`
 - GitHub Actions environment: `pypi`
 - trigger: package tag push or manual `workflow_dispatch`
-- supported package names: `catalogkit-core`, `catalogkit-query`, and `catalogkit`
+- supported package names: `catalogkit-core`, `catalogkit-query`, `catalogkit-lineage`, and `catalogkit`
+- package tag versions must match the package source version exactly
 
-Manual migration steps that stay outside the codebase:
+Release order when publishing multiple packages:
 
 1. Publish `catalogkit-core`.
 2. Publish `catalogkit-query`.
-3. Publish `catalogkit`.
-4. Publish one final `querymap` release as a deprecated pointer package to
-   `catalogkit-query`.
-5. Keep `querymap` available for a transition period instead of yanking it
-   immediately.
+3. Publish `catalogkit-lineage`.
+4. Publish `catalogkit`.
+
+While CatalogKit is in 0.x:
+
+- breaking changes bump the package minor version, for example `0.1.0` to
+  `0.2.0`
+- non-breaking additions bump the package patch version, for example `0.1.0` to
+  `0.1.1`
+- the artifact schema `version` field bumps only for a breaking schema change
+  and is decoupled from package versions
+- 1.0 is declared only when the artifact contract is considered stable
 
 ## Contribution Rules
 

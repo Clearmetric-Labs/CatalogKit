@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import TypeGuard
 
 from sqlglot import exp
 
+SqlglotExpression = exp.Expression  # pyright: ignore[reportPrivateImportUsage]
 
-def iter_ctes(root_expression: exp.Expression) -> Iterable[exp.CTE]:
+
+def is_sqlglot_expression(value: object) -> TypeGuard[SqlglotExpression]:
+    return isinstance(value, exp.Expression)  # pyright: ignore[reportPrivateImportUsage]
+
+
+def iter_ctes(root_expression: SqlglotExpression) -> Iterable[exp.CTE]:
     """Yield every CTE in the parsed query."""
     yield from root_expression.find_all(exp.CTE)
 
@@ -30,7 +37,7 @@ def qualified_table_name(table: exp.Table) -> str:
     return ".".join(parts)
 
 
-def has_join_ancestor(node: exp.Expression, *, stop_node: exp.Expression) -> bool:
+def has_join_ancestor(node: SqlglotExpression, *, stop_node: SqlglotExpression) -> bool:
     """Detect whether a table node appears under a JOIN subtree."""
     current = node.parent
     while current is not None and current is not stop_node:
@@ -40,7 +47,7 @@ def has_join_ancestor(node: exp.Expression, *, stop_node: exp.Expression) -> boo
     return False
 
 
-def iter_table_nodes(expression: exp.Expression | None) -> Iterable[exp.Table]:
+def iter_table_nodes(expression: SqlglotExpression | None) -> Iterable[exp.Table]:
     """Yield all table nodes under an expression."""
     if expression is None:
         return
@@ -49,7 +56,7 @@ def iter_table_nodes(expression: exp.Expression | None) -> Iterable[exp.Table]:
 
 
 def iter_table_nodes_skipping_ctes(
-    expression: exp.Expression | None,
+    expression: SqlglotExpression | None,
 ) -> Iterable[exp.Table]:
     """Yield table nodes while skipping traversal into nested CTE definitions."""
     if expression is None:
@@ -57,7 +64,9 @@ def iter_table_nodes_skipping_ctes(
     yield from _walk_tables(expression, skip_ctes=True)
 
 
-def _walk_tables(expression: exp.Expression, *, skip_ctes: bool) -> Iterable[exp.Table]:
+def _walk_tables(
+    expression: SqlglotExpression, *, skip_ctes: bool
+) -> Iterable[exp.Table]:
     if skip_ctes and isinstance(expression, exp.CTE):
         return
     if isinstance(expression, exp.Table):
@@ -66,7 +75,7 @@ def _walk_tables(expression: exp.Expression, *, skip_ctes: bool) -> Iterable[exp
     for child in expression.args.values():
         if isinstance(child, list):
             for item in child:
-                if isinstance(item, exp.Expression):
+                if is_sqlglot_expression(item):
                     yield from _walk_tables(item, skip_ctes=skip_ctes)
-        elif isinstance(child, exp.Expression):
+        elif is_sqlglot_expression(child):
             yield from _walk_tables(child, skip_ctes=skip_ctes)

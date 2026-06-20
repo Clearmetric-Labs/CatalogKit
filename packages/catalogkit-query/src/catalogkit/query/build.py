@@ -2,15 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 from catalogkit.core import CatalogArtifact, Edge, Evidence, Warning, merge
 from sqlglot import exp
 
+from .ast_utils import SqlglotExpression
 from .ctes import extract_dependency_edges
 from .errors import QueryMapContractError
 from .models import (
     EdgeKind as QueryMapEdgeKind,
+)
+from .models import (
     QueryMap,
     QuerySummary,
     RelationEdge,
@@ -78,7 +81,9 @@ def _build_catalog_artifact_from_parsed(
     parsed: ParsedStatement,
 ) -> tuple[CatalogArtifact, RelationExtraction]:
     """Build the internal shared artifact and keep extraction metadata nearby."""
-    relation_extraction = extract_relations(parsed.root_expression, dialect=parsed.dialect)
+    relation_extraction = extract_relations(
+        parsed.root_expression, dialect=parsed.dialect
+    )
     dependency_extraction = extract_dependency_edges(
         parsed.root_expression,
         relation_extraction=relation_extraction,
@@ -86,9 +91,13 @@ def _build_catalog_artifact_from_parsed(
     )
 
     if not relation_extraction.nodes:
-        raise QueryMapContractError("No tables or CTE relations were found in the SQL statement.")
+        raise QueryMapContractError(
+            "No tables or CTE relations were found in the SQL statement."
+        )
 
-    nodes_by_id = {node.id: node.model_copy(deep=True) for node in relation_extraction.nodes}
+    nodes_by_id = {
+        node.id: node.model_copy(deep=True) for node in relation_extraction.nodes
+    }
     for usage in relation_extraction.relation_usages:
         node = nodes_by_id[usage.relation_id]
         node.evidence.append(
@@ -111,7 +120,7 @@ def _build_catalog_artifact_from_parsed(
 
 
 def _extract_contract_warnings(
-    root_expression: Any,
+    root_expression: SqlglotExpression,
     *,
     dialect: str,
 ) -> list[Warning]:
@@ -155,7 +164,10 @@ def _extract_contract_warnings(
                         location=selection.sql(dialect=dialect),
                     )
                 )
-            elif isinstance(selection, exp.Column) and str(selection.name or "").strip() == "*":
+            elif (
+                isinstance(selection, exp.Column)
+                and str(selection.name or "").strip() == "*"
+            ):
                 warnings.append(
                     Warning(
                         code="table_star",
@@ -188,11 +200,13 @@ def _extract_contract_warnings(
     return warnings
 
 
-def _is_equality_join(expression: Any) -> bool:
+def _is_equality_join(expression: object) -> bool:
     if isinstance(expression, exp.EQ):
         return True
     if isinstance(expression, exp.And):
-        return _is_equality_join(expression.left) and _is_equality_join(expression.right)
+        return _is_equality_join(expression.left) and _is_equality_join(
+            expression.right
+        )
     return False
 
 

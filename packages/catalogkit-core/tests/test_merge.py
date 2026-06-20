@@ -1,6 +1,13 @@
 import pytest
-
-from catalogkit.core import CatalogArtifact, Edge, Evidence, MergeConflictError, Node, Warning, merge
+from catalogkit.core import (
+    CatalogArtifact,
+    Edge,
+    Evidence,
+    MergeConflictError,
+    Node,
+    Warning,
+    merge,
+)
 
 
 def test_merge_unions_node_and_edge_evidence():
@@ -20,7 +27,9 @@ def test_merge_unions_node_and_edge_evidence():
                 kind="depends_on",
                 source_id="query:root",
                 target_id="table:analytics.orders",
-                evidence=[Evidence(expression="FROM analytics.orders", confidence="high")],
+                evidence=[
+                    Evidence(expression="FROM analytics.orders", confidence="high")
+                ],
             )
         ],
         warnings=[Warning(code="select_star", message="star", location="*")],
@@ -33,7 +42,9 @@ def test_merge_unions_node_and_edge_evidence():
                 name="orders",
                 qualified_name="analytics.orders",
                 schema="analytics",
-                evidence=[Evidence(expression='"analytics"."orders"', confidence="medium")],
+                evidence=[
+                    Evidence(expression='"analytics"."orders"', confidence="medium")
+                ],
             )
         ],
         edges=[
@@ -41,7 +52,9 @@ def test_merge_unions_node_and_edge_evidence():
                 kind="depends_on",
                 source_id="query:root",
                 target_id="table:analytics.orders",
-                evidence=[Evidence(expression='"analytics"."orders"', confidence="medium")],
+                evidence=[
+                    Evidence(expression='"analytics"."orders"', confidence="medium")
+                ],
             )
         ],
         warnings=[Warning(code="select_star", message="star", location="*")],

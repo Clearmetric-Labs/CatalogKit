@@ -7,6 +7,7 @@ Install the shared core first, then any tool package that depends on it:
 ```bash
 python -m pip install -e packages/catalogkit-core
 python -m pip install -e "packages/catalogkit-query[dev,release]"
+python -m pip install -e "packages/catalogkit-lineage[dev,release]"
 ```
 
 The `catalogkit` meta-package ships no Python package files. It exists only to
@@ -25,6 +26,7 @@ Run package-focused tests:
 ```bash
 python -m pytest -v packages/catalogkit-core/tests
 python -m pytest -v packages/catalogkit-query/tests
+python -m pytest -v packages/catalogkit-lineage/tests
 python -m pytest -v tests/test_repository_boundaries.py
 ```
 
@@ -35,6 +37,7 @@ Build packages independently:
 ```bash
 python -m build packages/catalogkit-core
 python -m build packages/catalogkit-query
+python -m build packages/catalogkit-lineage
 python -m build packages/catalogkit
 ```
 
@@ -45,6 +48,7 @@ python -m venv .pkgsmoke
 source .pkgsmoke/bin/activate
 python -m pip install packages/catalogkit-core/dist/*.whl
 python -m pip install packages/catalogkit-query/dist/*.whl
+python -m pip install packages/catalogkit-lineage/dist/*.whl
 python -m pip install --no-deps packages/catalogkit/dist/*.whl
-python -c "import catalogkit.core; import catalogkit.query"
+python -c "import catalogkit.core; import catalogkit.query; import catalogkit.lineage"
 ```

@@ -4,10 +4,24 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from catalogkit.core import Edge, Evidence, Warning, cte_id, normalize_identifier, normalize_identifier_part
+from catalogkit.core import (
+    Edge,
+    Evidence,
+    Warning,
+    cte_id,
+    normalize_identifier,
+    normalize_identifier_part,
+)
 from sqlglot import exp
 
-from .ast_utils import cte_name, iter_ctes, iter_table_nodes, iter_table_nodes_skipping_ctes, qualified_table_name
+from .ast_utils import (
+    SqlglotExpression,
+    cte_name,
+    iter_ctes,
+    iter_table_nodes,
+    iter_table_nodes_skipping_ctes,
+    qualified_table_name,
+)
 from .errors import QueryMapContractError
 from .relations import RelationExtraction
 
@@ -19,7 +33,7 @@ class DependencyExtraction:
 
 
 def extract_dependency_edges(
-    root_expression: exp.Expression,
+    root_expression: SqlglotExpression,
     *,
     relation_extraction: RelationExtraction,
     dialect: str,
@@ -34,7 +48,9 @@ def extract_dependency_edges(
             continue
         source_id = cte_id(raw_cte_name)
         for table in iter_table_nodes(cte.this):
-            target_id = _resolve_relation_id(table, relation_extraction=relation_extraction)
+            target_id = _resolve_relation_id(
+                table, relation_extraction=relation_extraction
+            )
             if target_id is None:
                 continue
             if target_id == source_id:

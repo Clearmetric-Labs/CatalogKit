@@ -1,0 +1,87 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from catalogkit.lineage import build_lineage_map, trace_upstream
+from catalogkit.lineage.cli import main
+from catalogkit.lineage.errors import LineageInputError
+
+
+def test_invalid_file_input_fails_loudly(tmp_path: Path):
+    invalid_file = tmp_path / "not_a_manifest.txt"
+    invalid_file.write_text("hello", encoding="utf-8")
+
+    with pytest.raises(LineageInputError):
+        build_lineage_map(invalid_file, dialect="postgres")
+
+
+def test_empty_sql_folder_fails_loudly(tmp_path: Path):
+    with pytest.raises(LineageInputError):
+        build_lineage_map(tmp_path, dialect="postgres")
+
+
+def test_openlineage_and_traversal_flags_cannot_mix(capsys):
+    package_root = Path(__file__).resolve().parents[1]
+    manifest_path = package_root / "examples" / "jaffle_shop" / "manifest.json"
+
+    exit_code = main(
+        [
+            "--dialect",
+            "postgres",
+            "--format",
+            "openlineage",
+            "--upstream",
+            "customers.customer_lifetime_value",
+            str(manifest_path),
+        ]
+    )
+
+    captured = capsys.readouterr()
+    assert exit_code == 1
+    assert "cannot be combined" in captured.err
+
+
+def test_unknown_traversal_selection_fails_loudly():
+    compiled_dir = Path(__file__).resolve().parents[1] / "examples" / "sql_folder"
+
+    with pytest.raises(LineageInputError):
+        trace_upstream(
+            compiled_dir,
+            dialect="postgres",
+            selection="customers_report.missing_column",
+        )
+
+
+def test_manifest_compiled_path_cannot_escape_manifest_directory(tmp_path: Path):
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(
+        json.dumps(
+            {
+                "metadata": {"project_name": "escape_test"},
+                "nodes": {
+                    "model.escape_test.example": {
+                        "resource_type": "model",
+                        "name": "example",
+                        "compiled_path": "../outside.sql",
+                        "depends_on": {"nodes": []},
+                        "columns": {},
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(LineageInputError, match="escapes the manifest directory"):
+        build_lineage_map(manifest_path, dialect="postgres")
+
+
+def test_sql_folder_duplicate_dataset_names_fail_loudly(tmp_path: Path):
+    (tmp_path / "orders").mkdir()
+    (tmp_path / "orders.base.sql").write_text("select 1 as id", encoding="utf-8")
+    (tmp_path / "orders" / "base.sql").write_text("select 2 as id", encoding="utf-8")
+
+    with pytest.raises(LineageInputError, match="duplicate dataset name"):
+        build_lineage_map(tmp_path, dialect="postgres")

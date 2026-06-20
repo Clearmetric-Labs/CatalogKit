@@ -4,11 +4,15 @@ from catalogkit.query import build_catalog_artifact, build_query_map, render_jso
 
 
 def _read_example(name: str) -> str:
-    return (Path(__file__).resolve().parents[1] / "examples" / name).read_text(encoding="utf-8")
+    return (Path(__file__).resolve().parents[1] / "examples" / name).read_text(
+        encoding="utf-8"
+    )
 
 
 def test_catalogkit_query_emits_legacy_public_shape():
-    query_map = build_query_map(_read_example("ugly_real_world.sql"), dialect="postgres")
+    query_map = build_query_map(
+        _read_example("ugly_real_world.sql"), dialect="postgres"
+    )
     payload = render_json(query_map)
 
     relation_ids = {relation["id"] for relation in payload["relations"]}

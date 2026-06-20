@@ -32,7 +32,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "catalogkit-core>=0.1.0",
+    "catalogkit-core>=0.1.2",
     "sqlglot>=25.0.0",
 ]
 

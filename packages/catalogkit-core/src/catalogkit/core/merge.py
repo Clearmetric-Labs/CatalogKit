@@ -17,12 +17,16 @@ def merge(*artifacts: CatalogArtifact) -> CatalogArtifact:
     for artifact in artifacts:
         for node in artifact.nodes:
             existing = merged_nodes.get(node.id)
-            merged_nodes[node.id] = node if existing is None else _merge_node(existing, node)
+            merged_nodes[node.id] = (
+                node if existing is None else _merge_node(existing, node)
+            )
 
         for edge in artifact.edges:
             key = (edge.kind, edge.source_id, edge.target_id)
             existing = merged_edges.get(key)
-            merged_edges[key] = edge if existing is None else _merge_edge(existing, edge)
+            merged_edges[key] = (
+                edge if existing is None else _merge_edge(existing, edge)
+            )
 
         for warning in artifact.warnings:
             merged_warnings[(warning.code, warning.message, warning.location)] = warning
@@ -63,7 +67,9 @@ def _merge_node(left: Node, right: Node) -> Node:
             right.qualified_name,
             left.id,
         ),
-        schema=_merge_optional("node.schema", left.schema_name, right.schema_name, left.id),
+        schema=_merge_optional(
+            "node.schema", left.schema_name, right.schema_name, left.id
+        ),
         evidence=_merge_evidence(left.evidence, right.evidence),
     )
 

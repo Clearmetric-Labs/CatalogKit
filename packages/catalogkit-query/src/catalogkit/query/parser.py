@@ -3,17 +3,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import cast
 
 import sqlglot
 from sqlglot import exp
 
+from .ast_utils import SqlglotExpression, is_sqlglot_expression
 from .errors import QueryMapContractError, QueryMapParseError
 
 
 @dataclass(frozen=True)
 class ParsedStatement:
-    statement: exp.Expression
-    root_expression: exp.Expression
+    statement: SqlglotExpression
+    root_expression: SqlglotExpression
     dialect: str
 
 
@@ -24,34 +26,42 @@ def parse_statement(sql: str, *, dialect: str) -> ParsedStatement:
         raise QueryMapParseError("SQL input is empty.")
 
     try:
-        statements = [stmt for stmt in sqlglot.parse(cleaned, read=dialect) if stmt is not None]
+        statements = [
+            stmt for stmt in sqlglot.parse(cleaned, read=dialect) if stmt is not None
+        ]
     except Exception as exc:
-        raise QueryMapParseError(f"Failed to parse SQL with dialect {dialect!r}: {exc}") from exc
+        raise QueryMapParseError(
+            f"Failed to parse SQL with dialect {dialect!r}: {exc}"
+        ) from exc
 
     if not statements:
         raise QueryMapParseError("SQL input produced no parseable statements.")
     if len(statements) != 1:
-        raise QueryMapContractError("catalogkit-query accepts exactly one SQL statement per invocation.")
+        raise QueryMapContractError(
+            "catalogkit-query accepts exactly one SQL statement per invocation."
+        )
 
-    statement = statements[0]
+    statement = cast(SqlglotExpression, statements[0])
     root_expression = _unwrap_root_expression(statement)
     if not isinstance(root_expression, exp.Query):
         raise QueryMapContractError(
             "catalogkit-query supports exactly one SELECT, INSERT ... SELECT, or CREATE ... AS SELECT statement per invocation."
         )
-    return ParsedStatement(statement=statement, root_expression=root_expression, dialect=dialect)
+    return ParsedStatement(
+        statement=statement, root_expression=root_expression, dialect=dialect
+    )
 
 
-def _unwrap_root_expression(statement: exp.Expression) -> exp.Expression:
+def _unwrap_root_expression(statement: SqlglotExpression) -> SqlglotExpression:
     """Return the query-like root expression used for structure mapping."""
     if isinstance(statement, exp.Create):
         expression = statement.args.get("expression")
-        if isinstance(expression, exp.Expression):
+        if is_sqlglot_expression(expression):
             return expression
 
     if isinstance(statement, exp.Insert):
         expression = statement.args.get("expression")
-        if isinstance(expression, exp.Expression):
+        if is_sqlglot_expression(expression):
             return expression
 
     return statement

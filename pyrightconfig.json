@@ -1,12 +1,10 @@
 {
-  "include": [
-    "packages",
-    "tests"
-  ],
-  "venvPath": ".",
-  "venv": ".venv",
-  "extraPaths": [
-    "packages/catalogkit-core/src",
-    "packages/catalogkit-query/src"
-  ]
+    "include": ["packages", "tests"],
+    "venvPath": ".",
+    "venv": ".venv",
+    "extraPaths": [
+        "packages/catalogkit-core/src",
+        "packages/catalogkit-query/src",
+        "packages/catalogkit-lineage/src",
+    ],
 }

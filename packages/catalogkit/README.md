@@ -9,5 +9,11 @@ when you want the currently supported CatalogKit modules together:
 python -m pip install catalogkit
 ```
 
-Install `catalogkit-query` directly when you only want the query tool and its
-shared `catalogkit-core` dependency.
+Install individual CatalogKit modules directly when you only want a subset of
+the suite.
+
+The current meta-package set includes:
+
+- `catalogkit-core`
+- `catalogkit-query`
+- `catalogkit-lineage`

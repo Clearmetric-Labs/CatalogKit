@@ -6,7 +6,6 @@ import sys
 from pathlib import Path
 
 import pytest
-
 from catalogkit.query import __version__
 from catalogkit.query.cli import main
 
