@@ -1,0 +1,11 @@
+# Default ownership
+* @jonkimdev
+
+# Legal and contribution policy
+/CLA.md @jonkimdev
+/LICENSE @jonkimdev
+/CONTRIBUTING.md @jonkimdev
+
+# Repository enforcement and workflow policy
+/.github/CODEOWNERS @jonkimdev
+/.github/workflows/*.yml @jonkimdev

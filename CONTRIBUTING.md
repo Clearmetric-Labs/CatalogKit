@@ -2,6 +2,30 @@
 
 Thanks for contributing to `CatalogKit`.
 
+## Contributor License Agreement
+
+CatalogKit uses a [Contributor License Agreement (CLA)](CLA.md) so ClearMetric can safely maintain, distribute, and evolve the project over time.
+
+By opening a pull request, you agree that your contribution is submitted under the [ClearMetric LLC Individual Contributor License Agreement](CLA.md). Pull requests may not be merged until the CLA check passes.
+
+When you open your first pull request, a bot will comment with signing instructions. Sign by posting this comment on the pull request:
+
+```text
+I have read the CLA Document and I hereby sign the CLA
+```
+
+You only need to sign once. If the check does not update after signing, comment `recheck` on the pull request.
+
+## Protected Repository Files
+
+Changes to `CLA.md`, `LICENSE`, `CONTRIBUTING.md`, `.github/CODEOWNERS`, and
+files under `.github/workflows/` are treated as protected repository policy
+changes.
+
+If your pull request changes any of those files, a maintainer must review the
+change and apply either the `maintainer-approved` or `legal-approved` label
+before the protected-files check will pass.
+
 ## Setup
 
 Create a virtual environment and install the packages you need in editable mode:

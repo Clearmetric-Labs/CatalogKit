@@ -1,0 +1,78 @@
+name: Protected Files
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  protected-files:
+    name: Protected Files Policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check protected file changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const protectedPaths = [
+              "CLA.md",
+              "LICENSE",
+              "CONTRIBUTING.md",
+              ".github/CODEOWNERS",
+            ];
+            const protectedPrefixes = [
+              ".github/workflows/",
+            ];
+            const approvalLabels = new Set([
+              "maintainer-approved",
+              "legal-approved",
+            ]);
+
+            const pr = context.payload.pull_request;
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100,
+              },
+            );
+
+            const changedProtectedFiles = files
+              .map((file) => file.filename)
+              .filter((filename) =>
+                protectedPaths.includes(filename) ||
+                protectedPrefixes.some((prefix) => filename.startsWith(prefix)),
+              );
+
+            if (changedProtectedFiles.length === 0) {
+              core.info("No protected files changed.");
+              return;
+            }
+
+            const labels = new Set(pr.labels.map((label) => label.name));
+            const hasApprovalLabel = [...approvalLabels].some((label) => labels.has(label));
+
+            core.notice(
+              `Protected files changed: ${changedProtectedFiles.join(", ")}`,
+            );
+
+            if (!hasApprovalLabel) {
+              core.setFailed(
+                [
+                  "This pull request changes protected repository policy files:",
+                  ...changedProtectedFiles.map((filename) => `- ${filename}`),
+                  "",
+                  "A maintainer must review these changes and apply one of these labels:",
+                  "- maintainer-approved",
+                  "- legal-approved",
+                ].join("\n"),
+              );
+              return;
+            }
+
+            core.info("Protected file changes carry an approval label.");
