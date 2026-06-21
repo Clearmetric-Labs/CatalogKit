@@ -14,3 +14,4 @@ build/
 dist/
 htmlcov/
 STRATEGY.md
+uv.lock

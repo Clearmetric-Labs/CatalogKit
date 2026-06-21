@@ -29,7 +29,9 @@ SHOPIFY_ANCHOR_MODEL_NAMES = {
 }
 
 QUOTED_RELATION_PATTERN = re.compile(r'"[^"]+"\."[^"]+"\."([^"]+)"')
-MACRO_SOURCE_TABLE_PATTERN = re.compile(r"from\s+([a-zA-Z_][a-zA-Z0-9_]*)", re.IGNORECASE)
+MACRO_SOURCE_TABLE_PATTERN = re.compile(
+    r"from\s+([a-zA-Z_][a-zA-Z0-9_]*)", re.IGNORECASE
+)
 FIELDS_CTE_ALIAS_PATTERN = re.compile(
     r"as\s+\n\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:,|\n\s*\)|\n\s*,)",
     re.MULTILINE,
