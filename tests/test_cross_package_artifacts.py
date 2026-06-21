@@ -19,9 +19,9 @@ JAFFLE_MANIFEST = (
 
 
 def test_lineage_and_query_artifacts_merge_on_shared_ids():
-    customers_sql = (
-        JAFFLE_MANIFEST.parent / "compiled" / "customers.sql"
-    ).read_text(encoding="utf-8")
+    customers_sql = (JAFFLE_MANIFEST.parent / "compiled" / "customers.sql").read_text(
+        encoding="utf-8"
+    )
 
     lineage_artifact = build_catalog_artifact(JAFFLE_MANIFEST, dialect="postgres")
     query_artifact = build_query_catalog_artifact(customers_sql, dialect="postgres")
