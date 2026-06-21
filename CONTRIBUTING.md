@@ -107,8 +107,8 @@ Release order when publishing multiple packages:
 
 All four packages use **lockstep versioning**: every release bumps every package to the
 same version, publishes every package tag, and keeps the meta-package dependency pins
-aligned at that version (for example `catalogkit-core>=0.1.8`,
-`catalogkit-query>=0.1.8`, `catalogkit-lineage>=0.1.8` for release `0.1.8`).
+aligned at that version (for example `catalogkit-core>=0.1.9`,
+`catalogkit-query>=0.1.9`, `catalogkit-lineage>=0.1.9` for release `0.1.9`).
 
 While CatalogKit is in 0.x:
 

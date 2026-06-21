@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.9 - 2026-06-21
+
+### Changed
+
+- `catalogkit-lineage` enforces strict value-lineage (R6–R8): `SELECT *`, `UNION`, and quoted/unresolved outputs warn without emitting unsafe `derives_from` edges
+- centralized SQL shape detection and edge counting in shared engine modules
+- aligned all CatalogKit packages to lockstep versioning at `0.1.9`
+
+### Added
+
+- enterprise adversarial manifest with independent hand-derived value-lineage oracle
+- warning-cause variant fixtures and CI trust-gate coverage for oracle and variant tests
+
 ## 0.1.8 - 2026-06-21
 
 ### Changed
