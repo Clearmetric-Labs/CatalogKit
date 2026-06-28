@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from functools import lru_cache
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
@@ -12,22 +13,12 @@ from jsonschema import Draft202012Validator
 from .errors import ValidationError
 from .models import CatalogArtifact
 
-_REPO_CANDIDATES = Path(__file__).resolve().parents
-
-
-def _spec_root() -> Path:
-    for parent in _REPO_CANDIDATES:
-        candidate = parent / "spec"
-        if (candidate / "clearmetric-project.schema.json").is_file():
-            return candidate
-    raise ValidationError("Could not locate spec/ directory")
-
 
 @lru_cache(maxsize=8)
 def _load_schema(name: str) -> dict[str, Any]:
-    path = _spec_root() / name
+    path = files("clearmetric.spec").joinpath(name)
     if not path.is_file():
-        raise ValidationError(f"Schema file not found: {path}")
+        raise ValidationError(f"Schema not packaged: {name}")
     return json.loads(path.read_text(encoding="utf-8"))
 
 

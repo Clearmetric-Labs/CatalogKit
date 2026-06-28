@@ -1,6 +1,16 @@
 dialect: postgres
 mode: exact_edges
 derives_from:
+- - column:adv_01_select_star.amount
+  - column:stg_a.amount
+- - column:adv_01_select_star.created_at
+  - column:stg_a.created_at
+- - column:adv_01_select_star.id
+  - column:stg_a.id
+- - column:adv_01_select_star.status
+  - column:stg_a.status
+- - column:adv_01_select_star.user_id
+  - column:stg_a.user_id
 - - column:adv_02_qualified_star.email
   - column:stg_users.email
 - - column:adv_04_ambiguous_column.amount

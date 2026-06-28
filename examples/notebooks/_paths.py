@@ -17,7 +17,8 @@ def repo_root(start: Path | None = None) -> Path:
 
 
 def wedge_project(start: Path | None = None) -> Path:
-    return repo_root(start) / "examples" / "wedge-jaffle"
+    """Public quickstart project (examples/lineage-demo)."""
+    return repo_root(start) / "examples" / "lineage-demo"
 
 
 def backbone_lab_project(start: Path | None = None) -> Path:

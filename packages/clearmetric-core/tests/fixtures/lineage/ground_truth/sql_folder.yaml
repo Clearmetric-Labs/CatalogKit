@@ -15,3 +15,27 @@ probes:
   - column:raw_orders.amount
   expected_downstream: []
   expected_warnings: []
+- selection: raw_orders.id
+  expected_upstream: []
+  expected_downstream:
+  - column:orders_base.order_id
+  expected_warnings: []
+- selection: orders_base.order_id
+  expected_upstream:
+  - column:raw_orders.id
+  expected_downstream: []
+  expected_warnings: []
+- selection: customer_totals.customer_id
+  expected_upstream:
+  - column:orders_base.customer_id
+  - column:raw_orders.user_id
+  expected_downstream:
+  - column:customers_report.customer_id
+  expected_warnings: []
+- selection: raw_orders.user_id
+  expected_upstream: []
+  expected_downstream:
+  - column:orders_base.customer_id
+  - column:customer_totals.customer_id
+  - column:customers_report.customer_id
+  expected_warnings: []

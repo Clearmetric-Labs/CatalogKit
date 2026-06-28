@@ -39,7 +39,7 @@ Implemented under [`examples/consumers/`](../examples/consumers/README.md):
 
 - Versioned **bundle contract** (`bundle.manifest.json` + JSON schemas)
 - Scenario registry + `scripts/consumers/build_bundle.py`
-- Committed **minimal** admin-lane bundle (wedge-jaffle fixture) — catalog viewer default
+- Committed **minimal** admin-lane bundle (`lineage-demo` fixture) — catalog viewer default
 - Committed **lineage-demo** admin-lane bundle (sql_folder fixture) — lineage explorer default; non-empty column impact trace
 - Vanilla **catalog-viewer** and **lineage-explorer** (no build step, no browser policy)
 - **Corpus checks** via `checks.yaml` + `tests/consumers/checks_runner.py` (Track C instrument)

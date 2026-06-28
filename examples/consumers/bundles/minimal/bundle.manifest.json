@@ -14,14 +14,14 @@
       "lane": "admin"
     },
     "impacts": {
-      "orders.amount_upstream": {
-        "path": "impacts/orders.amount_upstream.json",
-        "selection": "orders.amount",
+      "orders_base.amount_upstream": {
+        "path": "impacts/orders_base.amount_upstream.json",
+        "selection": "orders_base.amount",
         "direction": "upstream"
       }
     }
   },
   "defaults": {
-    "impact_key": "orders.amount_upstream"
+    "impact_key": "orders_base.amount_upstream"
   }
 }

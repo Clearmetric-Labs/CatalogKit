@@ -135,8 +135,6 @@ def _ingest_information_schema(
 
 def _table_qualified_name(table: WarehouseMetadataTable) -> str:
     parts = [part for part in (table.database, table.schema_name, table.name) if part]
-    if len(parts) == 1:
-        return parts[0]
-    if table.schema_name:
-        return f"{table.schema_name}.{table.name}"
-    return table.name
+    if not parts:
+        raise AdapterError("warehouse table missing name")
+    return ".".join(parts)

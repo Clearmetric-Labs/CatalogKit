@@ -213,7 +213,7 @@ detail only and is not the cross-graph alias contract.
 
 ## Project configuration
 
-Wedge projects use `clearmetric.yaml` (validated against `spec/clearmetric-project.schema.json`).
+Wedge projects use `clearmetric.yaml` (validated against packaged `clearmetric-project.schema.json`).
 
 Required fields: `version`, `dialect`, `sources`, `posture`, `policy.rules`.
 

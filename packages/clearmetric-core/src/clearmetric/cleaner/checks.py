@@ -138,3 +138,19 @@ def check_partial_derivation(view: GraphView) -> list[Finding]:
                 )
             )
     return findings
+
+
+def check_zero_column_lineage(view: GraphView) -> list[Finding]:
+    if any(True for _ in view.edges(kind="derives_from")):
+        return []
+    return [
+        _finding(
+            check_id="check.zero_column_lineage",
+            node_id=None,
+            tier="warn",
+            message=(
+                "0 derives_from edges were produced; column-level impact will be incomplete."
+            ),
+            fix_hint="Run dbt compile, attach warehouse metadata, or review SQL patterns",
+        )
+    ]

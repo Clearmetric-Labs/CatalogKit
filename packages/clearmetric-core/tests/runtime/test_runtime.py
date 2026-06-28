@@ -18,6 +18,11 @@ from clearmetric.runtime import execute_project_query
 from tests.backbone_lab.helpers import setup_backbone_lab_project
 
 
+@pytest.fixture(autouse=True)
+def _enable_experimental(monkeypatch):
+    monkeypatch.setenv("CM_EXPERIMENTAL", "1")
+
+
 def test_execute_project_query_returns_rows(tmp_path: Path):
     project_dir = setup_backbone_lab_project(tmp_path / "lab")
     compiled = compile_project(project_dir)

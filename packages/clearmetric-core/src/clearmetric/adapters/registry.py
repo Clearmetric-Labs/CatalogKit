@@ -6,6 +6,7 @@ from collections.abc import Callable
 
 from clearmetric.core import CatalogArtifact
 from clearmetric.core.errors import AdapterError
+from clearmetric.core.experimental import require_experimental_source
 from clearmetric.core.project import ClearMetricProject
 
 from .dbt import ingest_dbt
@@ -23,7 +24,8 @@ _ADAPTERS: dict[str, Callable[[ClearMetricProject], CatalogArtifact]] = {
 }
 
 
-def enabled_sources(project: ClearMetricProject) -> list[str]:
+def configured_sources(project: ClearMetricProject) -> list[str]:
+    """Return configured source kinds from project config (scan/discover)."""
     enabled: list[str] = []
     if project.sources.warehouse is not None:
         enabled.append("warehouse")
@@ -36,7 +38,15 @@ def enabled_sources(project: ClearMetricProject) -> list[str]:
     return [kind for kind in SOURCE_ORDER if kind in enabled]
 
 
+def enabled_sources(project: ClearMetricProject) -> list[str]:
+    configured = configured_sources(project)
+    for kind in configured:
+        require_experimental_source(kind)
+    return configured
+
+
 def ingest_source(kind: str, project: ClearMetricProject) -> CatalogArtifact:
+    require_experimental_source(kind)
     adapter = _ADAPTERS.get(kind)
     if adapter is None:
         raise AdapterError(f"unknown source kind: {kind}")

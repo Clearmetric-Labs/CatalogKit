@@ -39,16 +39,16 @@ test("loadBundle loads minimal manifest and artifacts", async () => {
   const catalog = await loadArtifact(bundle, "catalog");
   assert.ok(Array.isArray(catalog.nodes));
 
-  const impact = await loadImpact(bundle, "orders.amount_upstream");
-  assert.equal(impact.selection_id, "column:orders.amount");
+  const impact = await loadImpact(bundle, "orders_base.amount_upstream");
+  assert.equal(impact.selection_id, "column:orders_base.amount");
 
   const byId = indexNodes(catalog.nodes);
-  assert.ok(byId.has("column:orders.amount"));
+  assert.ok(byId.has("column:orders_base.amount"));
 
   const groups = groupByKind(catalog.nodes);
   assert.ok(groups.has("column"));
 
-  const warnings = warningsForNode(catalog.warnings, "column:orders.amount");
+  const warnings = warningsForNode(catalog.warnings, "column:orders_base.amount");
   assert.ok(Array.isArray(warnings));
 });
 

@@ -50,7 +50,7 @@ from clearmetric.core import attach_warehouse_bindings, merge, parse_column_sele
 ## Contract & example
 
 - [`docs/contract.md`](docs/contract.md)
-- [`../../spec/clearmetric-project.schema.json`](../../spec/clearmetric-project.schema.json)
+- [`src/clearmetric/spec/clearmetric-project.schema.json`](src/clearmetric/spec/clearmetric-project.schema.json)
 
 ```bash
 python -m pip install -e ".[dev,runtime,release]"

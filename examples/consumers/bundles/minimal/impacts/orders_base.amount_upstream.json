@@ -1,0 +1,51 @@
+{
+  "selection": "orders_base.amount",
+  "selection_id": "column:orders_base.amount",
+  "related_ids": [
+    "column:raw_orders.amount"
+  ],
+  "traversed_edges": [
+    {
+      "kind": "derives_from",
+      "source_id": "column:orders_base.amount",
+      "target_id": "column:raw_orders.amount",
+      "label": "derives_from",
+      "confidence": "high",
+      "match_status": null,
+      "evidence": [
+        {
+          "file": "orders_base.sql",
+          "location": null,
+          "expression": "raw_orders.amount",
+          "confidence": "medium"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "code": "warehouse_bind_unresolved",
+      "message": "column:orders_base.amount parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "location": null,
+      "subject_id": "column:orders_base.amount"
+    }
+  ],
+  "derivation": [
+    {
+      "id": "column:raw_orders.amount",
+      "status": "complete",
+      "confidence": "high"
+    },
+    {
+      "edge": "column:orders_base.amount->column:raw_orders.amount",
+      "status": "complete",
+      "confidence": "high"
+    }
+  ]
+}

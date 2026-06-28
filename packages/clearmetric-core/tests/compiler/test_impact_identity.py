@@ -10,6 +10,11 @@ from tests.backbone_lab.helpers import setup_backbone_lab_project
 from tests.wedge.helpers import run_cm_subprocess
 
 
+@pytest.fixture(autouse=True)
+def _enable_experimental(monkeypatch):
+    monkeypatch.setenv("CM_EXPERIMENTAL", "1")
+
+
 def test_impact_identity_denies_viewer_on_selection(tmp_path):
     project_dir = setup_backbone_lab_project(tmp_path / "lab")
     with pytest.raises(PolicyDeniedError, match="denied by policy"):

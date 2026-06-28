@@ -73,7 +73,7 @@ pyright
 ## Local wedge smoke
 
 ```bash
-cd examples/wedge-jaffle
+cd examples/lineage-demo
 cm scan
 cm compile --format json > graph.json
 cm compile --format catalog > catalog.json

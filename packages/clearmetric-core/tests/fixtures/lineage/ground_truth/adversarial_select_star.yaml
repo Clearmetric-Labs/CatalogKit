@@ -1,0 +1,17 @@
+project_path: ../adversarial/select_star_with_schema/manifest.json
+dialect: postgres
+probes:
+- selection: report.id
+  expected_upstream:
+  - column:raw_orders.id
+  expected_downstream: []
+  expected_warnings:
+  - code: select_star
+    dataset: report
+- selection: report.amount
+  expected_upstream:
+  - column:raw_orders.amount
+  expected_downstream: []
+  expected_warnings:
+  - code: select_star
+    dataset: report

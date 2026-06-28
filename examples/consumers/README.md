@@ -30,7 +30,7 @@ The `?bundle=` parameter is **required**. It must point at a directory containin
 
 | Bundle | Fixture | Use |
 |--------|---------|-----|
-| **`minimal`** | wedge-jaffle (dbt + warehouse) | Catalog richness, warehouse metadata, `source_disagreement` warning. Column impact may be empty — that is honest for this fixture. |
+| **`minimal`** | lineage-demo (SQL + warehouse) | Column lineage, warehouse bind warnings, impact JSON with traversed edges. |
 | **`lineage-demo`** | sql_folder (plain SQL) | Non-empty column impact trace for lineage explorer screenshots. |
 
 Cross-linking between viewers keeps the same `?bundle=` parameter so you can navigate within one bundle.
@@ -71,9 +71,9 @@ builder rejects lab consumer formats at build time. Lab formats (`consumer-catal
 
 ## Specs
 
-- [`spec/consumer-bundle.schema.json`](../../spec/consumer-bundle.schema.json)
-- [`spec/impact-output.schema.json`](../../spec/impact-output.schema.json)
-- [`spec/consumer-envelope.schema.json`](../../spec/consumer-envelope.schema.json)
-- [`spec/catalog-artifact.schema.json`](../../spec/catalog-artifact.schema.json)
+- [`packages/clearmetric-core/src/clearmetric/spec/consumer-bundle.schema.json`](../../packages/clearmetric-core/src/clearmetric/spec/consumer-bundle.schema.json)
+- [`packages/clearmetric-core/src/clearmetric/spec/impact-output.schema.json`](../../packages/clearmetric-core/src/clearmetric/spec/impact-output.schema.json)
+- [`packages/clearmetric-core/src/clearmetric/spec/consumer-envelope.schema.json`](../../packages/clearmetric-core/src/clearmetric/spec/consumer-envelope.schema.json)
+- [`packages/clearmetric-core/src/clearmetric/spec/catalog-artifact.schema.json`](../../packages/clearmetric-core/src/clearmetric/spec/catalog-artifact.schema.json)
 
 Validation is centralized in `clearmetric.core.validate`.

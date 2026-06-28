@@ -15,6 +15,7 @@ from clearmetric.compiler import impact as run_impact
 from clearmetric.compiler.validate import enforce_graph
 from clearmetric.core import ClearMetricError, __version__, load_artifact_file
 from clearmetric.emitters import emit_compile, emit_impact
+from clearmetric.emitters.diagnostics import format_compile_diagnostics
 
 from .experimental import (
     compile_format_choices,
@@ -305,7 +306,11 @@ def _run_compile(args: argparse.Namespace) -> int:
     if is_lab_compile_format(args.format):
         identity = require_gated_compile(args.format, identity)
     compiled = run_compile(_project_dir(args))
-    print(emit_compile(args.format, compiled, identity=identity))
+    output = emit_compile(args.format, compiled, identity=identity)
+    warning_block = format_compile_diagnostics(compiled.artifact)
+    if warning_block:
+        print(warning_block, file=sys.stderr)
+    print(output)
     return 0
 
 

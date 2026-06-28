@@ -2,26 +2,18 @@
 
 from __future__ import annotations
 
-import os
-
 from clearmetric.core.errors import ClearMetricError, PolicyError
+from clearmetric.core.experimental import (
+    is_experimental_enabled,
+    require_experimental,
+    require_experimental_source,
+)
 from clearmetric.emitters.registry import (
     COMPILE_FORMATS,
     LAB_COMPILE_FORMATS,
     WEDGE_COMPILE_FORMATS,
 )
 from clearmetric.policy import require_gated_identity
-
-
-def is_experimental_enabled() -> bool:
-    return os.environ.get("CM_EXPERIMENTAL", "").strip() == "1"
-
-
-def require_experimental(feature: str) -> None:
-    if not is_experimental_enabled():
-        raise ClearMetricError(
-            f"{feature} requires CM_EXPERIMENTAL=1 (experimental backbone lab; not a shipped capability)"
-        )
 
 
 def _cli_gated_identity(identity: str | None, *, error: str) -> str:
@@ -59,6 +51,7 @@ __all__ = [
     "is_experimental_enabled",
     "is_lab_compile_format",
     "require_experimental",
+    "require_experimental_source",
     "require_gated_compile",
     "require_query_identity",
 ]

@@ -120,4 +120,5 @@ class TraversalResult(BaseModel):
     selection: str
     selection_id: str
     related_ids: list[str] = Field(default_factory=list)
+    traversed_edges: list[Edge] = Field(default_factory=list)
     warnings: list[Warning] = Field(default_factory=list)

@@ -42,9 +42,6 @@ def _derivation_summary(
     result: TraversalResult,
 ) -> list[dict[str, str | None]]:
     node_map = {node.id: node for node in compiled.artifact.nodes}
-    edge_map = {
-        (edge.source_id, edge.target_id): edge for edge in compiled.artifact.edges
-    }
     summary: list[dict[str, str | None]] = []
     for node_id in result.related_ids:
         node = node_map.get(node_id)
@@ -56,14 +53,13 @@ def _derivation_summary(
                     "confidence": node.derivation.confidence,
                 }
             )
-    for edge in edge_map.values():
-        if edge.source_id in result.related_ids or edge.target_id in result.related_ids:
-            if edge.derivation:
-                summary.append(
-                    {
-                        "edge": f"{edge.source_id}->{edge.target_id}",
-                        "status": edge.derivation.status,
-                        "confidence": edge.derivation.confidence,
-                    }
-                )
+    for edge in result.traversed_edges:
+        if edge.derivation:
+            summary.append(
+                {
+                    "edge": f"{edge.source_id}->{edge.target_id}",
+                    "status": edge.derivation.status,
+                    "confidence": edge.derivation.confidence,
+                }
+            )
     return summary

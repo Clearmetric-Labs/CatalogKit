@@ -48,7 +48,7 @@ def test_resolve_table_match_ambiguous():
     target_ids = {"table:dbo.orders", "table:sales.orders"}
     matched_id, status = resolve_table_match(["orders"], target_ids)
     assert status == "ambiguous"
-    assert matched_id in target_ids
+    assert matched_id is None
 
 
 def test_resolve_table_match_unresolved():

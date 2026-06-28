@@ -1,0 +1,15 @@
+project_path: ../adversarial/nested_cte
+dialect: postgres
+probes:
+- selection: report.normalized_amount
+  expected_upstream:
+  - column:base.amount
+  - column:raw_orders.amount
+  expected_downstream: []
+  expected_warnings: []
+- selection: report.customer_id
+  expected_upstream:
+  - column:base.customer_id
+  - column:raw_orders.customer_id
+  expected_downstream: []
+  expected_warnings: []

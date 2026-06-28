@@ -10,13 +10,12 @@ all from the same compiled graph.
 
 ```bash
 pip install clearmetric-core
-cd my-dbt-project
-cm init
+cd examples/lineage-demo
 cm connect warehouse --information-schema ./warehouse_schema.json
 cm scan
 cm compile --format json > graph.json
 cm compile --format catalog > catalog.json
-cm impact column.fct_orders.net_revenue --upstream
+cm impact orders_base.amount --downstream
 cm clean
 cm contract graph.json
 ```
@@ -25,7 +24,7 @@ Warehouse metadata is a **local INFORMATION_SCHEMA JSON export** — not a live 
 
 If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …`
 
-> **Status:** early development (0.x). Pin your versions. Full architecture: [`clearmetric-architecture.md`](clearmetric-architecture.md)
+> **Status:** early development (0.x). Pin your versions. Architecture: [`docs/public-architecture.md`](docs/public-architecture.md) · limits: [`docs/limitations.md`](docs/limitations.md)
 
 ## Features
 
@@ -33,20 +32,19 @@ If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …
 - **One graph** — warehouse, dbt, and SQL merged with physical bindings on lineage nodes
 - **Catalog** — `compile --format catalog` for table/column/model nodes
 - **OpenLineage** — `compile --format openlineage` for interop with DataHub, Marquez, etc.
-- **Cleaner + security floor** — structural checks and schema drift warnings; compile fails closed on security errors
+- **Cleaner + security floor** — structural checks and schema drift warnings; compile fails closed on security policy errors (see [`docs/limitations.md`](docs/limitations.md))
 
 ## Quickstart
 
-Start with any project that has dbt artifacts, SQL files, or a local INFORMATION_SCHEMA JSON
-export.
+Start with the self-contained [`examples/lineage-demo`](examples/lineage-demo/) project (SQL folder + warehouse JSON).
 
 ```bash
 pip install clearmetric-core
-cm init
+cd examples/lineage-demo
 cm connect warehouse --information-schema ./warehouse_schema.json
 cm scan
 cm compile --format json > graph.json
-cm impact orders.amount --upstream
+cm impact orders_base.amount --downstream
 cm clean
 cm contract graph.json
 ```
@@ -100,8 +98,9 @@ One install (`pip install clearmetric-core`) — Python subpackages, not separat
 
 Static analysis for SQL/dbt lineage; warehouse **metadata exports** only in the public CLI.
 ClearMetric does not connect to live warehouses or execute production queries. On star-heavy
-SQL (`SELECT *` without schema), ClearMetric flags what it cannot resolve. [Lineage
-limitations →](packages/clearmetric-core/docs/lineage/limitations.md)
+SQL (`SELECT *` without schema), ClearMetric flags what it cannot resolve. See
+[`docs/limitations.md`](docs/limitations.md) and
+[lineage limitations](packages/clearmetric-core/docs/lineage/limitations.md).
 
 ## Feedback
 
@@ -118,9 +117,10 @@ Apache 2.0.
 <summary><strong>Architecture & contributing</strong></summary>
 
 ClearMetric Core is one package at `packages/clearmetric-core`. See
-[`clearmetric-architecture.md`](clearmetric-architecture.md) for the full design.
+[`docs/public-architecture.md`](docs/public-architecture.md) for v1 scope and
+[`clearmetric-architecture.md`](clearmetric-architecture.md) for the full historical design.
 
-**Docs:** [architecture](clearmetric-architecture.md) · [contract](packages/clearmetric-core/docs/contract.md) · [orchestration](docs/orchestration.md) · [contributing](CONTRIBUTING.md)
+**Docs:** [public architecture](docs/public-architecture.md) · [vision](docs/vision.md) · [limitations](docs/limitations.md) · [contract](packages/clearmetric-core/docs/contract.md) · [contributing](CONTRIBUTING.md)
 
 **Local development**
 

@@ -27,12 +27,13 @@ contract: value-lineage
 models:
 
   adv_01_select_star:
-    edges: 0
-    edges_corrected: 0
+    edges: 5
+    edges_corrected: 5
     warns: [select_star]
     derivation: >
-      `select *` is not enumerated into per-column edges under R6; engine warns
-      select_star. `where status='active'` is a predicate (R2) -> no edge.
+      Single-source `select * from stg_a` with known seed columns expands to five
+      value-lineage edges (id, user_id, amount, status, created_at). Engine still
+      warns select_star. `where status='active'` is a predicate (R2) -> no extra edge.
 
   adv_02_qualified_star:
     edges: 1

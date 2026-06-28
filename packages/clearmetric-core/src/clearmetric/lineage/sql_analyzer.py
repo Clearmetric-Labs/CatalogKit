@@ -98,6 +98,24 @@ def star_expansion_policy(
             qualified_star_aliases.append(qualified_alias)
 
     if has_bare_star:
+        if _bare_star_from_multiple_relations(analysis):
+            return StarExpansionPolicy(
+                suppress_all_outputs=True,
+                suppressed_output_names=frozenset(),
+            )
+        source_relation = _single_bare_star_source_relation(analysis)
+        if source_relation is None:
+            return StarExpansionPolicy(
+                suppress_all_outputs=True,
+                suppressed_output_names=frozenset(),
+            )
+        declared_columns = _declared_columns_for_relation(
+            source_relation,
+            project=project,
+            alias_map=analysis.alias_map,
+        )
+        if declared_columns:
+            return None
         return StarExpansionPolicy(
             suppress_all_outputs=True,
             suppressed_output_names=frozenset(),
@@ -119,6 +137,32 @@ def star_expansion_policy(
         suppress_all_outputs=False,
         suppressed_output_names=frozenset(suppressed),
     )
+
+
+def bare_star_column_upstream(
+    output_name: str,
+    *,
+    analysis: SqlStatementAnalysis,
+    project: ProjectInput,
+) -> tuple[str, str] | None:
+    """Return upstream dataset/column for a bare-star output when schema is fully known."""
+    if _bare_star_from_multiple_relations(analysis):
+        return None
+    source_relation = _single_bare_star_source_relation(analysis)
+    if source_relation is None:
+        return None
+    declared_columns = _declared_columns_for_relation(
+        source_relation,
+        project=project,
+        alias_map=analysis.alias_map,
+    )
+    if not declared_columns:
+        return None
+    normalized_output = normalize_identifier_part(output_name)
+    if normalized_output not in declared_columns:
+        return None
+    resolved_parent = analysis.alias_map.get(source_relation, source_relation)
+    return resolved_parent, normalized_output
 
 
 def quoted_alias_output_columns(analysis: SqlStatementAnalysis) -> frozenset[str]:
@@ -158,6 +202,42 @@ def is_star_suppressed_output(
     if policy.suppress_all_outputs:
         return True
     return normalize_identifier_part(output_name) in policy.suppressed_output_names
+
+
+def _bare_star_from_multiple_relations(analysis: SqlStatementAnalysis) -> bool:
+    """True when bare SELECT * reads from more than one base relation (e.g. joins)."""
+    from_tables = _from_clause_base_relations(analysis)
+    return len(from_tables) > 1
+
+
+def _single_bare_star_source_relation(analysis: SqlStatementAnalysis) -> str | None:
+    from_tables = _from_clause_base_relations(analysis)
+    if len(from_tables) != 1:
+        return None
+    return from_tables[0]
+
+
+def _from_clause_base_relations(analysis: SqlStatementAnalysis) -> list[str]:
+    """Normalized relation names referenced by the outer FROM (excluding CTEs)."""
+    select = analysis.statement
+    if not isinstance(select, exp.Select):
+        selects = list(analysis.statement.find_all(exp.Select))
+        select = selects[0] if selects else analysis.statement
+    from_clause = select.args.get("from_") or select.args.get("from")
+    if from_clause is None:
+        from_clause = select.find(exp.From)
+    if from_clause is None:
+        return []
+    relations: list[str] = []
+    for table in from_clause.find_all(exp.Table):
+        if not table.name:
+            continue
+        relation = normalize_identifier_part(table.name)
+        if relation in analysis.cte_names:
+            continue
+        if relation not in relations:
+            relations.append(relation)
+    return relations
 
 
 def _declared_columns_for_relation(

@@ -1,0 +1,15 @@
+project_path: ../adversarial/ambiguous_join_column
+dialect: postgres
+probes:
+- selection: report.customer_id
+  expected_upstream:
+  - column:a.customer_id
+  - column:raw_orders.customer_id
+  expected_downstream: []
+  expected_warnings: []
+- selection: report.clicks
+  expected_upstream:
+  - column:b.clicks
+  - column:raw_clicks.clicks
+  expected_downstream: []
+  expected_warnings: []

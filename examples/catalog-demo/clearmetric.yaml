@@ -1,0 +1,11 @@
+version: 1
+dialect: postgres
+sources:
+  warehouse:
+    kind: information_schema
+    path: ./warehouse_schema.json
+  dbt:
+    manifest: ./target/manifest.json
+posture: strict
+policy:
+  rules: ./policy/rules.yaml

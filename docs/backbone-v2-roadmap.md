@@ -213,7 +213,7 @@ No adapter yet — hand-built fixtures in tests.
 
 **Gate:** Adoption gate + Phase 1.
 
-[adapters/intent.py](packages/clearmetric-core/src/clearmetric/adapters/intent.py), [spec/intent.schema.json](spec/intent.schema.json), `compiler/link_metrics.py` (add at gate).
+[adapters/intent.py](packages/clearmetric-core/src/clearmetric/adapters/intent.py), packaged [`intent.schema.json`](packages/clearmetric-core/src/clearmetric/spec/intent.schema.json), `compiler/link_metrics.py` (add at gate).
 
 **Batch validation:** scan all YAML → collect errors → single `AdapterError` with full list.
 

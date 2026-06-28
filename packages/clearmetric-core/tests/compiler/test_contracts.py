@@ -104,11 +104,13 @@ def test_malformed_metric_aspect_raises_compiler_error():
         validate_contract_nodes(artifact)
 
 
-def test_enforce_graph_rejects_broken_contract_via_compile(tmp_path: Path):
+def test_enforce_graph_rejects_broken_contract_via_compile(tmp_path: Path, monkeypatch):
+
     from clearmetric.compiler.compile import compile as compile_project
 
     from tests.backbone_lab.helpers import setup_backbone_lab_project
 
+    monkeypatch.setenv("CM_EXPERIMENTAL", "1")
     project_dir = setup_backbone_lab_project(tmp_path / "broken")
     intent_path = project_dir / "intent" / "metrics.yaml"
     intent_path.write_text(

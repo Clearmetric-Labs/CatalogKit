@@ -1,0 +1,12 @@
+[importlinter]
+root_package = clearmetric
+
+[importlinter:contract:cli-forbidden]
+name = CLI must not directly import lineage or powerbi
+type = forbidden
+source_modules =
+    clearmetric.cli
+forbidden_modules =
+    clearmetric.lineage
+    clearmetric.powerbi
+allow_indirect_imports = true

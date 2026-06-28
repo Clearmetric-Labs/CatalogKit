@@ -25,6 +25,12 @@ def derives_from_counts_by_source_dataset(edges: Iterable[Edge]) -> dict[str, in
     return dict(counts)
 
 
+def edge_kind_counts(artifact: CatalogArtifact) -> dict[str, int]:
+    """Count artifact edges by kind (single source for compile/coverage diagnostics)."""
+    counts: Counter[str] = Counter(edge.kind for edge in artifact.edges)
+    return dict(sorted(counts.items()))
+
+
 def column_selection_from_id(node_id: str) -> tuple[str, str]:
     if not node_id.startswith("column:"):
         raise ValueError(f"Expected column node id, got {node_id!r}")

@@ -5,7 +5,7 @@
   "description": "Exact JSON payload emitted by cm impact --format json via emitters/impact.py",
   "type": "object",
   "additionalProperties": false,
-  "required": ["selection", "selection_id", "related_ids", "warnings", "derivation"],
+  "required": ["selection", "selection_id", "related_ids", "traversed_edges", "warnings", "derivation"],
   "properties": {
     "selection": {
       "type": "string",
@@ -19,6 +19,10 @@
       "type": "array",
       "items": { "type": "string", "minLength": 1 }
     },
+    "traversed_edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/traversed_edge" }
+    },
     "warnings": {
       "type": "array",
       "items": { "$ref": "#/$defs/warning" }
@@ -29,6 +33,27 @@
     }
   },
   "$defs": {
+    "traversed_edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source_id", "target_id", "confidence", "evidence"],
+      "properties": {
+        "kind": { "type": "string", "minLength": 1 },
+        "source_id": { "type": "string", "minLength": 1 },
+        "target_id": { "type": "string", "minLength": 1 },
+        "label": { "type": ["string", "null"] },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "match_status": { "type": ["string", "null"] },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "derivation": { "type": ["object", "null"] }
+      }
+    },
     "warning": {
       "type": "object",
       "additionalProperties": false,

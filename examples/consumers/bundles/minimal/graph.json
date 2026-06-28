@@ -2,21 +2,40 @@
   "version": "1",
   "nodes": [
     {
-      "id": "column:customers.customer_id",
+      "id": "column:customer_totals.customer_id",
       "kind": "column",
       "name": "customer_id",
-      "qualified_name": "customers.customer_id",
+      "qualified_name": "customer_totals.customer_id",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "customers.customer_id",
+          "file": "customer_totals.sql",
+          "expression": "customer_totals.customer_id",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customer_totals.total_amount",
+      "kind": "column",
+      "name": "total_amount",
+      "qualified_name": "customer_totals.total_amount",
+      "evidence": [
+        {
+          "file": "customer_totals.sql",
+          "expression": "customer_totals.total_amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
@@ -27,12 +46,7 @@
       "qualified_name": "customers.customer_lifetime_value",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "customers.customer_lifetime_value",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/customers.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "customers.customer_lifetime_value",
           "confidence": "high"
         }
@@ -60,97 +74,40 @@
       }
     },
     {
-      "id": "column:customers.first_name",
+      "id": "column:customers_report.customer_id",
       "kind": "column",
-      "name": "first_name",
-      "qualified_name": "customers.first_name",
+      "name": "customer_id",
+      "qualified_name": "customers_report.customer_id",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "customers.first_name",
+          "file": "customers_report.sql",
+          "expression": "customers_report.customer_id",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "id": "column:customers.first_order",
+      "id": "column:customers_report.customer_lifetime_value",
       "kind": "column",
-      "name": "first_order",
-      "qualified_name": "customers.first_order",
+      "name": "customer_lifetime_value",
+      "qualified_name": "customers_report.customer_lifetime_value",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "customers.first_order",
+          "file": "customers_report.sql",
+          "expression": "customers_report.customer_lifetime_value",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:customers.last_name",
-      "kind": "column",
-      "name": "last_name",
-      "qualified_name": "customers.last_name",
-      "evidence": [
-        {
-          "file": "compiled/customers.sql",
-          "expression": "customers.last_name",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:customers.most_recent_order",
-      "kind": "column",
-      "name": "most_recent_order",
-      "qualified_name": "customers.most_recent_order",
-      "evidence": [
-        {
-          "file": "compiled/customers.sql",
-          "expression": "customers.most_recent_order",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:customers.number_of_orders",
-      "kind": "column",
-      "name": "number_of_orders",
-      "qualified_name": "customers.number_of_orders",
-      "evidence": [
-        {
-          "file": "compiled/customers.sql",
-          "expression": "customers.number_of_orders",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
@@ -161,12 +118,7 @@
       "qualified_name": "orders.amount",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "orders.amount",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/orders.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "orders.amount",
           "confidence": "high"
         }
@@ -194,154 +146,47 @@
       }
     },
     {
-      "id": "column:orders.bank_transfer_amount",
+      "id": "column:orders_base.amount",
       "kind": "column",
-      "name": "bank_transfer_amount",
-      "qualified_name": "orders.bank_transfer_amount",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.bank_transfer_amount",
-          "confidence": "high"
-        }
-      ],
+      "name": "amount",
+      "qualified_name": "orders_base.amount",
+      "evidence": [],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "id": "column:orders.coupon_amount",
-      "kind": "column",
-      "name": "coupon_amount",
-      "qualified_name": "orders.coupon_amount",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.coupon_amount",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:orders.credit_card_amount",
-      "kind": "column",
-      "name": "credit_card_amount",
-      "qualified_name": "orders.credit_card_amount",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.credit_card_amount",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:orders.customer_id",
+      "id": "column:orders_base.customer_id",
       "kind": "column",
       "name": "customer_id",
-      "qualified_name": "orders.customer_id",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.customer_id",
-          "confidence": "high"
-        }
-      ],
+      "qualified_name": "orders_base.customer_id",
+      "evidence": [],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "id": "column:orders.gift_card_amount",
-      "kind": "column",
-      "name": "gift_card_amount",
-      "qualified_name": "orders.gift_card_amount",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.gift_card_amount",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:orders.order_date",
-      "kind": "column",
-      "name": "order_date",
-      "qualified_name": "orders.order_date",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.order_date",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:orders.order_id",
+      "id": "column:orders_base.order_id",
       "kind": "column",
       "name": "order_id",
-      "qualified_name": "orders.order_id",
+      "qualified_name": "orders_base.order_id",
       "evidence": [
         {
-          "file": "compiled/orders.sql",
-          "expression": "orders.order_id",
+          "file": "orders_base.sql",
+          "expression": "orders_base.order_id",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:orders.status",
-      "kind": "column",
-      "name": "status",
-      "qualified_name": "orders.status",
-      "evidence": [
-        {
-          "file": "compiled/orders.sql",
-          "expression": "orders.status",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
@@ -352,7 +197,7 @@
       "qualified_name": "raw_customers.first_name",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_customers.first_name",
           "confidence": "high"
         }
@@ -386,7 +231,7 @@
       "qualified_name": "raw_customers.id",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_customers.id",
           "confidence": "high"
         }
@@ -414,26 +259,13 @@
       }
     },
     {
-      "id": "column:raw_customers.last_name",
-      "kind": "column",
-      "name": "last_name",
-      "qualified_name": "raw_customers.last_name",
-      "evidence": [],
-      "derivation": {
-        "status": "complete",
-        "confidence": "high",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
       "id": "column:raw_orders.amount",
       "kind": "column",
       "name": "amount",
       "qualified_name": "raw_orders.amount",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_orders.amount",
           "confidence": "high"
         }
@@ -467,7 +299,7 @@
       "qualified_name": "raw_orders.id",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_orders.id",
           "confidence": "high"
         }
@@ -495,32 +327,6 @@
       }
     },
     {
-      "id": "column:raw_orders.order_date",
-      "kind": "column",
-      "name": "order_date",
-      "qualified_name": "raw_orders.order_date",
-      "evidence": [],
-      "derivation": {
-        "status": "complete",
-        "confidence": "high",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:raw_orders.status",
-      "kind": "column",
-      "name": "status",
-      "qualified_name": "raw_orders.status",
-      "evidence": [],
-      "derivation": {
-        "status": "complete",
-        "confidence": "high",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
       "id": "column:raw_orders.user_id",
       "kind": "column",
       "name": "user_id",
@@ -529,7 +335,7 @@
       "derivation": {
         "status": "complete",
         "confidence": "high",
-        "source": "dbt_manifest",
+        "source": "sqlglot",
         "errors": []
       }
     },
@@ -540,7 +346,7 @@
       "qualified_name": "raw_payments.amount",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_payments.amount",
           "confidence": "high"
         }
@@ -574,7 +380,7 @@
       "qualified_name": "raw_payments.id",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_payments.id",
           "confidence": "high"
         }
@@ -602,26 +408,13 @@
       }
     },
     {
-      "id": "column:raw_payments.order_id",
-      "kind": "column",
-      "name": "order_id",
-      "qualified_name": "raw_payments.order_id",
-      "evidence": [],
-      "derivation": {
-        "status": "complete",
-        "confidence": "high",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
       "id": "column:raw_payments.payment_method",
       "kind": "column",
       "name": "payment_method",
       "qualified_name": "raw_payments.payment_method",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_payments.payment_method",
           "confidence": "high"
         }
@@ -655,12 +448,7 @@
       "qualified_name": "stg_customers.customer_id",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_customers.customer_id",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_customers.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_customers.customer_id",
           "confidence": "high"
         }
@@ -688,94 +476,13 @@
       }
     },
     {
-      "id": "column:stg_customers.first_name",
-      "kind": "column",
-      "name": "first_name",
-      "qualified_name": "stg_customers.first_name",
-      "evidence": [
-        {
-          "file": "compiled/stg_customers.sql",
-          "expression": "stg_customers.first_name",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:stg_customers.last_name",
-      "kind": "column",
-      "name": "last_name",
-      "qualified_name": "stg_customers.last_name",
-      "evidence": [
-        {
-          "file": "compiled/stg_customers.sql",
-          "expression": "stg_customers.last_name",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:stg_orders.customer_id",
-      "kind": "column",
-      "name": "customer_id",
-      "qualified_name": "stg_orders.customer_id",
-      "evidence": [
-        {
-          "file": "compiled/stg_orders.sql",
-          "expression": "stg_orders.customer_id",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:stg_orders.order_date",
-      "kind": "column",
-      "name": "order_date",
-      "qualified_name": "stg_orders.order_date",
-      "evidence": [
-        {
-          "file": "compiled/stg_orders.sql",
-          "expression": "stg_orders.order_date",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
       "id": "column:stg_orders.order_id",
       "kind": "column",
       "name": "order_id",
       "qualified_name": "stg_orders.order_id",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_orders.order_id",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_orders.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_orders.order_id",
           "confidence": "high"
         }
@@ -803,37 +510,13 @@
       }
     },
     {
-      "id": "column:stg_orders.status",
-      "kind": "column",
-      "name": "status",
-      "qualified_name": "stg_orders.status",
-      "evidence": [
-        {
-          "file": "compiled/stg_orders.sql",
-          "expression": "stg_orders.status",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
       "id": "column:stg_payments.amount",
       "kind": "column",
       "name": "amount",
       "qualified_name": "stg_payments.amount",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_payments.amount",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_payments.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_payments.amount",
           "confidence": "high"
         }
@@ -861,59 +544,21 @@
       }
     },
     {
-      "id": "column:stg_payments.order_id",
-      "kind": "column",
-      "name": "order_id",
-      "qualified_name": "stg_payments.order_id",
+      "id": "table:customer_totals",
+      "kind": "table",
+      "name": "customer_totals",
+      "qualified_name": "customer_totals",
       "evidence": [
         {
-          "file": "compiled/stg_payments.sql",
-          "expression": "stg_payments.order_id",
+          "file": "customer_totals.sql",
+          "expression": "customer_totals",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:stg_payments.payment_id",
-      "kind": "column",
-      "name": "payment_id",
-      "qualified_name": "stg_payments.payment_id",
-      "evidence": [
-        {
-          "file": "compiled/stg_payments.sql",
-          "expression": "stg_payments.payment_id",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
-        "errors": []
-      }
-    },
-    {
-      "id": "column:stg_payments.payment_method",
-      "kind": "column",
-      "name": "payment_method",
-      "qualified_name": "stg_payments.payment_method",
-      "evidence": [
-        {
-          "file": "compiled/stg_payments.sql",
-          "expression": "stg_payments.payment_method",
-          "confidence": "high"
-        }
-      ],
-      "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
@@ -924,12 +569,7 @@
       "qualified_name": "customers",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "customers",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/customers.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "customers",
           "confidence": "high"
         }
@@ -954,18 +594,32 @@
       }
     },
     {
+      "id": "table:customers_report",
+      "kind": "table",
+      "name": "customers_report",
+      "qualified_name": "customers_report",
+      "evidence": [
+        {
+          "file": "customers_report.sql",
+          "expression": "customers_report",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    },
+    {
       "id": "table:orders",
       "kind": "table",
       "name": "orders",
       "qualified_name": "orders",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "orders",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/orders.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "orders",
           "confidence": "high"
         }
@@ -990,13 +644,32 @@
       }
     },
     {
+      "id": "table:orders_base",
+      "kind": "table",
+      "name": "orders_base",
+      "qualified_name": "orders_base",
+      "evidence": [
+        {
+          "file": "orders_base.sql",
+          "expression": "orders_base",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    },
+    {
       "id": "table:raw_customers",
       "kind": "table",
       "name": "raw_customers",
       "qualified_name": "raw_customers",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_customers",
           "confidence": "high"
         }
@@ -1027,7 +700,7 @@
       "qualified_name": "raw_orders",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_orders",
           "confidence": "high"
         }
@@ -1058,7 +731,7 @@
       "qualified_name": "raw_payments",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "raw_payments",
           "confidence": "high"
         }
@@ -1089,12 +762,7 @@
       "qualified_name": "stg_customers",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_customers",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_customers.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_customers",
           "confidence": "high"
         }
@@ -1125,12 +793,7 @@
       "qualified_name": "stg_orders",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_orders",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_orders.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_orders",
           "confidence": "high"
         }
@@ -1161,12 +824,7 @@
       "qualified_name": "stg_payments",
       "evidence": [
         {
-          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
-          "expression": "stg_payments",
-          "confidence": "high"
-        },
-        {
-          "file": "compiled/stg_payments.sql",
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/examples/lineage-demo/warehouse_schema.json",
           "expression": "stg_payments",
           "confidence": "high"
         }
@@ -1194,325 +852,220 @@
   "edges": [
     {
       "kind": "depends_on",
-      "source_id": "table:customers",
-      "target_id": "table:stg_customers",
+      "source_id": "table:customer_totals",
+      "target_id": "table:orders_base",
       "label": "depends_on",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "stg_customers",
+          "file": "customer_totals.sql",
+          "expression": "orders_base",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
       "kind": "depends_on",
-      "source_id": "table:customers",
-      "target_id": "table:stg_orders",
+      "source_id": "table:customers_report",
+      "target_id": "table:customer_totals",
       "label": "depends_on",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "stg_orders",
+          "file": "customers_report.sql",
+          "expression": "customer_totals",
           "confidence": "high"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:customers",
-      "target_id": "table:stg_payments",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:customer_totals.customer_id",
+      "target_id": "column:orders_base.customer_id",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/customers.sql",
-          "expression": "stg_payments",
-          "confidence": "high"
+          "file": "customer_totals.sql",
+          "expression": "orders_base.customer_id",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:orders",
-      "target_id": "table:stg_orders",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:customer_totals.total_amount",
+      "target_id": "column:orders_base.amount",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/orders.sql",
-          "expression": "stg_orders",
-          "confidence": "high"
+          "file": "customer_totals.sql",
+          "expression": "orders_base.amount",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:orders",
-      "target_id": "table:stg_payments",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:customers_report.customer_id",
+      "target_id": "column:customer_totals.customer_id",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/orders.sql",
-          "expression": "stg_payments",
-          "confidence": "high"
+          "file": "customers_report.sql",
+          "expression": "customer_totals.customer_id",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:stg_customers",
-      "target_id": "table:raw_customers",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:customers_report.customer_lifetime_value",
+      "target_id": "column:customer_totals.total_amount",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/stg_customers.sql",
-          "expression": "raw_customers",
-          "confidence": "high"
+          "file": "customers_report.sql",
+          "expression": "customer_totals.total_amount",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:stg_orders",
-      "target_id": "table:raw_orders",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:orders_base.amount",
+      "target_id": "column:raw_orders.amount",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/stg_orders.sql",
-          "expression": "raw_orders",
-          "confidence": "high"
+          "file": "orders_base.sql",
+          "expression": "raw_orders.amount",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     },
     {
-      "kind": "depends_on",
-      "source_id": "table:stg_payments",
-      "target_id": "table:raw_payments",
-      "label": "depends_on",
+      "kind": "derives_from",
+      "source_id": "column:orders_base.customer_id",
+      "target_id": "column:raw_orders.user_id",
+      "label": "derives_from",
       "confidence": "high",
       "evidence": [
         {
-          "file": "compiled/stg_payments.sql",
-          "expression": "raw_payments",
-          "confidence": "high"
+          "file": "orders_base.sql",
+          "expression": "raw_orders.user_id",
+          "confidence": "medium"
         }
       ],
       "derivation": {
-        "status": "partial",
-        "confidence": "medium",
-        "source": "dbt_manifest",
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    },
+    {
+      "kind": "derives_from",
+      "source_id": "column:orders_base.order_id",
+      "target_id": "column:raw_orders.id",
+      "label": "derives_from",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "orders_base.sql",
+          "expression": "raw_orders.id",
+          "confidence": "medium"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
         "errors": []
       }
     }
   ],
   "warnings": [
     {
-      "code": "select_star",
-      "message": "SELECT * was detected; output mapping may stay warning-rich.",
-      "location": "compiled/customers.sql"
-    },
-    {
-      "code": "select_star",
-      "message": "SELECT * was detected; output mapping may stay warning-rich.",
-      "location": "compiled/orders.sql"
-    },
-    {
-      "code": "select_star",
-      "message": "SELECT * was detected; output mapping may stay warning-rich.",
-      "location": "compiled/stg_customers.sql"
-    },
-    {
-      "code": "select_star",
-      "message": "SELECT * was detected; output mapping may stay warning-rich.",
-      "location": "compiled/stg_orders.sql"
-    },
-    {
-      "code": "select_star",
-      "message": "SELECT * was detected; output mapping may stay warning-rich.",
-      "location": "compiled/stg_payments.sql"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'column:customers.customer_lifetime_value': complete/high vs partial/medium",
-      "subject_id": "column:customers.customer_lifetime_value"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'column:orders.amount': complete/high vs partial/medium",
-      "subject_id": "column:orders.amount"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'column:stg_customers.customer_id': complete/high vs partial/medium",
-      "subject_id": "column:stg_customers.customer_id"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'column:stg_orders.order_id': complete/high vs partial/medium",
-      "subject_id": "column:stg_orders.order_id"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'column:stg_payments.amount': complete/high vs partial/medium",
-      "subject_id": "column:stg_payments.amount"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'table:customers': complete/high vs partial/medium",
-      "subject_id": "table:customers"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'table:orders': complete/high vs partial/medium",
-      "subject_id": "table:orders"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'table:stg_customers': complete/high vs partial/medium",
-      "subject_id": "table:stg_customers"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'table:stg_orders': complete/high vs partial/medium",
-      "subject_id": "table:stg_orders"
-    },
-    {
-      "code": "source_disagreement",
-      "message": "Sources disagree on derivation for 'table:stg_payments': complete/high vs partial/medium",
-      "subject_id": "table:stg_payments"
+      "code": "warehouse_bind_unresolved",
+      "message": "column:customer_totals.customer_id parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:customer_totals.customer_id"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.customer_id parent matched table:customers but column 'customer_id' was not found in warehouse metadata",
-      "subject_id": "column:customers.customer_id"
+      "message": "column:customer_totals.total_amount parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:customer_totals.total_amount"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.first_name parent matched table:customers but column 'first_name' was not found in warehouse metadata",
-      "subject_id": "column:customers.first_name"
+      "message": "column:customers_report.customer_id parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:customers_report.customer_id"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.first_order parent matched table:customers but column 'first_order' was not found in warehouse metadata",
-      "subject_id": "column:customers.first_order"
+      "message": "column:customers_report.customer_lifetime_value parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:customers_report.customer_lifetime_value"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.last_name parent matched table:customers but column 'last_name' was not found in warehouse metadata",
-      "subject_id": "column:customers.last_name"
+      "message": "column:orders_base.amount parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:orders_base.amount"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.most_recent_order parent matched table:customers but column 'most_recent_order' was not found in warehouse metadata",
-      "subject_id": "column:customers.most_recent_order"
+      "message": "column:orders_base.customer_id parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:orders_base.customer_id"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:customers.number_of_orders parent matched table:customers but column 'number_of_orders' was not found in warehouse metadata",
-      "subject_id": "column:customers.number_of_orders"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.bank_transfer_amount parent matched table:orders but column 'bank_transfer_amount' was not found in warehouse metadata",
-      "subject_id": "column:orders.bank_transfer_amount"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.coupon_amount parent matched table:orders but column 'coupon_amount' was not found in warehouse metadata",
-      "subject_id": "column:orders.coupon_amount"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.credit_card_amount parent matched table:orders but column 'credit_card_amount' was not found in warehouse metadata",
-      "subject_id": "column:orders.credit_card_amount"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.customer_id parent matched table:orders but column 'customer_id' was not found in warehouse metadata",
-      "subject_id": "column:orders.customer_id"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.gift_card_amount parent matched table:orders but column 'gift_card_amount' was not found in warehouse metadata",
-      "subject_id": "column:orders.gift_card_amount"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.order_date parent matched table:orders but column 'order_date' was not found in warehouse metadata",
-      "subject_id": "column:orders.order_date"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.order_id parent matched table:orders but column 'order_id' was not found in warehouse metadata",
-      "subject_id": "column:orders.order_id"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:orders.status parent matched table:orders but column 'status' was not found in warehouse metadata",
-      "subject_id": "column:orders.status"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:raw_customers.last_name parent matched table:raw_customers but column 'last_name' was not found in warehouse metadata",
-      "subject_id": "column:raw_customers.last_name"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:raw_orders.order_date parent matched table:raw_orders but column 'order_date' was not found in warehouse metadata",
-      "subject_id": "column:raw_orders.order_date"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:raw_orders.status parent matched table:raw_orders but column 'status' was not found in warehouse metadata",
-      "subject_id": "column:raw_orders.status"
+      "message": "column:orders_base.order_id parent table could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "column:orders_base.order_id"
     },
     {
       "code": "warehouse_bind_unresolved",
@@ -1521,48 +1074,18 @@
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:raw_payments.order_id parent matched table:raw_payments but column 'order_id' was not found in warehouse metadata",
-      "subject_id": "column:raw_payments.order_id"
+      "message": "table:customer_totals could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "table:customer_totals"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:stg_customers.first_name parent matched table:stg_customers but column 'first_name' was not found in warehouse metadata",
-      "subject_id": "column:stg_customers.first_name"
+      "message": "table:customers_report could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "table:customers_report"
     },
     {
       "code": "warehouse_bind_unresolved",
-      "message": "column:stg_customers.last_name parent matched table:stg_customers but column 'last_name' was not found in warehouse metadata",
-      "subject_id": "column:stg_customers.last_name"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_orders.customer_id parent matched table:stg_orders but column 'customer_id' was not found in warehouse metadata",
-      "subject_id": "column:stg_orders.customer_id"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_orders.order_date parent matched table:stg_orders but column 'order_date' was not found in warehouse metadata",
-      "subject_id": "column:stg_orders.order_date"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_orders.status parent matched table:stg_orders but column 'status' was not found in warehouse metadata",
-      "subject_id": "column:stg_orders.status"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_payments.order_id parent matched table:stg_payments but column 'order_id' was not found in warehouse metadata",
-      "subject_id": "column:stg_payments.order_id"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_payments.payment_id parent matched table:stg_payments but column 'payment_id' was not found in warehouse metadata",
-      "subject_id": "column:stg_payments.payment_id"
-    },
-    {
-      "code": "warehouse_bind_unresolved",
-      "message": "column:stg_payments.payment_method parent matched table:stg_payments but column 'payment_method' was not found in warehouse metadata",
-      "subject_id": "column:stg_payments.payment_method"
+      "message": "table:orders_base could not be uniquely bound to warehouse metadata (match_status=unresolved)",
+      "subject_id": "table:orders_base"
     }
   ]
 }

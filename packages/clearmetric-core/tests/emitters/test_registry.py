@@ -15,6 +15,11 @@ from tests.backbone_lab.helpers import setup_backbone_lab_project
 from tests.wedge.helpers import setup_wedge_project
 
 
+@pytest.fixture(autouse=True)
+def _enable_experimental_for_lab(monkeypatch):
+    monkeypatch.setenv("CM_EXPERIMENTAL", "1")
+
+
 def test_compile_returns_merged_graph(tmp_path: Path):
     compiled = compile_project(setup_wedge_project(tmp_path))
     assert compiled.sources_run == ["warehouse", "dbt"]

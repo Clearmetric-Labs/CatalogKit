@@ -12,6 +12,7 @@ from .checks import (
     check_edges_resolve,
     check_partial_derivation,
     check_unique_node_ids,
+    check_zero_column_lineage,
 )
 from .hygiene import check_duplicate_formula
 from .models import Finding
@@ -49,6 +50,7 @@ CHECK_SPECS: list[CheckSpec] = [
     CheckSpec("check.edges_resolve", "structural", check_edges_resolve),
     CheckSpec("check.duplicate_bindings", "error", check_duplicate_bindings),
     CheckSpec("check.partial_derivation", "warn", check_partial_derivation),
+    CheckSpec("check.zero_column_lineage", "warn", check_zero_column_lineage),
     CheckSpec(
         "check.duplicate_formula",
         "warn",

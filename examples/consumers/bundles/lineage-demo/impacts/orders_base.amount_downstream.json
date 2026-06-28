@@ -5,6 +5,52 @@
     "column:customer_totals.total_amount",
     "column:customers_report.customer_lifetime_value"
   ],
+  "traversed_edges": [
+    {
+      "kind": "derives_from",
+      "source_id": "column:customer_totals.total_amount",
+      "target_id": "column:orders_base.amount",
+      "label": "derives_from",
+      "confidence": "high",
+      "match_status": null,
+      "evidence": [
+        {
+          "file": "customer_totals.sql",
+          "location": null,
+          "expression": "orders_base.amount",
+          "confidence": "medium"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    },
+    {
+      "kind": "derives_from",
+      "source_id": "column:customers_report.customer_lifetime_value",
+      "target_id": "column:customer_totals.total_amount",
+      "label": "derives_from",
+      "confidence": "high",
+      "match_status": null,
+      "evidence": [
+        {
+          "file": "customers_report.sql",
+          "location": null,
+          "expression": "customer_totals.total_amount",
+          "confidence": "medium"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "sqlglot",
+        "errors": []
+      }
+    }
+  ],
   "warnings": [],
   "derivation": [
     {

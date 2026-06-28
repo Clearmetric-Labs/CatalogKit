@@ -1,0 +1,12 @@
+version: 1
+dialect: postgres
+sources:
+  warehouse:
+    kind: information_schema
+    path: ./warehouse_schema.json
+  sql:
+    paths:
+      - ./sql
+posture: strict
+policy:
+  rules: ./policy/rules.yaml

@@ -111,7 +111,7 @@ def resolve_table_match(
     if len(unique_matches) == 1:
         return unique_matches[0], "resolved"
     if len(unique_matches) > 1:
-        return unique_matches[0], "ambiguous"
+        return None, "ambiguous"
     return None, "unresolved"
 
 

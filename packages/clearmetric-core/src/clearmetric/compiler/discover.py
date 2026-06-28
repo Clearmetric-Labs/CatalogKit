@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from clearmetric.adapters.registry import enabled_sources
+from clearmetric.adapters.registry import configured_sources
 from clearmetric.core.errors import CompilerError
 from clearmetric.core.project import load_project_config
 
@@ -16,7 +16,7 @@ def discover(project_dir: Path) -> DiscoverReport:
     project = load_project_config(root)
     sources: list[ResolvedSource] = []
 
-    for kind in enabled_sources(project):
+    for kind in configured_sources(project):
         if kind == "warehouse":
             warehouse = project.sources.warehouse
             if warehouse is None:

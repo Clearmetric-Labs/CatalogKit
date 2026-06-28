@@ -69,7 +69,9 @@ def test_cm_query_denied_for_wrong_identity(tmp_path: Path):
 
 
 def test_wedge_catalog_and_openlineage_without_experimental(tmp_path: Path):
-    project_dir = setup_backbone_lab_project(tmp_path / "lab")
+    from tests.wedge.helpers import setup_wedge_project
+
+    project_dir = setup_wedge_project(tmp_path / "wedge")
     catalog = run_cm_subprocess(project_dir, "compile", "--format", "catalog")
     assert catalog.returncode == 0, catalog.stderr
     openlineage = run_cm_subprocess(project_dir, "compile", "--format", "openlineage")

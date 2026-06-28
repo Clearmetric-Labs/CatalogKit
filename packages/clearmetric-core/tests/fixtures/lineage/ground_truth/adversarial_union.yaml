@@ -1,0 +1,10 @@
+project_path: ../adversarial/union_all_branches
+dialect: postgres
+probes:
+- selection: report.total_amount
+  expected_upstream: []
+  expected_downstream: []
+  expected_warnings:
+  - code: unresolved_lineage
+    dataset: report
+    subject_id: column:report.total_amount

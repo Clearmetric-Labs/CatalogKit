@@ -1,0 +1,15 @@
+project_path: ../adversarial/window_function_derived
+dialect: postgres
+probes:
+- selection: report.customer_total
+  expected_upstream:
+  - column:orders.amount
+  - column:raw_orders.amount
+  expected_downstream: []
+  expected_warnings: []
+- selection: report.amount
+  expected_upstream:
+  - column:orders.amount
+  - column:raw_orders.amount
+  expected_downstream: []
+  expected_warnings: []

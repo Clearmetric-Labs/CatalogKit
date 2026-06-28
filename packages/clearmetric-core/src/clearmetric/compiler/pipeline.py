@@ -36,12 +36,14 @@ def run_build(project_dir: Path) -> CompiledGraph:
             alias_map=alias_map,
         )
 
-    merged = link_contract_dependencies(merged)
-    merged = compile_query_contracts(merged, dialect=project.dialect)
+    sources_run = enabled_sources(project)
+    if "intent" in sources_run:
+        merged = link_contract_dependencies(merged)
+        merged = compile_query_contracts(merged, dialect=project.dialect)
 
     return CompiledGraph(
         artifact=merged,
         project=project,
         project_dir=root,
-        sources_run=enabled_sources(project),
+        sources_run=sources_run,
     )

@@ -17,7 +17,7 @@ from tests.wedge.helpers import run_cm_subprocess
 def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     project_dir = setup_backbone_lab_project(tmp_path / "lab")
 
-    compile_json = run_cm_subprocess(project_dir, "compile", "--format", "json")
+    compile_json = run_cm_subprocess(project_dir, "compile", "--format", "json", experimental=True)
     assert compile_json.returncode == 0, compile_json.stderr
     graph = json.loads(compile_json.stdout)
     graph_ids = {node["id"] for node in graph["nodes"]}
@@ -25,7 +25,9 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     assert "metric:executive_revenue" in graph_ids
     assert "query:executive_revenue" in graph_ids
 
-    compile_catalog = run_cm_subprocess(project_dir, "compile", "--format", "catalog")
+    compile_catalog = run_cm_subprocess(
+        project_dir, "compile", "--format", "catalog", experimental=True
+    )
     assert compile_catalog.returncode == 0, compile_catalog.stderr
     catalog = json.loads(compile_catalog.stdout)
     catalog_ids = {node["id"] for node in catalog["nodes"]}
@@ -35,7 +37,7 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     assert "payload" not in catalog
 
     compile_openlineage = run_cm_subprocess(
-        project_dir, "compile", "--format", "openlineage"
+        project_dir, "compile", "--format", "openlineage", experimental=True
     )
     assert compile_openlineage.returncode == 0, compile_openlineage.stderr
 
@@ -90,6 +92,7 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
         "impact",
         "orders.amount",
         "--upstream",
+        experimental=True,
     )
     assert impact.returncode == 0, impact.stderr
     assert "orders.amount" in impact.stdout or "column:orders.amount" in impact.stdout

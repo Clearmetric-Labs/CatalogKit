@@ -140,7 +140,7 @@ def test_atomic_failure_preserves_existing_bundle(tmp_path: Path):
                 "id": "fail-test",
                 "label": "fail",
                 "mode": "project",
-                "project_dir": str(REPO_ROOT / "examples" / "wedge-jaffle"),
+                "project_dir": str(REPO_ROOT / "examples" / "lineage-demo"),
                 "outputs": [
                     {"compile_format": "json", "out": "graph.json"},
                     {"compile_format": "catalog", "out": "catalog.json"},
@@ -173,7 +173,7 @@ def test_rejects_consumer_catalog_format(tmp_path: Path):
                 "id": "bad-format",
                 "label": "bad",
                 "mode": "project",
-                "project_dir": str(REPO_ROOT / "examples" / "wedge-jaffle"),
+                "project_dir": str(REPO_ROOT / "examples" / "lineage-demo"),
                 "outputs": [
                     {"compile_format": "consumer-catalog", "out": "catalog.json"},
                 ],
@@ -205,7 +205,7 @@ def test_rejects_consumer_lane(tmp_path: Path):
                 "id": "bad-lane",
                 "label": "bad",
                 "mode": "project",
-                "project_dir": str(REPO_ROOT / "examples" / "wedge-jaffle"),
+                "project_dir": str(REPO_ROOT / "examples" / "lineage-demo"),
                 "outputs": [
                     {
                         "compile_format": "json",
@@ -241,7 +241,7 @@ def test_requires_defaults_impact_key(tmp_path: Path):
                 "id": "no-defaults",
                 "label": "bad",
                 "mode": "project",
-                "project_dir": str(REPO_ROOT / "examples" / "wedge-jaffle"),
+                "project_dir": str(REPO_ROOT / "examples" / "lineage-demo"),
                 "outputs": [
                     {"compile_format": "json", "out": "graph.json"},
                     {"compile_format": "catalog", "out": "catalog.json"},

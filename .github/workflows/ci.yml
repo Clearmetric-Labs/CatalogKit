@@ -22,6 +22,9 @@ jobs:
           python -m pip install -e "packages/clearmetric-core[dev,runtime]"
           python -m pip install ruff pyright
 
+      - name: Fail on legacy repo-root spec directory
+        run: test ! -d spec
+
       - name: Run Ruff lint checks
         run: python -m ruff check --select E,F,I --ignore E501 --target-version py311 --extend-exclude .pkgmeta --extend-exclude .pkgsmoke --extend-exclude .pkgtest .
 
@@ -30,6 +33,9 @@ jobs:
 
       - name: Run Pyright
         run: pyright
+
+      - name: Run import-linter
+        run: PYTHONPATH=packages/clearmetric-core/src lint-imports
 
       - name: Fail on legacy name references
         run: |
@@ -87,6 +93,44 @@ jobs:
           PYTHONPATH=packages/clearmetric-core \
             python packages/clearmetric-core/scripts/sweep_lineage_coverage.py
 
+  examples-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install editable package for examples smoke
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "packages/clearmetric-core[runtime]"
+
+      - name: Smoke test lineage-demo example
+        run: |
+          cd examples/lineage-demo
+          cm connect warehouse --information-schema ./warehouse_schema.json
+          cm scan
+          cm compile --format json > /tmp/lineage-demo-graph.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("/tmp/lineage-demo-graph.json"))
+          derives = [e for e in payload["edges"] if e["kind"] == "derives_from"]
+          assert derives, "expected non-zero derives_from edges from lineage-demo"
+          PY
+          cm impact orders_base.amount --downstream --format json > /tmp/lineage-demo-impact.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("/tmp/lineage-demo-impact.json"))
+          assert payload["related_ids"], "expected non-empty downstream impact"
+          assert payload["traversed_edges"], "expected traversed_edges in impact JSON"
+          PY
+          cm clean
+          cm contract /tmp/lineage-demo-graph.json
+
   release-smoke:
     runs-on: ubuntu-latest
     steps:
@@ -109,23 +153,34 @@ jobs:
       - name: Validate package metadata
         run: python -m twine check packages/clearmetric-core/dist/*
 
-      - name: Smoke test installed wheel
+      - name: Smoke test installed wheel in /tmp
         run: |
-          python -m venv .pkgsmoke
-          . .pkgsmoke/bin/activate
+          WHEEL="$(ls -t packages/clearmetric-core/dist/*.whl | head -1)"
+          SMOKE_ROOT="$(mktemp -d /tmp/cm-smoke.XXXXXX)"
+          cd "$SMOKE_ROOT"
+          python -m venv .venv
+          . .venv/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install packages/clearmetric-core/dist/*.whl
+          python -m pip install "$GITHUB_WORKSPACE/$WHEEL"
+          python -c "from importlib.resources import files; assert files('clearmetric.spec').joinpath('catalog-artifact.schema.json').is_file()"
           cm --version
-          SMOKE_PROJECT="$(mktemp -d)"
-          mkdir -p "$SMOKE_PROJECT/target" "$SMOKE_PROJECT/policy"
-          cp packages/clearmetric-core/tests/fixtures/lineage/projects/jaffle_shop/manifest.json \
-            "$SMOKE_PROJECT/target/manifest.json"
-          cp -R packages/clearmetric-core/tests/fixtures/lineage/projects/jaffle_shop/compiled \
-            "$SMOKE_PROJECT/target/compiled"
-          cp packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json \
-            "$SMOKE_PROJECT/warehouse_schema.json"
-          cm --project-dir "$SMOKE_PROJECT" init
-          cm --project-dir "$SMOKE_PROJECT" compile --format json > /dev/null
-          cm --project-dir "$SMOKE_PROJECT" impact orders.amount --upstream
+          cp -R "$GITHUB_WORKSPACE/examples/lineage-demo" ./project
+          cd project
+          cm connect warehouse --information-schema ./warehouse_schema.json
+          cm scan
+          cm compile --format json > graph.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("graph.json"))
+          derives = [e for e in payload["edges"] if e["kind"] == "derives_from"]
+          assert derives, "wheel smoke: expected non-zero derives_from edges"
+          PY
+          cm impact orders_base.amount --downstream --format json > impact.json
+          python - <<'PY'
+          import json
+          payload = json.load(open("impact.json"))
+          assert payload["related_ids"], "wheel smoke: expected non-empty impact"
+          PY
+          cm clean
+          cm contract graph.json
           python -m clearmetric.cli --help
-          python -c "import clearmetric.core, clearmetric.lineage, clearmetric.query, clearmetric.powerbi"

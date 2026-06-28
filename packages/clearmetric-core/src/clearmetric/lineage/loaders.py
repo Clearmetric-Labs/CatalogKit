@@ -27,10 +27,18 @@ class ProjectDataset:
 
 
 @dataclass(frozen=True)
+class ManifestCompileReport:
+    models_total: int
+    models_with_compiled_sql: int
+    models_missing_compiled_sql: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class ProjectInput:
     input_kind: InputKind
     label: str
     datasets: dict[str, ProjectDataset]
+    manifest_compile_report: ManifestCompileReport | None = None
 
     def local_dataset_names(self) -> set[str]:
         return {
@@ -90,6 +98,8 @@ def _load_manifest_project(path: Path) -> ProjectInput:
         raise LineageInputError(f"Manifest is missing a nodes object: {path}")
 
     datasets: dict[str, ProjectDataset] = {}
+    models_total = 0
+    models_with_compiled_sql = 0
     for node_payload in raw_nodes.values():
         if not isinstance(node_payload, dict):
             raise LineageInputError(
@@ -101,7 +111,9 @@ def _load_manifest_project(path: Path) -> ProjectInput:
             continue
 
         if resource_type == "model":
+            models_total += 1
             sql = _read_compiled_sql(path, node_payload)
+            models_with_compiled_sql += 1
             depends_on: list[str] = []
             for dependency in node_payload.get("depends_on", {}).get("nodes", []):
                 normalized_dependency = _normalize_dependency_name(dependency)
@@ -130,7 +142,17 @@ def _load_manifest_project(path: Path) -> ProjectInput:
 
     project_name = str(payload.get("metadata", {}).get("project_name") or "").strip()
     label = project_name or path.parent.name
-    return ProjectInput(input_kind="dbt_manifest", label=label, datasets=datasets)
+    compile_report = ManifestCompileReport(
+        models_total=models_total,
+        models_with_compiled_sql=models_with_compiled_sql,
+        models_missing_compiled_sql=(),
+    )
+    return ProjectInput(
+        input_kind="dbt_manifest",
+        label=label,
+        datasets=datasets,
+        manifest_compile_report=compile_report,
+    )
 
 
 def _read_compiled_sql(manifest_path: Path, node_payload: dict) -> str:
@@ -168,9 +190,13 @@ def _compiled_path_label(node_payload: dict) -> str | None:
 def _resolve_manifest_relative_path(manifest_path: Path, relative_path: str) -> Path:
     manifest_root = manifest_path.parent.resolve()
     candidate = (manifest_root / relative_path).resolve()
-    if manifest_root == candidate or manifest_root not in candidate.parents:
+    if not candidate.is_relative_to(manifest_root):
         raise LineageInputError(
             f"Manifest compiled_path escapes the manifest directory: {relative_path!r}"
+        )
+    if not candidate.is_file():
+        raise LineageInputError(
+            f"Manifest compiled_path is not a readable file: {relative_path!r}"
         )
     return candidate
 

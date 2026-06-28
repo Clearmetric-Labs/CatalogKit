@@ -1,17 +1,17 @@
 id: _template
 label: Template scenario (copy to create a new scenario)
 mode: project
-project_dir: ../../../wedge-jaffle
+project_dir: ../../../lineage-demo
 outputs:
   - compile_format: json
     out: graph.json
   - compile_format: catalog
     out: catalog.json
 impacts:
-  - selection: orders.amount
+  - selection: orders_base.amount
     direction: upstream
-    manifest_key: orders.amount_upstream
-    out: impacts/orders.amount_upstream.json
+    manifest_key: orders_base.amount_upstream
+    out: impacts/orders_base.amount_upstream.json
 defaults:
-  impact_key: orders.amount_upstream
+  impact_key: orders_base.amount_upstream
 checks: checks.yaml

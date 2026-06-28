@@ -10,6 +10,7 @@ from clearmetric.core import CatalogArtifact
 from clearmetric.graph import (
     column_selection_from_id,
     dataset_from_location,
+    edge_kind_counts,
     upstream_adjacency,
     view_of,
 )
@@ -125,7 +126,9 @@ def coverage_summary(
         if warning.code:
             warning_counts[warning.code] += 1
     total = sum(counts.values())
-    return {
+    edge_counts = edge_kind_counts(artifact)
+    derives_from_count = edge_counts.get("derives_from", 0)
+    summary = {
         "total": total,
         "resolved": counts[ColumnResolution.RESOLVED.value],
         "source_leaf": counts[ColumnResolution.SOURCE_LEAF.value],
@@ -143,7 +146,18 @@ def coverage_summary(
             counts[ColumnResolution.FLAGGED.value],
             total,
         ),
+        "edge_counts": edge_counts,
+        "derives_from_count": derives_from_count,
+        "zero_column_lineage": derives_from_count == 0,
     }
+    if project.manifest_compile_report is not None:
+        report = project.manifest_compile_report
+        summary["manifest_compile_report"] = {
+            "models_total": report.models_total,
+            "models_with_compiled_sql": report.models_with_compiled_sql,
+            "models_missing_compiled_sql": list(report.models_missing_compiled_sql),
+        }
+    return summary
 
 
 def _project_column_ids(

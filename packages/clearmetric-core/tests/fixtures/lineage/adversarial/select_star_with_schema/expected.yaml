@@ -1,5 +1,7 @@
 dialect: postgres
 mode: exact_edges
-derives_from: []
+derives_from:
+  - [column:report.id, column:raw_orders.id]
+  - [column:report.amount, column:raw_orders.amount]
 warnings:
   - {code: select_star, dataset: report}

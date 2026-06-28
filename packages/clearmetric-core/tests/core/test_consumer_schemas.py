@@ -42,6 +42,15 @@ _VALID_IMPACT = {
     "selection": "orders.amount",
     "selection_id": "column:orders.amount",
     "related_ids": ["column:orders.amount", "column:raw.orders.amount"],
+    "traversed_edges": [
+        {
+            "kind": "derives_from",
+            "source_id": "column:orders.amount",
+            "target_id": "column:raw.orders.amount",
+            "confidence": "high",
+            "evidence": [],
+        }
+    ],
     "warnings": [],
     "derivation": [
         {

@@ -5,5 +5,5 @@ cases:
       - table
       - column
   - id: example_impact_resolves
-    impact: orders.amount_upstream
-    expect_selection_id: column:orders.amount
+    impact: orders_base.amount_upstream
+    expect_selection_id: column:orders_base.amount

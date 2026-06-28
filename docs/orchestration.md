@@ -88,4 +88,4 @@ during `build_graph()` via `attach_warehouse_bindings()`.
 
 ## CI
 
-`cm contract graph.json` loads the artifact, validates against `spec/catalog-artifact.schema.json`, and runs `enforce_graph(..., posture="strict")` (structural checks + security floor).
+`cm contract graph.json` loads the artifact, validates against packaged `catalog-artifact.schema.json`, and runs `enforce_graph(..., posture="strict")` (structural checks + security floor).

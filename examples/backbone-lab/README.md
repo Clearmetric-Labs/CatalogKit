@@ -16,7 +16,7 @@ cd examples/backbone-lab
 ```
 
 Warehouse and dbt fixtures are referenced from committed paths under
-`packages/clearmetric-core/tests/fixtures/` (same pattern as wedge-jaffle).
+Fixtures live under `packages/clearmetric-core/tests/fixtures/` (same pattern as `examples/lineage-demo`).
 
 ## Demo
 

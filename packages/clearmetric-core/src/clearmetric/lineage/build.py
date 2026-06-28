@@ -31,6 +31,7 @@ from .loaders import ProjectDataset, ProjectInput
 from .models import LineageMap, LineageSummary
 from .sql_analyzer import (
     analyze_sql_statement,
+    bare_star_column_upstream,
     filter_value_lineage_refs,
     has_select_star_projection,
     is_star_suppressed_output,
@@ -415,6 +416,58 @@ def _add_lineage_edges(
             )
             continue
         if not selected_refs:
+            bare_star_upstream = None
+            if (
+                has_select_star
+                and star_policy is None
+                and statement_analysis is not None
+            ):
+                bare_star_upstream = bare_star_column_upstream(
+                    output_name,
+                    analysis=statement_analysis,
+                    project=project,
+                )
+            if bare_star_upstream is not None:
+                parent_name, source_column = bare_star_upstream
+                _add_dataset_node(
+                    nodes_by_id,
+                    ProjectDataset(
+                        name=parent_name,
+                        kind=project.datasets[parent_name].kind
+                        if parent_name in project.datasets
+                        else "root",
+                        sql=project.datasets[parent_name].sql
+                        if parent_name in project.datasets
+                        else None,
+                        dependency_names=(),
+                        declared_columns=project.datasets[parent_name].declared_columns
+                        if parent_name in project.datasets
+                        else (),
+                        evidence_file=project.datasets[parent_name].evidence_file
+                        if parent_name in project.datasets
+                        else None,
+                    ),
+                )
+                _add_column_node(nodes_by_id, parent_name, source_column, None)
+                edges.append(
+                    Edge(
+                        kind="derives_from",
+                        source_id=source_id,
+                        target_id=column_id(parent_name, source_column),
+                        label="derives_from",
+                        evidence=[
+                            Evidence(
+                                file=dataset.evidence_file,
+                                expression=f"{parent_name}.{source_column}",
+                                confidence="high",
+                            )
+                        ]
+                        if dataset.evidence_file
+                        else [],
+                    )
+                )
+                state.columns_with_edges.add(normalized_output)
+                continue
             _emit_column_warning(
                 warnings,
                 code="unresolved_output_source",

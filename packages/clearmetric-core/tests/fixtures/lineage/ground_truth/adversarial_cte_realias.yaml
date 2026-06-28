@@ -1,0 +1,15 @@
+project_path: ../adversarial/cte_column_realias
+dialect: postgres
+probes:
+- selection: b.net_amount
+  expected_upstream:
+  - column:a.amount
+  - column:raw_orders.amount
+  expected_downstream: []
+  expected_warnings: []
+- selection: b.order_id
+  expected_upstream:
+  - column:a.id
+  - column:raw_orders.id
+  expected_downstream: []
+  expected_warnings: []

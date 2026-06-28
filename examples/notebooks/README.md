@@ -28,6 +28,6 @@ root automatically.
 
 ## Related examples (non-notebook)
 
-- [examples/wedge-jaffle](../wedge-jaffle/README.md) — CLI quickstart for the public wedge
+- [examples/lineage-demo](../lineage-demo/README.md) — CLI quickstart with self-contained SQL folder fixture
 - [examples/backbone-lab](../backbone-lab/README.md) — experimental scaffold demo
 - [examples/consumers](../consumers/README.md) — artifact bundle + vanilla HTML viewers
