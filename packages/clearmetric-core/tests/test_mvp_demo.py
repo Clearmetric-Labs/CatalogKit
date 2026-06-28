@@ -3,6 +3,11 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
 
 from tests.backbone_lab.helpers import setup_backbone_lab_project
@@ -27,6 +32,7 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     assert "column:orders.amount" in catalog_ids
     assert "metric:executive_revenue" not in catalog_ids
     assert "query:executive_revenue" not in catalog_ids
+    assert "payload" not in catalog
 
     compile_openlineage = run_cm_subprocess(
         project_dir, "compile", "--format", "openlineage"
@@ -44,7 +50,8 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     )
     assert compile_consumer.returncode == 0, compile_consumer.stderr
     consumer = json.loads(compile_consumer.stdout)
-    consumer_ids = {node["id"] for node in consumer["nodes"]}
+    consumer_ids = {node["id"] for node in consumer["payload"]["nodes"]}
+    assert consumer["format"] == "consumer-catalog"
     assert "column:orders.amount" in consumer_ids
     assert "metric:executive_revenue" in consumer_ids
     assert "query:executive_revenue" in consumer_ids
@@ -60,8 +67,23 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     )
     assert compile_contracts.returncode == 0, compile_contracts.stderr
     contracts = json.loads(compile_contracts.stdout)
-    assert contracts["queries"][0]["id"] == "query:executive_revenue"
-    assert "SELECT" in contracts["queries"][0]["sql"]
+    assert contracts["payload"]["queries"][0]["id"] == "query:executive_revenue"
+    assert "SELECT" in contracts["payload"]["queries"][0]["sql"]
+
+    compile_ai = run_cm_subprocess(
+        project_dir,
+        "compile",
+        "--format",
+        "ai-context",
+        "--identity",
+        "analyst",
+        experimental=True,
+    )
+    assert compile_ai.returncode == 0, compile_ai.stderr
+    ai_context = json.loads(compile_ai.stdout)
+    ai_ids = {node["id"] for node in ai_context["payload"]["nodes"]}
+    assert "metric:executive_revenue" in ai_ids
+    assert "query:executive_revenue" not in ai_ids
 
     impact = run_cm_subprocess(
         project_dir,
@@ -83,3 +105,53 @@ def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     assert query.returncode == 0, query.stderr
     rows = json.loads(query.stdout)
     assert rows[0]["net_revenue"] == 100
+
+    graph_path = project_dir / "graph.json"
+    graph_path.write_text(compile_json.stdout, encoding="utf-8")
+    port = 18765
+    server = subprocess.Popen(
+        [
+            sys.executable,
+            "-m",
+            "clearmetric.cli",
+            "--project-dir",
+            str(project_dir),
+            "serve",
+            str(graph_path),
+            "--identity",
+            "analyst",
+            "--port",
+            str(port),
+        ],
+        env={**dict(**__import__("os").environ), "CM_EXPERIMENTAL": "1"},
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    try:
+        for _ in range(50):
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/health") as resp:
+                    health = json.loads(resp.read().decode("utf-8"))
+                    break
+            except urllib.error.URLError:
+                time.sleep(0.1)
+        else:
+            raise AssertionError(
+                server.stderr.read() if server.stderr else "serve failed to start"
+            )
+        assert health["status"] == "ok"
+        assert "debug harness" in health["note"]
+
+        request = urllib.request.Request(
+            f"http://127.0.0.1:{port}/query",
+            data=json.dumps({"query_id": "query:executive_revenue"}).encode("utf-8"),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with urllib.request.urlopen(request) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+        assert payload["rows"][0]["net_revenue"] == 100
+    finally:
+        server.terminate()
+        server.wait(timeout=5)

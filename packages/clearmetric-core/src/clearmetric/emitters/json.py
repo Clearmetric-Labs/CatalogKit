@@ -1,12 +1,13 @@
-"""JSON emitter."""
+"""JSON artifact serializer."""
 
 from __future__ import annotations
 
-import json
-
-from clearmetric.compiler.models import CompiledGraph
 from clearmetric.core import render_json
+from clearmetric.core.models import CatalogArtifact
 
 
-def emit_json(compiled: CompiledGraph) -> str:
-    return json.dumps(render_json(compiled.artifact), indent=2, sort_keys=False)
+def serialize_artifact(artifact: CatalogArtifact) -> dict:
+    return render_json(artifact)
+
+
+__all__ = ["serialize_artifact"]

@@ -29,6 +29,13 @@ def test_example_backbone_lab_demo(tmp_path: Path):
             "--identity",
             "analyst",
         ),
+        (
+            "compile",
+            "--format",
+            "ai-context",
+            "--identity",
+            "analyst",
+        ),
         ("impact", "orders.amount", "--upstream"),
         (
             "query",
@@ -46,3 +53,18 @@ def test_example_backbone_lab_demo(tmp_path: Path):
 
     rows = json.loads(last_stdout)
     assert rows[0]["net_revenue"] == 100
+
+    consumer = json.loads(
+        run_cm_subprocess(
+            project_dir,
+            "compile",
+            "--format",
+            "consumer-catalog",
+            "--identity",
+            "analyst",
+            experimental=True,
+        ).stdout
+    )
+    assert "query:executive_revenue" in {
+        node["id"] for node in consumer["payload"]["nodes"]
+    }

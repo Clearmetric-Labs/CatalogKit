@@ -239,8 +239,8 @@ structural checks and the security floor always apply on enforce paths.
 
 `cm clean` exits non-zero on `severity == error` only; warnings never fail exit regardless of posture.
 
-Catalog output uses `project_catalog_assets()` (table/column/model nodes, pruned edges) via
-`compile --format catalog` only — not a separate CLI command.
+Catalog output uses `graph.select_kinds` + `emitters.registry` (`compile --format catalog`) —
+table/column/model nodes with pruned edges — not a separate CLI command.
 
 ## Graph read API
 

@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0 - 2026-06-28
+
+### Changed (Backbone Scaffold — experimental lab, wedge outputs stable)
+
+- **Graph select** — `clearmetric.graph.select`, `select_kinds`; warnings filtered to visible subjects
+- **Projection** — narrowed to `apply_policy` only; kind slicing removed from projection
+- **Format registry** — `FormatSpec` + `COMPILE_FORMATS`; sole `emit_compile` dispatch path; sole `gated_context` caller for consumer compile
+- **Consumer envelope** — `consumer-catalog`, `frontend-contract`, `ai-context` wrap JSON in `{format, identity, payload, ...}`; admin `json`/`catalog`/`openlineage` stay raw
+- **Thin serializers** — emitters serialize artifact only; no policy/projection imports outside registry
+- **Runtime** — `execute_project_query` uses `load_rules` + `require_allow`; `runtime.serve` localhost-only debug harness
+- **Lab CLI** — `cm serve`, `cm impact --identity`, `ai-context` format (all `CM_EXPERIMENTAL=1`)
+
+### Docs
+
+- Updated [backbone-lab.md](docs/backbone-lab.md), [clearmetric-architecture.md](clearmetric-architecture.md), examples/backbone-lab
+
 ## 0.6.1 - 2026-06-28
 
 ### Changed (Backbone Lab QA — experimental, not public README promise)

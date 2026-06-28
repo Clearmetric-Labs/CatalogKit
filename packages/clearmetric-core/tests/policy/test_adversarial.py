@@ -7,7 +7,7 @@ from unittest.mock import patch
 from clearmetric.core.models import CatalogArtifact, Node
 from clearmetric.policy import evaluate_node
 from clearmetric.policy.models import PolicyRule, PolicyRulesFile, PolicySelector
-from clearmetric.projection import project_consumer_catalog, project_for_emit
+from clearmetric.projection import apply_policy
 
 
 def _node(**kwargs: object) -> Node:
@@ -97,7 +97,7 @@ def test_mask_strips_sensitive_aspects_in_consumer_catalog():
             )
         ]
     )
-    projected = project_consumer_catalog(artifact, identity="analyst", rules=rules)
+    projected = apply_policy(artifact, identity="analyst", rules=rules)
     assert len(projected.nodes) == 1
     aspects = projected.nodes[0].aspects or {}
     assert "classification" not in aspects
@@ -129,5 +129,5 @@ def test_rls_filter_excludes_denied_nodes_from_projection():
             ),
         ]
     )
-    projected = project_for_emit(artifact, identity="viewer", rules=rules)
+    projected = apply_policy(artifact, identity="viewer", rules=rules)
     assert [node.id for node in projected.nodes] == ["table:orders"]

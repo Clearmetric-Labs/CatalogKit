@@ -6,7 +6,7 @@ import os
 
 from clearmetric.core.errors import ClearMetricError, PolicyError
 from clearmetric.emitters.registry import (
-    GATED_COMPILE_FORMATS,
+    COMPILE_FORMATS,
     LAB_COMPILE_FORMATS,
     WEDGE_COMPILE_FORMATS,
 )
@@ -50,7 +50,8 @@ def compile_format_choices() -> tuple[str, ...]:
 
 
 def is_lab_compile_format(format: str) -> bool:
-    return format in GATED_COMPILE_FORMATS
+    spec = COMPILE_FORMATS.get(format)
+    return spec is not None and spec.lane == "consumer"
 
 
 __all__ = [

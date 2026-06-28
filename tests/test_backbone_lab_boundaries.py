@@ -14,7 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 def _readme_shipped_section() -> str:
     readme = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
     match = re.search(
-        r"## What you get today \(v1 wedge\)(.*?)## ",
+        r"## Features(.*?)## ",
         readme,
         flags=re.DOTALL,
     )
@@ -73,6 +73,7 @@ def test_experimental_help_shows_lab_formats():
     help_text = result.stdout.lower()
     assert "consumer-catalog" in help_text
     assert "frontend-contract" in help_text
+    assert "ai-context" in help_text
 
 
 def test_experimental_query_command_requires_env():

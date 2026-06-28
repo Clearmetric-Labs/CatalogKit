@@ -84,7 +84,7 @@ def _build_root_parser() -> argparse.ArgumentParser:
     if is_experimental_enabled():
         compile_parser.add_argument(
             "--identity",
-            help="[experimental] Identity for gated lab formats (consumer-catalog, frontend-contract).",
+            help="[experimental] Identity for gated lab formats (consumer-catalog, frontend-contract, ai-context).",
         )
 
     impact_parser = subparsers.add_parser(
@@ -104,6 +104,11 @@ def _build_root_parser() -> argparse.ArgumentParser:
         default="text",
         help="Output format (default: text).",
     )
+    if is_experimental_enabled():
+        impact_parser.add_argument(
+            "--identity",
+            help="[experimental] Governance preview: filter traversal to nodes visible to identity.",
+        )
 
     if is_experimental_enabled():
         query_parser = subparsers.add_parser(
@@ -118,6 +123,31 @@ def _build_root_parser() -> argparse.ArgumentParser:
         query_parser.add_argument(
             "query_id",
             help="Query node id, for example query.executive_revenue or query:executive_revenue.",
+        )
+
+        serve_parser = subparsers.add_parser(
+            "serve",
+            help="[experimental] Localhost-only single-identity query debug harness (not an auth server).",
+        )
+        serve_parser.add_argument(
+            "artifact_path",
+            help="Path to compiled graph JSON.",
+        )
+        serve_parser.add_argument(
+            "--identity",
+            required=True,
+            help="[experimental] Server-bound identity for gated query execution (local debug only).",
+        )
+        serve_parser.add_argument(
+            "--host",
+            default="127.0.0.1",
+            help="Loopback host only (default: 127.0.0.1).",
+        )
+        serve_parser.add_argument(
+            "--port",
+            type=int,
+            default=8765,
+            help="Port (default: 8765).",
         )
 
     clean_parser = subparsers.add_parser(
@@ -281,10 +311,14 @@ def _run_compile(args: argparse.Namespace) -> int:
 
 def _run_impact(args: argparse.Namespace) -> int:
     direction = "upstream" if args.upstream else "downstream"
+    identity = getattr(args, "identity", None)
+    if identity is not None:
+        require_experimental("cm impact --identity")
     compiled, result = run_impact(
         _project_dir(args),
         selection=args.selection,
         direction=direction,
+        identity=identity,
     )
     print(
         emit_impact(
@@ -314,6 +348,24 @@ def _run_contract(args: argparse.Namespace) -> int:
     artifact = load_artifact_file(Path(args.artifact_path))
     enforce_graph(artifact, posture="strict")
     print(f"contract: valid ({args.artifact_path})")
+    return 0
+
+
+def _run_serve(args: argparse.Namespace) -> int:
+    require_experimental("cm serve")
+    from clearmetric.compiler.compile import build_graph
+    from clearmetric.runtime.serve import serve_project
+
+    root = _project_dir(args)
+    built = build_graph(root)
+    serve_project(
+        artifact_path=Path(args.artifact_path),
+        project_dir=root,
+        identity=args.identity,
+        rules_path=Path(built.project.policy.rules),
+        host=args.host,
+        port=args.port,
+    )
     return 0
 
 
@@ -356,6 +408,8 @@ def main(argv: list[str] | None = None) -> int:
             return _run_contract(args)
         if args.command == "query":
             return _run_query(args)
+        if args.command == "serve":
+            return _run_serve(args)
     except ClearMetricError as exc:
         print(f"cm error: {exc}", file=sys.stderr)
         return 1

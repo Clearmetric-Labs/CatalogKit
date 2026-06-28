@@ -1,6 +1,7 @@
 # clearmetric-core
 
-One PyPI package. Column-level lineage and impact from SQL/dbt + warehouse metadata exports.
+One PyPI package for the ClearMetric analytics backbone: a canonical, queryable graph
+compiled from SQL, dbt, and warehouse metadata exports.
 
 See the repo [`README.md`](../../README.md) and [`clearmetric-architecture.md`](../../clearmetric-architecture.md) for positioning. Warehouse metadata is a local INFORMATION_SCHEMA JSON export — not a live connector.
 
@@ -10,7 +11,7 @@ See the repo [`README.md`](../../README.md) and [`clearmetric-architecture.md`](
 python -m pip install clearmetric-core
 ```
 
-## CLI (v1 wedge)
+## CLI
 
 ```bash
 cm init
@@ -29,13 +30,13 @@ If `cm` is occupied: `python -m clearmetric.cli --project-dir . compile --format
 
 | Module | Purpose |
 |--------|---------|
-| `clearmetric.lineage` | SQL/dbt artifact build (**Module B — parse only**) |
-| `clearmetric.graph` | `GraphView`, impact trace, traversal render |
+| `clearmetric.lineage` | SQL/dbt artifact build |
+| `clearmetric.graph` | `GraphView`, impact trace, traversal render, graph slices |
 | `clearmetric.compiler` | Build, validate, impact orchestration |
 | `clearmetric.adapters` | Warehouse JSON, dbt, SQL ingestion |
 | `clearmetric.core` | Artifact, IDs, merge, bindings interop |
-| `clearmetric.cleaner` / `clearmetric.policy` / `clearmetric.projection` / `clearmetric.emitters` | Checks, floor, catalog slice, output |
-| `clearmetric.query` | Single-statement SQL (**Module A — library only**) |
+| `clearmetric.cleaner` / `clearmetric.policy` / `clearmetric.projection` / `clearmetric.emitters` | Checks, security floor, projections, output formats |
+| `clearmetric.query` | Single-statement SQL structure and contract support |
 | `clearmetric.powerbi` | PBIP lineage (not in CLI registry) |
 
 ## Imports
@@ -50,13 +51,7 @@ from clearmetric.core import attach_warehouse_bindings, merge, parse_column_sele
 
 - [`docs/contract.md`](docs/contract.md)
 - [`../../spec/clearmetric-project.schema.json`](../../spec/clearmetric-project.schema.json)
-- [`../../examples/wedge-jaffle`](../../examples/wedge-jaffle)
-- [`../../docs/v1-boundary.md`](../../docs/v1-boundary.md)
-
-**Experimental (internal):** backbone lab primitives (`consumer-catalog`, `frontend-contract`,
-`cm query`) require `CM_EXPERIMENTAL=1` — see [`../../docs/backbone-lab.md`](../../docs/backbone-lab.md).
-Not part of the v1 wedge promise until [adoption-gate.md](../../docs/adoption-gate.md) passes.
 
 ```bash
-python -m pip install -e ".[dev,release]"
+python -m pip install -e ".[dev,runtime,release]"
 ```

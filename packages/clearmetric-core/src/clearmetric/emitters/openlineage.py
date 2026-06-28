@@ -1,4 +1,4 @@
-"""OpenLineage emitter — target serialization lives here, not in lineage build."""
+"""OpenLineage serializer — target serialization lives here, not in lineage build."""
 
 from __future__ import annotations
 
@@ -63,9 +63,12 @@ def build_openlineage_payload(
     }
 
 
-def emit_openlineage(compiled: CompiledGraph) -> str:
+def serialize_openlineage(artifact: CatalogArtifact, compiled: CompiledGraph) -> str:
     payload = build_openlineage_payload(
-        compiled.artifact,
+        artifact,
         job_name=compiled.project_dir.name,
     )
     return json.dumps(payload, indent=2, sort_keys=False)
+
+
+__all__ = ["build_openlineage_payload", "serialize_openlineage"]

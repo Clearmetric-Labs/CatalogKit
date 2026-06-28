@@ -20,20 +20,21 @@ def test_compile_returns_merged_graph(tmp_path: Path):
     assert any(node for node in compiled.artifact.nodes if node.bindings)
 
 
-def test_emit_compile_json(tmp_path: Path):
+def test_emit_compile_json_raw_admin(tmp_path: Path):
     compiled = compile_project(setup_wedge_project(tmp_path))
     payload = json.loads(emit_compile("json", compiled))
     assert payload["version"] == "1"
     assert payload["nodes"]
+    assert "payload" not in payload
+    assert "envelope" not in payload
 
 
-def test_emit_compile_catalog_excludes_non_assets(tmp_path: Path):
+def test_emit_compile_catalog_raw_admin(tmp_path: Path):
     compiled = compile_project(setup_wedge_project(tmp_path))
     payload = json.loads(emit_compile("catalog", compiled))
     kinds = {node["kind"] for node in payload["nodes"]}
     assert kinds.issubset({"table", "column", "model"})
-    assert "report" not in kinds
-    assert "visual" not in kinds
+    assert "payload" not in payload
 
 
 def test_emit_compile_gated_formats_require_identity(tmp_path: Path):
@@ -42,15 +43,32 @@ def test_emit_compile_gated_formats_require_identity(tmp_path: Path):
         emit_compile("consumer-catalog", compiled, identity=None)
     with pytest.raises(PolicyError):
         emit_compile("frontend-contract", compiled, identity=None)
+    with pytest.raises(PolicyError):
+        emit_compile("ai-context", compiled, identity=None)
 
 
-def test_emit_compile_gated_formats_with_identity(tmp_path: Path):
+def test_emit_compile_consumer_formats_use_envelope(tmp_path: Path):
     compiled = compile_project(setup_backbone_lab_project(tmp_path / "lab"))
     consumer = json.loads(
         emit_compile("consumer-catalog", compiled, identity="analyst")
     )
-    assert any(node["id"] == "query:executive_revenue" for node in consumer["nodes"])
+    assert consumer["format"] == "consumer-catalog"
+    assert consumer["identity"] == "analyst"
+    assert "payload" in consumer
+    assert any(
+        node["id"] == "query:executive_revenue" for node in consumer["payload"]["nodes"]
+    )
+
     contracts = json.loads(
         emit_compile("frontend-contract", compiled, identity="analyst")
     )
-    assert contracts["queries"][0]["id"] == "query:executive_revenue"
+    assert contracts["format"] == "frontend-contract"
+    assert contracts["payload"]["queries"][0]["id"] == "query:executive_revenue"
+    assert "SELECT" in contracts["payload"]["queries"][0]["sql"]
+
+    ai_context = json.loads(emit_compile("ai-context", compiled, identity="analyst"))
+    assert ai_context["format"] == "ai-context"
+    assert any(
+        node["id"] == "metric:executive_revenue"
+        for node in ai_context["payload"]["nodes"]
+    )

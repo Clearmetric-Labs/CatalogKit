@@ -1,29 +1,16 @@
-"""Frontend contract emitter."""
+"""Frontend contract serializer."""
 
 from __future__ import annotations
 
-import json
-from typing import TYPE_CHECKING
-
-from clearmetric.compiler.models import CompiledGraph
-from clearmetric.core.contracts import QueryContract, require_compiled_query_contract
+from clearmetric.core.contracts import require_compiled_query_contract
 from clearmetric.core.errors import CompilerError
-from clearmetric.core.models import Node
-from clearmetric.projection import project_for_emit
-
-if TYPE_CHECKING:
-    from clearmetric.policy import GatedContext
+from clearmetric.core.models import CatalogArtifact
 
 
-def emit_frontend_contract(compiled: CompiledGraph, ctx: GatedContext) -> str:
-    gated = project_for_emit(
-        compiled.artifact,
-        identity=ctx.identity,
-        rules=ctx.rules,
-    )
+def serialize_frontend_contract(artifact: CatalogArtifact) -> dict:
     violations: list[str] = []
-    validated: list[tuple[str, QueryContract, Node]] = []
-    for node in gated.nodes:
+    queries: list[dict] = []
+    for node in artifact.nodes:
         if node.kind != "query":
             continue
         try:
@@ -31,16 +18,17 @@ def emit_frontend_contract(compiled: CompiledGraph, ctx: GatedContext) -> str:
         except CompilerError as exc:
             violations.append(str(exc))
             continue
-        validated.append((sql, contract, node))
+        queries.append(
+            {
+                "id": node.id,
+                "name": node.name,
+                "sql": sql,
+                "parameters": contract.parameters,
+            }
+        )
     if violations:
         raise CompilerError("; ".join(violations))
-    contracts = [
-        {
-            "id": node.id,
-            "name": node.name,
-            "sql": sql,
-            "parameters": contract.parameters,
-        }
-        for sql, contract, node in validated
-    ]
-    return json.dumps({"version": "1", "queries": contracts}, indent=2, sort_keys=False)
+    return {"version": "1", "queries": queries}
+
+
+__all__ = ["serialize_frontend_contract"]

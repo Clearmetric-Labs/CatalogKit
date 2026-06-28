@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any
 
 from clearmetric.core.contracts import require_compiled_query_sql, resolve_query_node
 from clearmetric.core.errors import QueryExecutionError
-from clearmetric.policy import gated_context, require_allow
+from clearmetric.policy import load_rules, require_allow
 
 if TYPE_CHECKING:
     from clearmetric.core.models import CatalogArtifact
@@ -57,9 +57,9 @@ def execute_project_query(
     project_dir: Path,
 ) -> list[dict]:
     """Gate, resolve, and execute a project query contract via DuckDB fixtures."""
-    ctx = gated_context(rules_path=rules_path, identity=identity)
+    rules = load_rules(rules_path)
     node = resolve_query_node(artifact, query_selection)
-    require_allow(node=node, identity=ctx.identity, rules=ctx.rules)
+    require_allow(node=node, identity=identity, rules=rules)
     sql = require_compiled_query_sql(node)
     return execute_query(sql, seed_sql_path=project_dir / "fixtures" / "seed.sql")
 

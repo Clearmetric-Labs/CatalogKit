@@ -1,10 +1,12 @@
 # ClearMetric Core
 
-**Column-level lineage and impact analysis from your existing SQL/dbt — free, local, one command.**
+**One canonical graph of your analytics layer — compiled from SQL, dbt, and warehouse
+metadata you already have.**
 
-Point ClearMetric at your warehouse metadata export and/or dbt project. It compiles lineage and structure into **one canonical graph** with physical bindings, derivation state, and honest warnings when something cannot be resolved.
-
-The sharp question the wedge answers: *what breaks if I rename this column?*
+ClearMetric merges warehouse metadata, dbt, and SQL into a single graph with physical
+bindings, derivation state, and explicit warnings when something cannot be resolved. Use it
+for lineage, impact analysis, catalog output, structural checks, and OpenLineage export —
+all from the same compiled graph.
 
 ```bash
 pip install clearmetric-core
@@ -25,30 +27,18 @@ If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …
 
 > **Status:** early development (0.x). Pin your versions. Full architecture: [`clearmetric-architecture.md`](clearmetric-architecture.md)
 
-## What you get today (v1 wedge)
+## Features
 
-- **Lineage + impact** — upstream/downstream column traversal from dbt manifests, SQL folders, and warehouse metadata
-- **One graph** — warehouse metadata, dbt, and SQL merged via adapters; physical bindings attached on lineage nodes
-- **Honest derivation** — partial or unresolved lineage is stamped with confidence and surfaced as findings, not guessed
-- **Catalog slice** — `compile --format catalog` emits table/column/model nodes only
-- **Cleaner + security floor** — structural checks, schema drift warnings, and a non-bypassable security floor at compile time
-
-**Gated** until [adoption-gate.md](docs/adoption-gate.md) passes with external evidence: metrics/query YAML, intent adapter, `cm query`/`serve`, policy-gated exports, user-defined checks, live warehouse connectors, full policy compiler. Internal lab build (tested behind `CM_EXPERIMENTAL=1`): [`docs/backbone-lab.md`](docs/backbone-lab.md). Roadmap: [`docs/future-roadmap-gated.md`](docs/future-roadmap-gated.md). Scope: [`docs/v1-boundary.md`](docs/v1-boundary.md).
-
-## Why it's different
-
-Most catalogs are platforms you log into and maintain by hand — and they drift out of sync with the code. ClearMetric Core is the opposite: a compiler that derives structure *from* your code and metadata exports, keeps the graph in your repo, and runs in CI. When it cannot resolve something, it flags it instead of guessing.
-
-Four design phrases (full detail in [`clearmetric-architecture.md`](clearmetric-architecture.md)):
-
-- **Open-source core, paid managed history.**
-- **Logical IDs with physical bindings.**
-- **Contracts, not dashboards.**
-- **Derived metadata with confidence, not magic.**
+- **Lineage + impact** — upstream/downstream column traversal; answer *what breaks if I rename this column?*
+- **One graph** — warehouse, dbt, and SQL merged with physical bindings on lineage nodes
+- **Catalog** — `compile --format catalog` for table/column/model nodes
+- **OpenLineage** — `compile --format openlineage` for interop with DataHub, Marquez, etc.
+- **Cleaner + security floor** — structural checks and schema drift warnings; compile fails closed on security errors
 
 ## Quickstart
 
-See [`examples/wedge-jaffle/README.md`](examples/wedge-jaffle/README.md) for a walkthrough with committed fixtures.
+Start with any project that has dbt artifacts, SQL files, or a local INFORMATION_SCHEMA JSON
+export.
 
 ```bash
 pip install clearmetric-core
@@ -80,18 +70,19 @@ report = check_graph(built.artifact, posture=built.project.posture)  # report-on
 
 One install (`pip install clearmetric-core`) — Python subpackages, not separate PyPI packages.
 
-| Module | Role | Wedge |
-|--------|------|-------|
-| **`clearmetric.graph`** | `GraphView`, impact traversal, traversal render, selectors | Shipped (Phase 0) |
-| **`clearmetric.lineage`** | SQL/dbt artifact build (**Module B — parse**) | Shipped |
-| **`clearmetric.compiler`** | `build_graph`, `check_graph`, `enforce_graph`, CLI orchestration | Shipped |
-| **`clearmetric.adapters`** | INFORMATION_SCHEMA JSON, dbt manifest, SQL folders | Shipped |
-| **`clearmetric.core`** | Artifact, canonical IDs, merge, bindings interop | Shipped |
-| **`clearmetric.cleaner`** | Posture-aware checks | Shipped |
-| **`clearmetric.policy`** | Security floor (+ evaluation shell) | Shipped (floor) |
-| **`clearmetric.projection`** / **`clearmetric.emitters`** | Catalog slice + output formats | Shipped |
-| **`clearmetric.query`** | Single-statement SQL structure (**Module A — accretes later**) | Library only |
-| **`clearmetric.powerbi`** | PBIP lineage | Shipped (not in CLI registry) |
+| Module | Role |
+|--------|------|
+| **`clearmetric.graph`** | `GraphView`, impact traversal, traversal render, selectors, graph slices |
+| **`clearmetric.lineage`** | SQL/dbt artifact build |
+| **`clearmetric.compiler`** | `build_graph`, `check_graph`, `enforce_graph`, CLI orchestration |
+| **`clearmetric.adapters`** | INFORMATION_SCHEMA JSON, dbt manifest, SQL folders |
+| **`clearmetric.core`** | Artifact, canonical IDs, merge, bindings interop |
+| **`clearmetric.cleaner`** | Posture-aware checks |
+| **`clearmetric.policy`** | Compile-time security floor and policy primitives |
+| **`clearmetric.projection`** | Policy-aware graph projection |
+| **`clearmetric.emitters`** | Registry-backed compile formats, catalog/OpenLineage/admin JSON |
+| **`clearmetric.query`** | Single-statement SQL structure and contract support |
+| **`clearmetric.powerbi`** | PBIP lineage API |
 
 ## CLI
 
@@ -107,7 +98,10 @@ One install (`pip install clearmetric-core`) — Python subpackages, not separat
 
 ## Limits
 
-Static analysis for SQL/dbt lineage; warehouse **metadata exports** only in v1 (no query execution). On star-heavy SQL (`SELECT *` without schema), ClearMetric flags what it cannot resolve. [Lineage limitations →](packages/clearmetric-core/docs/lineage/limitations.md)
+Static analysis for SQL/dbt lineage; warehouse **metadata exports** only in the public CLI.
+ClearMetric does not connect to live warehouses or execute production queries. On star-heavy
+SQL (`SELECT *` without schema), ClearMetric flags what it cannot resolve. [Lineage
+limitations →](packages/clearmetric-core/docs/lineage/limitations.md)
 
 ## Feedback
 
@@ -123,14 +117,15 @@ Apache 2.0.
 <details>
 <summary><strong>Architecture & contributing</strong></summary>
 
-ClearMetric Core is one package at `packages/clearmetric-core`. Modules compose through `clearmetric.core` and emit mergeable artifacts. The architecture doc describes the full foundation; **the shipped product is the wedge** — lineage and impact first, everything else accretes.
+ClearMetric Core is one package at `packages/clearmetric-core`. See
+[`clearmetric-architecture.md`](clearmetric-architecture.md) for the full design.
 
-**Docs:** [architecture](clearmetric-architecture.md) · [v1 boundary](docs/v1-boundary.md) · [contract](packages/clearmetric-core/docs/contract.md) · [orchestration](docs/orchestration.md) · [contributing](CONTRIBUTING.md)
+**Docs:** [architecture](clearmetric-architecture.md) · [contract](packages/clearmetric-core/docs/contract.md) · [orchestration](docs/orchestration.md) · [contributing](CONTRIBUTING.md)
 
 **Local development**
 
 ```bash
-python -m pip install -e "packages/clearmetric-core[dev,release]"
+python -m pip install -e "packages/clearmetric-core[dev,runtime,release]"
 python -m pytest -v packages/clearmetric-core/tests tests/
 ```
 

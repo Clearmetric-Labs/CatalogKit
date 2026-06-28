@@ -113,6 +113,59 @@ The substrate is whole on day one; the things standing on it arrive in waves. Th
 lets a new consumer be purely additive: the primitive it needs was always there, waiting for
 something to use it.
 
+## What makes a consumer a *simple command* (the load-bearing primitives)
+
+The point of the backbone is not "we have a graph." It is that **every consumer — BI,
+catalog, lineage, AI context, docs, governance — collapses to the same four-step shape over
+that graph, so building a new one is a thin command, not a project:**
+
+```
+select  →  gate  →  project  →  emit
+```
+
+A catalog is `select(asset kinds) → emit(catalog)` on the **admin lane** (no gate). A governed
+catalog is `select → gate → apply_policy → emit(consumer-catalog)` on the **consumer lane**.
+AI context is the same with `emit(ai-context)`. Lineage is `select(start) → traverse → emit`.
+A BI contract is `select(query nodes) → gate → apply_policy → emit(frontend-contract)`. **The
+consumers differ only in a selector and a format string.** If a consumer needs custom
+plumbing instead of those four steps, the primitive it needs is missing — that is the signal
+to enrich the substrate, not to special-case the consumer.
+
+For that to hold, four primitives must be first-class and general. These are the load-bearing
+ones — the leverage that turns consumers into one-liners:
+
+1. **Graph query / selection API** (`clearmetric.graph`) — a general
+   `select(view, predicate) → subgraph`, plus `neighbors` and unbounded `traverse`. *Every*
+   consumer starts here. This is not the check-scoping selector; it is the universal way any
+   consumer names the slice it wants. Highest leverage primitive — nothing is a one-liner
+   until this exists.
+2. **One universal projection path** (`projection.apply_policy`) —
+   the single way a gated slice removes denied/masked nodes, always through `gate`. No
+   consumer filters nodes itself; no consumer-specific projection. Adding a consumer = adding
+   a format, not a pipeline.
+3. **The contract primitive, complete end to end** — metric/query nodes with bindable
+   inputs/outputs, `compile_contracts` producing `compiled_sql`, and a stable bindable shape a
+   frontend or agent binds to without knowing graph internals. This is what makes BI and
+   query consumers thin.
+4. **A uniform emit envelope + format registry** — every consumer output carries consistent
+   provenance/identity metadata, and registering a new consumer is registering a format
+   function that calls the universal projection. This is what makes "add a consumer" a
+   bounded, repeatable act.
+
+When these four are general and complete, the consumer list above is not a roadmap of
+features to build — it is a list of format strings over one pipeline. **That is the backbone
+being "done" in the only sense that matters: not every consumer built, but the substrate rich
+enough that the next consumer is free.**
+
+A caution that follows directly from this design: `select → project → emit` is
+*correctness-transparent* — it faithfully exposes whatever the compiler put in the graph. The
+same property that makes consumers trivial also means every consumer inherits the graph's
+correctness, good or bad. A right graph yields N right consumers for free; a wrong identity or
+binding yields N wrong consumers that all agree with the error. The primitives are a
+multiplier on graph correctness — which is the argument both for building them (leverage) and
+for load-testing the compiler against real, messy input before stacking consumers high (the
+multiplier cuts both ways).
+
 ---
 
 ## What it is (precisely)
@@ -684,7 +737,7 @@ usage:    { tracking_enabled: false }
 
 ---
 
-## The four invariants (non-negotiable, every posture)
+## The five invariants (non-negotiable, every posture)
 
 1. **One logical node per real thing**, with physical bindings — the same node to
    lineage, policy, usage, and BI.
@@ -886,3 +939,15 @@ Central concrete phrase:
 4. Do not tell buyers to build their own BI tool — they get frontend control over
    governed analytics primitives.
 5. Do not separate core from modules — live query and lineage from day one.
+
+---
+
+## Implementation status (scaffold)
+
+The open-source wedge ships lineage, impact, catalog, and cleaner. Backbone lab primitives
+(contracts, format registry, consumer projections, runtime harness) are built and tested
+behind `CM_EXPERIMENTAL=1` — see [docs/backbone-lab.md](docs/backbone-lab.md). Public product
+expansion remains gated on [docs/adoption-gate.md](docs/adoption-gate.md).
+
+Multi-consumer lab demos validate **pipeline composability**, not resolver correctness on
+messy SQL. Resolver corpus work remains a parallel track.

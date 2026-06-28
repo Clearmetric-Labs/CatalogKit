@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from .impact import trace_downstream_from_artifact, trace_upstream_from_artifact
 from .render import render_traversal_mermaid, render_traversal_tree
+from .select import select, select_kinds
 from .selector import SelectorPredicate, matches_selector, parse_selector
 from .subjects import (
     column_selection_from_id,
@@ -44,6 +45,8 @@ __all__ = [
     "parse_selector",
     "render_traversal_mermaid",
     "render_traversal_tree",
+    "select",
+    "select_kinds",
     "traverse",
     "upstream_adjacency",
     "view_of",
