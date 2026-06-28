@@ -14,7 +14,15 @@ from clearmetric.compiler import discover
 from clearmetric.compiler import impact as run_impact
 from clearmetric.compiler.validate import enforce_graph
 from clearmetric.core import ClearMetricError, __version__, load_artifact_file
+from clearmetric.core.contracts import resolve_query_node
 from clearmetric.emitters import emit_compile, emit_impact
+
+from .experimental import (
+    compile_format_choices,
+    is_experimental_enabled,
+    is_lab_compile_format,
+    require_experimental,
+)
 
 
 def _build_root_parser() -> argparse.ArgumentParser:
@@ -58,15 +66,25 @@ def _build_root_parser() -> argparse.ArgumentParser:
         help="Output format (default: text).",
     )
 
+    compile_choices = compile_format_choices()
+    compile_help = "Output format (default: json)."
+    if is_experimental_enabled():
+        compile_help += " Experimental formats require CM_EXPERIMENTAL=1."
+
     compile_parser = subparsers.add_parser(
         "compile", help="Compile project into a graph."
     )
     compile_parser.add_argument(
         "--format",
-        choices=("json", "text", "openlineage", "catalog"),
+        choices=compile_choices,
         default="json",
-        help="Output format (default: json).",
+        help=compile_help,
     )
+    if is_experimental_enabled():
+        compile_parser.add_argument(
+            "--identity",
+            help="[experimental] Identity for gated lab formats (consumer-catalog, frontend-contract).",
+        )
 
     impact_parser = subparsers.add_parser(
         "impact",
@@ -85,6 +103,21 @@ def _build_root_parser() -> argparse.ArgumentParser:
         default="text",
         help="Output format (default: text).",
     )
+
+    if is_experimental_enabled():
+        query_parser = subparsers.add_parser(
+            "query",
+            help="[experimental] Execute a compiled query contract via DuckDB.",
+        )
+        query_parser.add_argument(
+            "--identity",
+            required=True,
+            help="[experimental] Identity for policy gate before query execution.",
+        )
+        query_parser.add_argument(
+            "query_id",
+            help="Query node id, for example query.executive_revenue or query:executive_revenue.",
+        )
 
     clean_parser = subparsers.add_parser(
         "clean",
@@ -237,8 +270,16 @@ def _run_scan(args: argparse.Namespace) -> int:
 
 
 def _run_compile(args: argparse.Namespace) -> int:
+    if is_lab_compile_format(args.format):
+        require_experimental(f"compile --format {args.format}")
+        if not getattr(args, "identity", None):
+            print(
+                f"cm error: --identity required for experimental format {args.format!r}",
+                file=sys.stderr,
+            )
+            return 1
     compiled = run_compile(_project_dir(args))
-    print(emit_compile(args.format, compiled))
+    print(emit_compile(args.format, compiled, identity=getattr(args, "identity", None)))
     return 0
 
 
@@ -280,6 +321,30 @@ def _run_contract(args: argparse.Namespace) -> int:
     return 0
 
 
+def _run_query(args: argparse.Namespace) -> int:
+    require_experimental("cm query")
+    from clearmetric.policy import load_gated_context
+    from clearmetric.runtime import execute_gated_query
+
+    root = _project_dir(args)
+    compiled = run_compile(root)
+    identity, rules = load_gated_context(
+        rules_path=compiled.project.policy.rules,
+        identity=args.identity,
+    )
+    node = resolve_query_node(compiled.artifact, args.query_id)
+
+    seed_path = root / "fixtures" / "seed.sql"
+    rows = execute_gated_query(
+        node,
+        identity=identity,
+        rules=rules,
+        seed_sql_path=seed_path if seed_path.is_file() else None,
+    )
+    print(json.dumps(rows, indent=2, sort_keys=False))
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = _build_root_parser()
     args = parser.parse_args(argv)
@@ -299,6 +364,8 @@ def main(argv: list[str] | None = None) -> int:
             return _run_clean(args)
         if args.command == "contract":
             return _run_contract(args)
+        if args.command == "query":
+            return _run_query(args)
     except ClearMetricError as exc:
         print(f"cm error: {exc}", file=sys.stderr)
         return 1

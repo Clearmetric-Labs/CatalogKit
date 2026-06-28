@@ -9,6 +9,7 @@ from clearmetric.core.contracts import (
     contract_for_node,
 )
 from clearmetric.core.errors import CompilerError
+from clearmetric.core.errors import ValidationError as ArtifactValidationError
 from clearmetric.core.models import CatalogArtifact
 
 
@@ -17,8 +18,13 @@ def validate_contract_nodes(artifact: CatalogArtifact) -> None:
     violations: list[str] = []
     node_ids = {node.id for node in artifact.nodes}
 
+    violations.extend(contract_dependency_violations(artifact, node_ids=node_ids))
+
     for node in artifact.nodes:
-        contract = contract_for_node(node)
+        try:
+            contract = contract_for_node(node)
+        except ArtifactValidationError:
+            continue
         if contract is None:
             if node.kind in {"metric", "query"}:
                 aspect = "metric" if node.kind == "metric" else "query"
@@ -35,8 +41,6 @@ def validate_contract_nodes(artifact: CatalogArtifact) -> None:
         elif isinstance(contract, QueryContract):
             if not contract.sql.strip():
                 violations.append(f"{node.id} query contract requires non-empty sql")
-
-    violations.extend(contract_dependency_violations(artifact, node_ids=node_ids))
 
     if violations:
         raise CompilerError("; ".join(violations))

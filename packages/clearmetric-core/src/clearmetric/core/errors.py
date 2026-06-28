@@ -51,6 +51,14 @@ class EmitterError(ClearMetricError):
     """Raised when output emission fails."""
 
 
+class QueryExecutionError(ClearMetricError):
+    """Raised when query execution fails."""
+
+
+class PolicyDeniedError(ClearMetricError):
+    """Raised when policy denies an operation."""
+
+
 class GraphError(ClearMetricError):
     """Raised when a graph lookup or traversal fails."""
 

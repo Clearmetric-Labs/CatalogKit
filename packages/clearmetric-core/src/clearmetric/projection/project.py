@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from clearmetric.core.models import CatalogArtifact, Edge, Node
-from clearmetric.policy import evaluate_node
+from clearmetric.policy import gate
 from clearmetric.policy.models import PolicyRulesFile
 
 CATALOG_ASSET_KINDS = frozenset({"table", "column", "model"})
@@ -59,8 +59,8 @@ def project_for_emit(
     allowed_ids: set[str] = set()
 
     for node in artifact.nodes:
-        decision = evaluate_node(node=node, identity=identity, rules=rules)
-        if decision == "deny":
+        decision = gate(node=node, identity=identity, rules=rules)
+        if decision in {"deny", "filter"}:
             continue
         if decision == "mask":
             nodes.append(_apply_mask(node))

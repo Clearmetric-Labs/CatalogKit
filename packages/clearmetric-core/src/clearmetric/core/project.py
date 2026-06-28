@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from clearmetric.policy.load import load_rules
+from clearmetric.policy import load_rules
 from pydantic import BaseModel, Field, ValidationError
 
 from .aliases import load_table_alias_map

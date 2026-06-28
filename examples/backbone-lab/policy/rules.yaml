@@ -1,0 +1,19 @@
+rules:
+  - id: analyst-columns
+    kind: rbac
+    identity: analyst
+    effect: allow
+    selector:
+      kind: column
+  - id: analyst-metrics
+    kind: rbac
+    identity: analyst
+    effect: allow
+    selector:
+      kind: metric
+  - id: analyst-queries
+    kind: rbac
+    identity: analyst
+    effect: allow
+    selector:
+      kind: query

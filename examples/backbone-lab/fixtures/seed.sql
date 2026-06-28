@@ -1,0 +1,1 @@
+CREATE TABLE orders AS SELECT 100::DOUBLE AS amount;

@@ -35,6 +35,12 @@ def discover(project_dir: Path) -> DiscoverReport:
                 raise CompilerError("enabled sql source missing from project config")
             for path in sql.paths:
                 sources.append(ResolvedSource(kind="sql", path=path))
+        elif kind == "intent":
+            intent = project.sources.intent
+            if intent is None:
+                raise CompilerError("enabled intent source missing from project config")
+            for path in intent.paths:
+                sources.append(ResolvedSource(kind="intent", path=path))
         else:
             raise CompilerError(
                 f"discover does not resolve enabled source kind: {kind!r}"

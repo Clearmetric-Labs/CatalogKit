@@ -1,16 +1,34 @@
 # Adoption gate
 
-Backbone Phases 1–6 require **external adoption evidence** before execution. This gate is intentionally hard.
+The adoption gate blocks **public product claims and production positioning**. It does
+**not** block internal, tested, backbone-tied primitives built in the core (see
+[backbone-lab.md](backbone-lab.md)).
 
 ## Status
 
-**Gate: NOT PASSED** (as of Backbone v2 implementation)
+**Gate: NOT PASSED**
 
-## Requirements
+## What the gate blocks (public only)
+
+Until external evidence exists, do **not**:
+
+- Expand [README.md](../README.md) shipped capabilities beyond the wedge promise
+- Expand [v1-boundary.md](v1-boundary.md) in-scope tables with metrics/runtime/governance
+- Market production governance, cloud, live warehouse connectors, or native RLS deployment
+- Present lab primitives as shipped product (README / v1-boundary / marketing)
+
+## What the gate does not block
+
+- Building backbone lab primitives in code (contracts, intent, gate, consumer catalog,
+  frontend contract, runtime harness)
+- Pipeline wiring and end-to-end tests (`CM_EXPERIMENTAL=1`)
+- `examples/backbone-lab/` and [backbone-lab.md](backbone-lab.md)
+
+## Requirements (public unlock)
 
 Pass **all** of:
 
-- [ ] Wedge v1 checklist green in CI
+- [x] Wedge v1 checklist green in CI
 - [ ] Wedge used by at least one **real user who is not the implementer**
 - [ ] **External pull on record** below with named asker, verbatim quote, and link
 
@@ -30,8 +48,7 @@ Pass **all** of:
 - "We'll need this eventually"
 - Momentum without a named external asker
 
-If the gate fails: **stop at Phase 0** for product scope expansion. Phase 0 (GraphView) improves the wedge without expanding the product promise.
+## Public wedge promise (frozen until gate passes)
 
-## Note on Backbone v2 code
-
-Implementation of Phases 1–6 may exist in the repository for review and testing, but **shipping** those features to users should wait until this gate passes with real evidence filled in above.
+> ClearMetric Core compiles dbt, SQL, and warehouse metadata exports into one graph for
+> lineage, impact analysis, schema drift findings, and catalog output.

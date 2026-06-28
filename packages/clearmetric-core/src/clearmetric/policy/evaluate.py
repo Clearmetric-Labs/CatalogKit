@@ -35,6 +35,9 @@ def evaluate_node(
         if any(rule.kind == "masking" or rule.effect == "mask" for rule in matching):
             return "mask"
 
+        if any(rule.kind == "rls" and rule.effect == "allow" for rule in matching):
+            return "filter"
+
         if any(rule.effect == "allow" for rule in matching):
             return "allow"
 

@@ -161,6 +161,24 @@ def query_id(name: str) -> str:
     return f"query:{normalize_identifier_part(name)}"
 
 
+def parse_query_selection(selection: str) -> str:
+    """Parse a user query selection into canonical query: ID form."""
+    text = selection.strip()
+    if not text:
+        raise CanonicalIdError("Query selection cannot be empty.")
+
+    if text.startswith("query:"):
+        return query_id(text[len("query:") :])
+    if text.startswith("query."):
+        return query_id(text[len("query.") :])
+
+    prefix, _, remainder = text.partition(":")
+    if prefix == "query" and remainder:
+        return query_id(remainder)
+
+    return query_id(text)
+
+
 def parse_column_selection(selection: str) -> str:
     """Parse a user column selection into canonical column: ID form."""
     text = selection.strip()
@@ -238,6 +256,7 @@ __all__ = [
     "page_id",
     "parse_column_selection",
     "parse_impact_selection",
+    "parse_query_selection",
     "query_id",
     "report_id",
     "schema_name",

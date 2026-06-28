@@ -1,14 +1,13 @@
-# Future Architecture MVP Roadmap (Gated)
+# Future Architecture MVP Roadmap (Public expansion — gated)
 
-**Status: Do not execute.**
+**Status:** Public README / marketing expansion only — **not** internal backbone lab builds.
 
-This document is the post-gate roadmap for core + Module A + Module B. It is **not** the active execution plan.
+Active internal execution: [backbone-lab.md](backbone-lab.md) (build + test primitives behind
+`CM_EXPERIMENTAL=1`). Wedge shipping: [v1-boundary.md](v1-boundary.md).
 
-Active work lives in the frozen Wedge Phase 0 plan and [docs/backbone-v2-roadmap.md](backbone-v2-roadmap.md).
+## Gate requirement (public claims only)
 
-## Gate requirement
-
-Do not start any item in this document until [adoption-gate.md](adoption-gate.md) records all of:
+Do not expand public product claims until [adoption-gate.md](adoption-gate.md) records all of:
 
 - Named external asker (person, team, or paying org)
 - Verbatim quote asking for metrics, gated contracts, runtime, or policy expansion
@@ -23,7 +22,7 @@ Fails the gate: internal momentum, "the architecture is clear," or "we'll need t
 1. **One path per concern** — traversal in `clearmetric.graph`, policy in `clearmetric.policy`, projection in `clearmetric.projection`, emission in `clearmetric.emitters`, build in `clearmetric.compiler`, lineage parse in `clearmetric.lineage` (build only).
 2. **Delete, don't reroute** — no stub CLI formats, legacy wrappers, or compatibility shims.
 3. **Loud errors only** — missing nodes, missing `compiled_sql`, missing identity on gated paths, policy eval errors → typed exceptions; never silent fallbacks.
-4. **Security centralized** — `evaluate_node` + `validate_security_floor` are the only authorization surfaces (`gate` re-added at Phase 3).
+4. **Security centralized** — `gate` is the sole consumer authorization entry; `evaluate_node` and `validate_security_floor` live inside `policy/` only.
 5. **Production-ready simplicity** — minimal HTTP surface; only working emitters registered in CLI.
 6. **Test where it matters** — MVP e2e, ground_truth parity, policy adversarial suite, security floor.
 

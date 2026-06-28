@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.0 - 2026-06-28
+
+### Added (Backbone Lab — experimental, not public README promise)
+
+- **Pipeline stages** — `link`, `compile_contracts` after bind; intent ingest via adapter registry
+- **Policy gate** — `policy/gate.py`, `require_allow`, `load_gated_context`; projection uses `gate` only
+- **Lab emitters** — `consumer-catalog`, `frontend-contract` behind `CM_EXPERIMENTAL=1` and `--identity`
+- **Runtime harness** — `clearmetric.runtime`, `cm query` (DuckDB fixtures); gate before execute; no `cm serve`
+- **Contracts** — `require_compiled_query_sql` (no raw SQL fallback), `resolve_query_node`, `parse_query_selection`
+- **Examples & docs** — `examples/backbone-lab/`, `docs/backbone-lab.md`; adoption gate scoped to public claims only
+- **Tests** — MVP demo subprocess flow, backbone lab boundary tests, contract/discover/link coverage (203 tests)
+
+### Changed
+
+- **`openlineage` / `catalog`** — remain ungated admin wedge exports
+- **Normal CLI** — wedge commands and formats unchanged without `CM_EXPERIMENTAL=1`
+
 ## 0.5.2 - 2026-06-28
 
 ### Fixed

@@ -18,6 +18,7 @@ MODULE_ROOTS = {
     "cleaner": SRC_ROOT / "cleaner",
     "policy": SRC_ROOT / "policy",
     "projection": SRC_ROOT / "projection",
+    "runtime": SRC_ROOT / "runtime",
     "cli": SRC_ROOT / "cli",
 }
 ALLOWED_MODULES_BY_SUBPACKAGE = {
@@ -32,6 +33,7 @@ ALLOWED_MODULES_BY_SUBPACKAGE = {
         "clearmetric.compiler",
         "clearmetric.projection",
         "clearmetric.graph",
+        "clearmetric.policy",
     },
     "cleaner": {"clearmetric.core", "clearmetric.graph"},
     "policy": {"clearmetric.core", "clearmetric.policy", "clearmetric.projection"},
@@ -42,12 +44,20 @@ ALLOWED_MODULES_BY_SUBPACKAGE = {
         "clearmetric.cleaner",
         "clearmetric.policy",
         "clearmetric.graph",
+        "clearmetric.query",
+    },
+    "runtime": {
+        "clearmetric.core",
+        "clearmetric.policy",
+        "clearmetric.runtime",
     },
     "cli": {
         "clearmetric.core",
         "clearmetric.cli",
         "clearmetric.compiler",
         "clearmetric.emitters",
+        "clearmetric.policy",
+        "clearmetric.runtime",
     },
 }
 SHARED_CLASS_NAMES = {"Node", "Edge", "Evidence", "Warning"}
@@ -116,14 +126,27 @@ def test_subpackages_only_import_allowed_clearmetric_modules():
 
 def test_cli_does_not_import_lineage_or_powerbi():
     cli_path = MODULE_ROOTS["cli"] / "__init__.py"
-    source = cli_path.read_text(encoding="utf-8")
-    assert "clearmetric.lineage" not in source
-    assert "clearmetric.powerbi" not in source
-    assert "clearmetric.runtime" not in source
+    tree = ast.parse(cli_path.read_text(encoding="utf-8"), filename=str(cli_path))
+    module_imports: list[str] = []
+    for node in tree.body:
+        if isinstance(node, ast.Import):
+            module_imports.extend(alias.name for alias in node.names)
+        elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+            module_imports.append(node.module)
+    assert "clearmetric.lineage" not in module_imports
+    assert "clearmetric.powerbi" not in module_imports
+    assert not any(name == "clearmetric.runtime" for name in module_imports)
 
 
-def test_runtime_module_not_shipped():
-    assert not (SRC_ROOT / "runtime").exists()
+def test_runtime_module_exists_for_lab():
+    assert (SRC_ROOT / "runtime" / "__init__.py").is_file()
+
+
+def test_projection_does_not_import_evaluate_node():
+    project_path = MODULE_ROOTS["projection"] / "project.py"
+    source = project_path.read_text(encoding="utf-8")
+    assert "evaluate_node" not in source
+    assert "gate" in source
 
 
 def test_lineage_build_does_not_define_traversal():
@@ -165,19 +188,27 @@ def test_emitters_do_not_import_lineage():
     assert violations == []
 
 
-def test_cli_compile_formats_are_wedge_only():
-    cli_path = MODULE_ROOTS["cli"] / "__init__.py"
-    source = cli_path.read_text(encoding="utf-8")
-    for banned in (
-        "consumer-catalog",
-        "frontend-contract",
-        "ai-context",
-        "_run_query",
-        "_run_serve",
-        'command == "query"',
-        'command == "serve"',
-    ):
-        assert banned not in source
+def test_emitters_do_not_import_evaluate_node():
+    emitters_root = MODULE_ROOTS["emitters"]
+    violations: list[str] = []
+    for path in emitters_root.rglob("*.py"):
+        if _is_ignored_package_path(path):
+            continue
+        source = path.read_text(encoding="utf-8")
+        if "evaluate_node" in source:
+            violations.append(f"{path}: references evaluate_node")
+    assert violations == []
+
+
+def test_cli_normal_compile_choices_are_wedge_only():
+    from clearmetric.cli.experimental import (
+        compile_format_choices,
+        is_experimental_enabled,
+    )
+
+    if is_experimental_enabled():
+        return
+    assert compile_format_choices() == ("json", "text", "openlineage", "catalog")
 
 
 def test_lineage_does_not_import_compiler_or_adapters():

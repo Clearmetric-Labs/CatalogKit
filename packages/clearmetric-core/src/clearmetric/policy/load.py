@@ -29,3 +29,14 @@ def load_rules(path: str | Path) -> PolicyRulesFile:
         raise PolicyError(
             f"Policy rules file failed validation: {rules_path}: {exc}"
         ) from exc
+
+
+def load_gated_context(
+    *,
+    rules_path: str | Path,
+    identity: str | None,
+) -> tuple[str, PolicyRulesFile]:
+    """Load policy rules for a gated consumer operation."""
+    if not identity:
+        raise PolicyError("gated operation requires identity")
+    return identity, load_rules(rules_path)

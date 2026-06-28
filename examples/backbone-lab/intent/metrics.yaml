@@ -1,0 +1,12 @@
+metrics:
+  - id: executive_revenue
+    name: Executive Revenue
+    formula: sum(amount)
+    depends_on:
+      - column:orders.amount
+queries:
+  - id: executive_revenue
+    name: Executive Revenue Query
+    sql: SELECT amount AS net_revenue FROM orders
+    depends_on:
+      - column:orders.amount
