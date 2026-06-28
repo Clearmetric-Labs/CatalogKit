@@ -108,8 +108,16 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install packages/clearmetric-core/dist/*.whl
           cm --version
-          FIXTURE=packages/clearmetric-core/tests/fixtures/lineage/projects/jaffle_shop/manifest.json
-          cm compile "$FIXTURE" --dialect postgres > /dev/null
-          cm impact orders.amount "$FIXTURE" --dialect postgres --upstream
+          SMOKE_PROJECT="$(mktemp -d)"
+          mkdir -p "$SMOKE_PROJECT/target" "$SMOKE_PROJECT/policy"
+          cp packages/clearmetric-core/tests/fixtures/lineage/projects/jaffle_shop/manifest.json \
+            "$SMOKE_PROJECT/target/manifest.json"
+          cp -R packages/clearmetric-core/tests/fixtures/lineage/projects/jaffle_shop/compiled \
+            "$SMOKE_PROJECT/target/compiled"
+          cp packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json \
+            "$SMOKE_PROJECT/warehouse_schema.json"
+          cm --project-dir "$SMOKE_PROJECT" init
+          cm --project-dir "$SMOKE_PROJECT" compile --format json > /dev/null
+          cm --project-dir "$SMOKE_PROJECT" impact orders.amount --upstream
           python -m clearmetric.cli --help
           python -c "import clearmetric.core, clearmetric.lineage, clearmetric.query, clearmetric.powerbi"

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from clearmetric.lineage import build_catalog_artifact as build_lineage_artifact
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 from clearmetric.powerbi import build_catalog_artifact as build_powerbi_artifact
 from clearmetric.query import build_catalog_artifact as build_query_artifact
 
@@ -33,7 +33,8 @@ def test_query_module_builds_artifact_standalone():
 
 
 def test_lineage_module_builds_artifact_standalone():
-    artifact = build_lineage_artifact(JAFFLE_MANIFEST, dialect="postgres")
+    project = load_project(JAFFLE_MANIFEST, dialect="postgres")
+    artifact = build_catalog_artifact_from_project(project, dialect="postgres")
     assert artifact.version == "1"
     assert any(node.kind == "column" for node in artifact.nodes)
 

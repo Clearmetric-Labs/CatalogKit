@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 import pytest
-from clearmetric.lineage.build import build_lineage_map_from_project
+from clearmetric.lineage import build_lineage_map_from_project, load_project
 from clearmetric.lineage.coverage import (
     ColumnResolution,
     classify_column,
@@ -11,7 +11,6 @@ from clearmetric.lineage.coverage import (
     find_bogus_source_leaves,
     find_silent_columns,
 )
-from clearmetric.lineage.loaders import load_project
 from clearmetric.lineage.render.json import render_json
 
 from .ground_truth import (

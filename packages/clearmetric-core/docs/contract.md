@@ -43,6 +43,12 @@ Every node has:
 - `schema`
 - `evidence`
 
+Optional extensions (artifact schema version stays `1`):
+
+- `derivation` — provenance state (`status`, `confidence`, `source`, `errors`)
+- `bindings` — list of `PhysicalBinding` (`warehouse`, `database`, `schema`, `table`, `column`)
+- `aspects` — open metadata bag (warehouse metadata, classification, policy refs, etc.)
+
 `kind` is one of:
 
 - `table`
@@ -97,20 +103,18 @@ composition path.
 
 - Nodes merge by canonical `id`.
 - Same `id` means the two nodes claim to describe the same entity.
-- Evidence is unioned across matching nodes.
-- Non-evidence attributes are merged field by field.
-- If one side provides a value and the other side leaves that field empty, the
-  populated value wins.
-- If both sides provide non-empty different values for the same non-evidence
-  field, merge fails with a typed error. There is no last-write-wins behavior.
+- Evidence, bindings, aspects, and derivation state are unioned/merged additively where compatible.
+- If one side provides a value and the other side leaves that field empty, the populated value wins.
+- Same `id` with different non-structural facts (names, comments, nullable, types) emits
+  `source_disagreement` / `schema_drift` warnings — merge does not silently pick a winner.
+- Same `id` with structurally impossible facts (different `kind`, invalid ID shape) raises
+  `MergeConflictError`.
 
 ### Edges
 
 - Edges dedupe by `(kind, source_id, target_id)`.
-- Evidence is unioned across matching edges.
-- For other edge fields such as `label`, `confidence`, and `match_status`, a populated value may
-  fill an empty value.
-- Conflicting non-empty edge attributes fail with a typed error.
+- Evidence and derivation are unioned/merged additively where compatible.
+- Conflicting non-empty edge attributes emit `source_disagreement` warnings unless structurally impossible.
 
 ### Warnings
 

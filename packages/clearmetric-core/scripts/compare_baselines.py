@@ -13,7 +13,10 @@ from _sqlglot_baseline import (
     build_sources_by_name,
     load_fixture,
 )
-from clearmetric.lineage import trace_downstream
+from clearmetric.lineage import (
+    load_project,
+    trace_downstream_from_project,
+)
 
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 JAFFLE_MANIFEST = (
@@ -59,8 +62,8 @@ def compare_sqlglot() -> str:
         sources_by_name=sources_by_name,
         dialect="postgres",
     )
-    downstream_result = trace_downstream(
-        JAFFLE_MANIFEST,
+    downstream_result = trace_downstream_from_project(
+        load_project(JAFFLE_MANIFEST, dialect="postgres"),
         dialect="postgres",
         selection="raw_payments.amount",
     ).related_ids
@@ -97,8 +100,8 @@ def compare_dbt_manifest() -> str:
         queue.extend(child_map.get(current, []))
 
     model_names = [item.split(".")[-1] for item in descendants]
-    column_downstream = trace_downstream(
-        JAFFLE_MANIFEST,
+    column_downstream = trace_downstream_from_project(
+        load_project(JAFFLE_MANIFEST, dialect="postgres"),
         dialect="postgres",
         selection="raw_payments.amount",
     ).related_ids

@@ -65,9 +65,9 @@ Only fully enumerated, independently checked truth sets should be committed.
 
 ## Robustness results
 
-- **Determinism:** `render_json(build_lineage_map(...))` is byte-stable across every committed fixture, not only `jaffle_shop`.
+- **Determinism:** `render_json(build_lineage_map_from_project(...))` is byte-stable across every committed fixture, not only `jaffle_shop`.
 - **Recoverability:** one bad SQL file in a folder no longer aborts the whole run during dependency inference or star detection; it emits `lineage_resolution_failed` and preserves valid sibling lineage.
-- **CLI/API parity:** JSON downstream output from the CLI matches the Python API for the same selection.
+- **CLI/API parity:** project-first `cm impact` JSON output matches `clearmetric.compiler.impact` for the same `clearmetric.yaml` project.
 - **Artifact validity:** lineage artifacts still merge cleanly with `clearmetric-core` on shared canonical IDs.
 - **Output legibility:** traversal output is now a tree by default, with Mermaid export available for `--upstream` / `--downstream`.
 

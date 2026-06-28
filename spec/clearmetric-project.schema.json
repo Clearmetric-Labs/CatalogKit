@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearmetric.dev/spec/clearmetric-project.schema.json",
+  "title": "ClearMetric Project",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "dialect", "sources", "posture", "policy"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "dialect": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "warehouse": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": ["information_schema", "snowflake"]
+            },
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "database": {
+              "type": "string"
+            },
+            "schema": {
+              "type": "string"
+            }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "kind": { "const": "information_schema" },
+                "path": { "type": "string", "minLength": 1 }
+              },
+              "required": ["kind", "path"]
+            },
+            {
+              "properties": {
+                "kind": { "const": "snowflake" },
+                "profile": { "type": "string", "minLength": 1 }
+              },
+              "required": ["kind", "profile"]
+            }
+          ]
+        },
+        "dbt": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "manifest": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "sql": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "paths": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "posture": {
+      "type": "string",
+      "enum": ["strict", "standard", "permissive"]
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rules"],
+      "properties": {
+        "rules": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

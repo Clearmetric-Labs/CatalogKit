@@ -11,6 +11,12 @@ MODULE_ROOTS = {
     "query": SRC_ROOT / "query",
     "lineage": SRC_ROOT / "lineage",
     "powerbi": SRC_ROOT / "powerbi",
+    "adapters": SRC_ROOT / "adapters",
+    "emitters": SRC_ROOT / "emitters",
+    "compiler": SRC_ROOT / "compiler",
+    "cleaner": SRC_ROOT / "cleaner",
+    "policy": SRC_ROOT / "policy",
+    "projection": SRC_ROOT / "projection",
     "cli": SRC_ROOT / "cli",
 }
 ALLOWED_MODULES_BY_SUBPACKAGE = {
@@ -18,10 +24,25 @@ ALLOWED_MODULES_BY_SUBPACKAGE = {
     "query": {"clearmetric.core", "clearmetric.query"},
     "lineage": {"clearmetric.core", "clearmetric.lineage"},
     "powerbi": {"clearmetric.core", "clearmetric.powerbi"},
+    "adapters": {"clearmetric.core", "clearmetric.lineage"},
+    "emitters": {"clearmetric.core", "clearmetric.lineage", "clearmetric.compiler"},
+    "cleaner": {"clearmetric.core"},
+    "policy": {"clearmetric.core"},
+    "projection": {"clearmetric.core", "clearmetric.policy"},
+    "compiler": {
+        "clearmetric.core",
+        "clearmetric.adapters",
+        "clearmetric.cleaner",
+        "clearmetric.policy",
+        "clearmetric.projection",
+        "clearmetric.lineage",
+    },
     "cli": {
         "clearmetric.core",
         "clearmetric.cli",
-        "clearmetric.lineage",
+        "clearmetric.compiler",
+        "clearmetric.emitters",
+        "clearmetric.cleaner",
     },
 }
 SHARED_CLASS_NAMES = {"Node", "Edge", "Evidence", "Warning"}
@@ -85,6 +106,27 @@ def test_subpackages_only_import_allowed_clearmetric_modules():
                     ) and not _is_allowed_module(node.module, allowed_modules):
                         violations.append(f"{path}: from {node.module} import ...")
 
+    assert violations == []
+
+
+def test_cli_does_not_import_lineage_or_powerbi():
+    cli_path = MODULE_ROOTS["cli"] / "__init__.py"
+    source = cli_path.read_text(encoding="utf-8")
+    assert "clearmetric.lineage" not in source
+    assert "clearmetric.powerbi" not in source
+
+
+def test_lineage_does_not_import_compiler_or_adapters():
+    lineage_root = MODULE_ROOTS["lineage"]
+    banned = ("clearmetric.compiler", "clearmetric.adapters", "clearmetric.cli")
+    violations: list[str] = []
+    for path in lineage_root.rglob("*.py"):
+        if _is_ignored_package_path(path):
+            continue
+        source = path.read_text(encoding="utf-8")
+        for prefix in banned:
+            if prefix in source:
+                violations.append(f"{path}: references {prefix}")
     assert violations == []
 
 

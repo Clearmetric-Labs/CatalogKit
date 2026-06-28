@@ -5,47 +5,70 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
-from clearmetric.core import __version__, render_json
-from clearmetric.lineage import (
-    build_catalog_artifact,
-    build_lineage_map,
-    trace_downstream,
-    trace_upstream,
-)
-from clearmetric.lineage.errors import LineageError
-from clearmetric.lineage.render.mermaid import render_traversal_mermaid
-from clearmetric.lineage.render.text import render_text, render_traversal_tree
+import yaml
+from clearmetric.cleaner import enforce_structural_checks
+from clearmetric.compiler import clean as run_clean
+from clearmetric.compiler import compile as run_compile
+from clearmetric.compiler import discover
+from clearmetric.compiler import impact as run_impact
+from clearmetric.core import ClearMetricError, __version__, load_artifact_file
+from clearmetric.emitters import emit_compile, emit_impact
 
 
 def _build_root_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="cm",
-        description="ClearMetric Core — local compiler, graph engine, and CLI.",
+        description="ClearMetric Core — warehouse-connected compiler and graph engine.",
     )
     parser.add_argument(
         "--version",
         action="version",
         version=f"cm {__version__} (ClearMetric Core)",
     )
+    parser.add_argument(
+        "--project-dir",
+        default=".",
+        help="Project directory containing clearmetric.yaml (default: .)",
+    )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    compile_parser = subparsers.add_parser(
-        "compile",
-        help="Compile project input into a catalog graph artifact (JSON).",
+    subparsers.add_parser("init", help="Initialize a ClearMetric project.")
+
+    connect = subparsers.add_parser(
+        "connect", help="Configure warehouse metadata source."
     )
-    compile_parser.add_argument(
-        "project_input",
-        help="Path to a dbt manifest.json file or a folder of UTF-8 .sql files.",
+    connect_sub = connect.add_subparsers(dest="connect_target", required=True)
+    warehouse = connect_sub.add_parser(
+        "warehouse",
+        help="Configure credential-free warehouse metadata fixture.",
     )
-    compile_parser.add_argument(
-        "--dialect",
+    warehouse.add_argument(
+        "--information-schema",
         required=True,
-        help="sqlglot dialect name, for example postgres, snowflake, tsql, or bigquery.",
+        help="Path to local INFORMATION_SCHEMA JSON fixture.",
+    )
+    snowflake = connect_sub.add_parser(
+        "snowflake",
+        help="Configure live Snowflake metadata connection.",
+    )
+    snowflake.add_argument("--profile", required=True, help="Snowflake profile name.")
+
+    scan = subparsers.add_parser("scan", help="Discover configured project sources.")
+    scan.add_argument(
+        "--format",
+        choices=("json", "text"),
+        default="text",
+        help="Output format (default: text).",
+    )
+
+    compile_parser = subparsers.add_parser(
+        "compile", help="Compile project into a graph."
     )
     compile_parser.add_argument(
         "--format",
-        choices=("json", "text"),
+        choices=("json", "text", "openlineage"),
         default="json",
         help="Output format (default: json).",
     )
@@ -56,84 +79,204 @@ def _build_root_parser() -> argparse.ArgumentParser:
     )
     impact_parser.add_argument(
         "selection",
-        help="Dataset column selection, for example orders.amount.",
-    )
-    impact_parser.add_argument(
-        "project_input",
-        help="Path to a dbt manifest.json file or a folder of UTF-8 .sql files.",
-    )
-    impact_parser.add_argument(
-        "--dialect",
-        required=True,
-        help="sqlglot dialect name, for example postgres, snowflake, tsql, or bigquery.",
+        help="Column selection, for example orders.amount.",
     )
     traversal = impact_parser.add_mutually_exclusive_group(required=True)
-    traversal.add_argument(
-        "--upstream",
-        action="store_true",
-        help="Trace upstream lineage for the selection.",
-    )
-    traversal.add_argument(
-        "--downstream",
-        action="store_true",
-        help="Trace downstream impact for the selection.",
-    )
+    traversal.add_argument("--upstream", action="store_true")
+    traversal.add_argument("--downstream", action="store_true")
     impact_parser.add_argument(
         "--format",
         choices=("text", "json", "mermaid"),
         default="text",
         help="Output format (default: text).",
     )
+
+    clean_parser = subparsers.add_parser(
+        "clean",
+        help="Run compile checks and print a cleaner report.",
+    )
+    clean_parser.add_argument(
+        "--format",
+        choices=("json", "text"),
+        default="text",
+        help="Output format (default: text).",
+    )
+
+    contract_parser = subparsers.add_parser(
+        "contract",
+        help="Validate a compiled artifact against the contract schema.",
+    )
+    contract_parser.add_argument("artifact_path", help="Path to compiled graph JSON.")
+
     return parser
 
 
-def _run_compile(args: argparse.Namespace) -> int:
-    if args.format == "json":
-        artifact = build_catalog_artifact(args.project_input, dialect=args.dialect)
-        print(json.dumps(render_json(artifact), indent=2, sort_keys=False))
+def _project_dir(args: argparse.Namespace) -> Path:
+    return Path(args.project_dir).expanduser().resolve()
+
+
+def _run_init(args: argparse.Namespace) -> int:
+    root = _project_dir(args)
+    config_path = root / "clearmetric.yaml"
+    if config_path.exists():
+        print(f"cm error: project already exists: {config_path}", file=sys.stderr)
+        return 1
+
+    manifest = root / "target" / "manifest.json"
+    sql_dir = root / "sql"
+    warehouse_schema = root / "warehouse_schema.json"
+    sources: dict = {
+        "dbt": {"manifest": "./target/manifest.json"},
+        "sql": {"paths": []},
+    }
+    if warehouse_schema.exists():
+        sources = {
+            "warehouse": {
+                "kind": "information_schema",
+                "path": "./warehouse_schema.json",
+            },
+            **sources,
+        }
+
+    if not manifest.exists() and not sql_dir.is_dir() and "warehouse" not in sources:
+        print(
+            "cm error: no target/manifest.json, sql/, or warehouse_schema.json found to initialize from",
+            file=sys.stderr,
+        )
+        return 1
+
+    if not manifest.exists():
+        sources.pop("dbt", None)
+
+    policy_dir = root / "policy"
+    policy_dir.mkdir(parents=True, exist_ok=True)
+    rules_path = policy_dir / "rules.yaml"
+    rules_path.write_text("rules: []\n", encoding="utf-8")
+
+    config_body = {
+        "version": 1,
+        "dialect": "postgres",
+        "sources": sources,
+        "posture": "strict",
+        "policy": {"rules": "./policy/rules.yaml"},
+    }
+    config_path.write_text(
+        yaml.safe_dump(config_body, sort_keys=False), encoding="utf-8"
+    )
+
+    gitignore = root / ".gitignore"
+    if gitignore.exists():
+        content = gitignore.read_text(encoding="utf-8")
+        if ".clearmetric/" not in content:
+            gitignore.write_text(
+                content.rstrip() + "\n.clearmetric/\n", encoding="utf-8"
+            )
     else:
-        lineage_map = build_lineage_map(args.project_input, dialect=args.dialect)
-        print(render_text(lineage_map))
+        gitignore.write_text(".clearmetric/\n", encoding="utf-8")
+
+    print(f"Initialized ClearMetric project at {config_path}")
+    return 0
+
+
+def _run_connect(args: argparse.Namespace) -> int:
+    root = _project_dir(args)
+    config_path = root / "clearmetric.yaml"
+    if not config_path.exists():
+        print(f"cm error: project config not found: {config_path}", file=sys.stderr)
+        return 1
+
+    raw = yaml.safe_load(config_path.read_text(encoding="utf-8")) or {}
+    sources = raw.setdefault("sources", {})
+    if args.connect_target == "warehouse":
+        resolved = (root / args.information_schema).resolve()
+        if not resolved.is_file():
+            print(
+                f"cm error: information schema file not found: {resolved}",
+                file=sys.stderr,
+            )
+            return 1
+        try:
+            path_value = f"./{resolved.relative_to(root).as_posix()}"
+        except ValueError:
+            path_value = str(resolved)
+        sources["warehouse"] = {
+            "kind": "information_schema",
+            "path": path_value,
+        }
+    else:
+        sources["warehouse"] = {"kind": "snowflake", "profile": args.profile}
+
+    config_path.write_text(yaml.safe_dump(raw, sort_keys=False), encoding="utf-8")
+    print(f"Updated warehouse source in {config_path}")
+    return 0
+
+
+def _run_scan(args: argparse.Namespace) -> int:
+    report = discover(_project_dir(args))
+    if args.format == "json":
+        print(
+            json.dumps(
+                {
+                    "config_path": report.config_path,
+                    "dialect": report.dialect,
+                    "sources": [
+                        {"kind": source.kind, "path": source.path}
+                        for source in report.sources
+                    ],
+                },
+                indent=2,
+                sort_keys=False,
+            )
+        )
+        return 0
+    print(f"config: {report.config_path}")
+    print(f"dialect: {report.dialect}")
+    for source in report.sources:
+        print(f"source: {source.kind} -> {source.path}")
+    return 0
+
+
+def _run_compile(args: argparse.Namespace) -> int:
+    compiled = run_compile(_project_dir(args))
+    print(emit_compile(args.format, compiled))
     return 0
 
 
 def _run_impact(args: argparse.Namespace) -> int:
     direction = "upstream" if args.upstream else "downstream"
-    if direction == "upstream":
-        result = trace_upstream(
-            args.project_input,
-            dialect=args.dialect,
-            selection=args.selection,
-        )
-    else:
-        result = trace_downstream(
-            args.project_input,
-            dialect=args.dialect,
-            selection=args.selection,
-        )
-
-    if args.format == "json":
-        print(json.dumps(result.model_dump(mode="json"), indent=2, sort_keys=False))
-        return 0
-
-    artifact = build_catalog_artifact(args.project_input, dialect=args.dialect)
-    if args.format == "mermaid":
-        print(
-            render_traversal_mermaid(
-                result.selection_id,
-                artifact,
-                direction=direction,
-            )
-        )
-        return 0
-
+    compiled, result = run_impact(
+        _project_dir(args),
+        selection=args.selection,
+        direction=direction,
+    )
     print(
-        render_traversal_tree(
+        emit_impact(
+            compiled,
             result,
-            artifact,
+            format=args.format,
             direction=direction,
         )
     )
+    return 0
+
+
+def _run_clean(args: argparse.Namespace) -> int:
+    report, _compiled = run_clean(_project_dir(args))
+    if args.format == "json":
+        print(json.dumps(report.model_dump(mode="json"), indent=2, sort_keys=False))
+    else:
+        if not report.findings:
+            print("clean: no findings")
+        for finding in report.findings:
+            print(f"{finding.severity}: {finding.check_id}: {finding.message}")
+    errors = [finding for finding in report.findings if finding.severity == "error"]
+    return 1 if errors else 0
+
+
+def _run_contract(args: argparse.Namespace) -> int:
+    artifact = load_artifact_file(Path(args.artifact_path))
+    enforce_structural_checks(artifact)
+    print(f"contract: valid ({args.artifact_path})")
     return 0
 
 
@@ -142,11 +285,21 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        if args.command == "init":
+            return _run_init(args)
+        if args.command == "connect":
+            return _run_connect(args)
+        if args.command == "scan":
+            return _run_scan(args)
         if args.command == "compile":
             return _run_compile(args)
         if args.command == "impact":
             return _run_impact(args)
-    except LineageError as exc:
+        if args.command == "clean":
+            return _run_clean(args)
+        if args.command == "contract":
+            return _run_contract(args)
+    except ClearMetricError as exc:
         print(f"cm error: {exc}", file=sys.stderr)
         return 1
 

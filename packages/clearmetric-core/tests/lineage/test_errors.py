@@ -4,10 +4,10 @@ import json
 from pathlib import Path
 
 import pytest
-from clearmetric.lineage import build_lineage_map, trace_upstream
 from clearmetric.lineage.errors import LineageInputError
 
 from .ground_truth import load_built_fixture
+from .project_helpers import build_lineage_map, trace_upstream
 
 
 def test_invalid_file_input_fails_loudly(tmp_path: Path):

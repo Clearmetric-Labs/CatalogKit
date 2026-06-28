@@ -48,9 +48,9 @@ ClearMetric Core must contain ONLY general-purpose, non-proprietary logic.
 - Public artifact contract stays stable once shipped.
 
 ### 5. Stay in scope
-The OSS suite is structure/lineage primitives only.
-**Out of scope:** metric definitions, semantic-layer logic, AI context packs, live BI connectors,
-governance/policy engines, standalone usage analytics.
+The OSS suite is structure/lineage primitives plus the v0 compiler spine (adapters,
+emitters, policy floor, cleaner). Semantic execution, live BI connectors, and hosted
+orchestration remain out of scope.
 
 ---
 
@@ -63,7 +63,19 @@ governance/policy engines, standalone usage analytics.
 ---
 
 ## Module status (running list)
-- `clearmetric.core` — shared contract. Done.
+- `clearmetric.core` — shared contract, IDs, validation, merge. Done.
+- `clearmetric.compiler` — wedge orchestration spine. Done (v0).
+- `clearmetric.adapters` / `clearmetric.emitters` — source ingestion + output formats. Done (v0).
+- `clearmetric.policy` / `clearmetric.cleaner` / `clearmetric.projection` — centralized security + structural checks. Done (v0 shell + floor).
 - `clearmetric.query` — single-statement SQL structure. Done.
 - `clearmetric.lineage` — project-level lineage. Done.
-- `clearmetric.powerbi` — PBIP file lineage (M sources, report bindings, warehouse merge). Done (V1).
+- `clearmetric.powerbi` — PBIP file lineage (shipped; not v0 CLI registry). Done (V1).
+
+## Wedge phasing
+
+v0 is warehouse-metadata-connected lineage/impact — not the full platform. The CLI reads
+`clearmetric.yaml`, ingests warehouse INFORMATION_SCHEMA fixtures + dbt/SQL, merges via
+`clearmetric.compiler`, and emits honest warnings for schema drift and partial derivation.
+
+Policy, cleaner, and projection are centralized OSS packages (not deferred to enterprise).
+Governance rule evaluation is incremental; the security floor is enforced at compile time.

@@ -3,9 +3,8 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-from clearmetric.lineage import build_catalog_artifact
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 from clearmetric.lineage.coverage import coverage_summary
-from clearmetric.lineage.loaders import load_project
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,7 +21,7 @@ def main() -> int:
             else project_input
         )
         project = load_project(project_input, dialect=dialect)
-        artifact = build_catalog_artifact(project_input, dialect=dialect)
+        artifact = build_catalog_artifact_from_project(project, dialect=dialect)
         summary = coverage_summary(artifact, project)
         print(
             f"{project_dir.name}: total={summary['total']} "

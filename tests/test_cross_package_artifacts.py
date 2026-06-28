@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from clearmetric.core import load_table_alias_map, merge
-from clearmetric.lineage import build_catalog_artifact as build_warehouse
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 from clearmetric.powerbi import build_catalog_artifact as build_powerbi
 from clearmetric.powerbi import merge_with_warehouse
 
@@ -24,6 +24,11 @@ PBIP_FIXTURE = (
 GOLDEN_ALIAS_FILE = REPO_ROOT / "tests" / "fixtures" / "golden_merge" / "aliases.yaml"
 
 
+def _build_warehouse_artifact(*, dialect: str = "postgres"):
+    project = load_project(JAFFLE_MANIFEST, dialect=dialect)
+    return build_catalog_artifact_from_project(project, dialect=dialect)
+
+
 def test_lineage_and_query_artifacts_merge_on_shared_ids():
     from clearmetric.query import build_catalog_artifact as build_query_catalog_artifact
 
@@ -31,7 +36,7 @@ def test_lineage_and_query_artifacts_merge_on_shared_ids():
         encoding="utf-8"
     )
 
-    lineage_artifact = build_warehouse(JAFFLE_MANIFEST, dialect="postgres")
+    lineage_artifact = _build_warehouse_artifact()
     query_artifact = build_query_catalog_artifact(customers_sql, dialect="postgres")
     merged = merge(lineage_artifact, query_artifact)
 
@@ -45,7 +50,7 @@ def test_lineage_and_query_artifacts_merge_on_shared_ids():
 
 
 def test_lineage_and_powerbi_artifacts_merge():
-    warehouse = build_warehouse(JAFFLE_MANIFEST, dialect="postgres")
+    warehouse = _build_warehouse_artifact()
     powerbi = build_powerbi(PBIP_FIXTURE)
     merged = merge(warehouse, powerbi)
 
@@ -54,7 +59,7 @@ def test_lineage_and_powerbi_artifacts_merge():
 
 
 def test_golden_lineage_powerbi_merge_resolves_orders_without_alias():
-    warehouse = build_warehouse(JAFFLE_MANIFEST, dialect="postgres")
+    warehouse = _build_warehouse_artifact()
     powerbi = build_powerbi(PBIP_FIXTURE)
     merged = merge_with_warehouse(powerbi, warehouse)
 
@@ -71,7 +76,7 @@ def test_golden_lineage_powerbi_merge_resolves_orders_without_alias():
 
 
 def test_golden_lineage_powerbi_merge_loads_alias_file():
-    warehouse = build_warehouse(JAFFLE_MANIFEST, dialect="postgres")
+    warehouse = _build_warehouse_artifact()
     powerbi = build_powerbi(PBIP_FIXTURE)
     alias_map = load_table_alias_map(GOLDEN_ALIAS_FILE)
     merged = merge_with_warehouse(powerbi, warehouse, alias_map=alias_map)

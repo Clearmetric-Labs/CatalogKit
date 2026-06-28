@@ -7,4 +7,4 @@ from .models import CatalogArtifact
 
 def render_json(artifact: CatalogArtifact) -> dict:
     """Return the canonical JSON-serializable artifact."""
-    return artifact.model_dump(mode="json", by_alias=True)
+    return artifact.model_dump(mode="json", by_alias=True, exclude_none=True)

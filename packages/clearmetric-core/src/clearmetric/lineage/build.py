@@ -8,6 +8,7 @@ from typing import Any
 from clearmetric.core import (
     CanonicalIdError,
     CatalogArtifact,
+    DerivationState,
     Edge,
     Evidence,
     Node,
@@ -17,16 +18,19 @@ from clearmetric.core import (
     merge,
     normalize_identifier,
     normalize_identifier_part,
+    parse_column_selection,
     schema_name,
     split_qualified_identifier,
     table_id,
 )
+from clearmetric.core.models import Confidence, DerivationStatus
 from sqlglot.lineage import Node as SqlglotLineageNode
 from sqlglot.lineage import lineage
 
 from .errors import LineageContractError, LineageInputError
 from .graph import (
     column_selection_from_id,
+    dataset_from_location,
     derives_from_edges,
     walk_downstream,
     walk_upstream,
@@ -107,8 +111,9 @@ def trace_upstream_from_artifact(
     *,
     selection: str,
 ) -> TraversalResult:
-    selection_id = _selection_to_column_id(selection)
+    selection_id = parse_column_selection(selection)
     _require_column_selection(artifact, selection=selection, selection_id=selection_id)
+    parent_name = selection_id.removeprefix("column:").rsplit(".", 1)[0]
     return TraversalResult(
         selection=selection,
         selection_id=selection_id,
@@ -116,7 +121,7 @@ def trace_upstream_from_artifact(
         warnings=warnings_for_subject(
             artifact,
             selection_id,
-            dataset_name=selection.rsplit(".", 1)[0],
+            dataset_name=parent_name,
         ),
     )
 
@@ -126,8 +131,9 @@ def trace_downstream_from_artifact(
     *,
     selection: str,
 ) -> TraversalResult:
-    selection_id = _selection_to_column_id(selection)
+    selection_id = parse_column_selection(selection)
     _require_column_selection(artifact, selection=selection, selection_id=selection_id)
+    parent_name = selection_id.removeprefix("column:").rsplit(".", 1)[0]
     return TraversalResult(
         selection=selection,
         selection_id=selection_id,
@@ -135,18 +141,9 @@ def trace_downstream_from_artifact(
         warnings=warnings_for_subject(
             artifact,
             selection_id,
-            dataset_name=selection.rsplit(".", 1)[0],
+            dataset_name=parent_name,
         ),
     )
-
-
-def build_openlineage_export_from_project(
-    project: ProjectInput,
-    *,
-    dialect: str,
-) -> dict[str, Any]:
-    artifact = build_catalog_artifact_from_project(project, dialect=dialect)
-    return build_openlineage_export_from_artifact(artifact, job_name=project.label)
 
 
 def build_openlineage_export_from_artifact(
@@ -234,12 +231,15 @@ def _build_lineage(project: ProjectInput, *, dialect: str) -> BuiltLineage:
         resolution_by_dataset=resolution_by_dataset,
     )
 
-    artifact = merge(
-        CatalogArtifact(
-            nodes=sorted(nodes_by_id.values(), key=lambda item: item.id),
-            edges=edges,
-            warnings=warnings,
-        )
+    artifact = _stamp_derivation(
+        merge(
+            CatalogArtifact(
+                nodes=sorted(nodes_by_id.values(), key=lambda item: item.id),
+                edges=edges,
+                warnings=warnings,
+            )
+        ),
+        project=project,
     )
     column_count = sum(1 for node in artifact.nodes if node.kind == "column")
     dataset_count = sum(1 for node in artifact.nodes if node.kind == "table")
@@ -941,9 +941,82 @@ def _try_split_ref(reference: str) -> tuple[str, str] | None:
         return None
 
 
-def _selection_to_column_id(selection: str) -> str:
-    parent_name, column_name = _split_ref(selection)
-    return column_id(parent_name, column_name)
+def _stamp_derivation(
+    artifact: CatalogArtifact,
+    *,
+    project: ProjectInput,
+) -> CatalogArtifact:
+    source = "dbt_manifest" if project.input_kind == "dbt_manifest" else "sqlglot"
+    warning_codes_by_subject: dict[str, set[str]] = {}
+    for warning in artifact.warnings:
+        if warning.subject_id:
+            warning_codes_by_subject.setdefault(warning.subject_id, set()).add(
+                warning.code
+            )
+        if warning.location:
+            dataset = dataset_from_location(warning.location)
+            if dataset:
+                warning_codes_by_subject.setdefault(f"table:{dataset}", set()).add(
+                    warning.code
+                )
+
+    def _codes_for(subject_id: str | None) -> set[str]:
+        if not subject_id:
+            return set()
+        codes = set(warning_codes_by_subject.get(subject_id, set()))
+        if subject_id.startswith("column:"):
+            parent = subject_id.removeprefix("column:").rsplit(".", 1)[0]
+            codes |= warning_codes_by_subject.get(f"table:{parent}", set())
+        return codes
+
+    def _status_for(
+        subject_id: str | None,
+        *,
+        default: DerivationStatus = "complete",
+    ) -> tuple[DerivationStatus, Confidence]:
+        if not subject_id:
+            return default, "high"
+        codes = _codes_for(subject_id)
+        if any(
+            code.endswith("_failed") or code == "lineage_resolution_failed"
+            for code in codes
+        ):
+            return "failed", "low"
+        if codes:
+            return "partial", "medium"
+        return default, "high"
+
+    stamped_nodes: list[Node] = []
+    for node in artifact.nodes:
+        status, confidence = _status_for(node.id)
+        stamped_nodes.append(
+            node.model_copy(
+                update={
+                    "derivation": DerivationState(
+                        status=status,
+                        confidence=confidence,
+                        source=source,
+                    )
+                }
+            )
+        )
+
+    stamped_edges: list[Edge] = []
+    for edge in artifact.edges:
+        status, confidence = _status_for(edge.source_id, default="complete")
+        stamped_edges.append(
+            edge.model_copy(
+                update={
+                    "derivation": DerivationState(
+                        status=status,
+                        confidence=confidence,
+                        source=source,
+                    )
+                }
+            )
+        )
+
+    return artifact.model_copy(update={"nodes": stamped_nodes, "edges": stamped_edges})
 
 
 def _require_column_selection(

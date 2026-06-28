@@ -4,15 +4,44 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+## 0.3.0 - 2026-06-27
+
+### Added
+
+- **Warehouse-connected wedge** — project-first CLI via `clearmetric.yaml` (`cm init`, `connect`, `scan`, `compile`, `impact`, `clean`, `contract`)
+- **`clearmetric.compiler`** — discover → adapters → merge → structural checks → security floor
+- **`clearmetric.adapters`** — warehouse `information_schema` JSON, dbt manifest, SQL folder ingestion (`SOURCE_ORDER`: warehouse, dbt, sql)
+- **`clearmetric.policy`** / **`clearmetric.cleaner`** / **`clearmetric.projection`** — centralized security floor, structural checks, identity projection
+- **`clearmetric.emitters`** — json, text, openlineage, impact output dispatch
+- Graph extensions — `DerivationState`, `PhysicalBinding`, optional `aspects` on nodes/edges
+- JSON schemas — `spec/clearmetric-project.schema.json`, `spec/catalog-artifact.schema.json`
+- `core.ids.parse_column_selection` — single column selection entry (`orders.amount`, `column:orders.amount`, `column.fct_orders.net_revenue`)
+- Wedge example — `examples/wedge-jaffle/`; warehouse fixture at `tests/fixtures/wedge/jaffle_warehouse_schema.json`
+- Wedge E2E tests, derivation honesty gate, repository boundary tests for new packages
+
+### Changed
+
+- CLI is project-first only — removed positional `project_input`, `--dialect`, and direct lineage imports
+- Removed path-based lineage API wrappers; use `load_project` + `*_from_project` or `compiler.compile`
+- Cross-source merge emits `schema_drift` / `source_disagreement` warnings instead of silent winner-picking
+- CI release smoke uses temp project + `cm init` / `compile` / `impact`
+- Public lineage imports centralized on `clearmetric.lineage` (including `load_project`, `ProjectInput`)
+
+### Notes
+
+- Snowflake live metadata (`connect snowflake`) is config-only in v0 — raises `AdapterError` until optional connector support lands
+- Power BI remains a shipped module but is not in the v0 warehouse CLI source registry
+- `serve`, live query execution, metrics YAML, and full RBAC rule kinds are deferred
+
+## 0.2.0 - 2026-06-25
+
 ### Changed
 
 - Renamed project to ClearMetric Core
 - Consolidated prior multi-package PyPI layout into `clearmetric-core`
 - CLI is `cm`; module entry is `python -m clearmetric.cli`
 
-## 0.2.0 - 2026-06-25
-
-> Package names in releases below predate the rename.
+> Package names in the section below predate the rename.
 
 ### Added
 

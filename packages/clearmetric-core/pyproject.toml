@@ -34,7 +34,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
+    "jsonschema>=4.0",
     "pydantic>=2.10.0",
+    "PyYAML>=6.0",
     "sqlglot>=25.0.0",
     "pbi-parsers>=0.9.5",
 ]
@@ -67,3 +69,6 @@ version = {attr = "clearmetric.core._version.__version__"}
 where = ["src"]
 include = ["clearmetric.*"]
 namespaces = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]

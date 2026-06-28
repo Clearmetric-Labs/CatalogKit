@@ -1,9 +1,7 @@
-import pytest
 from clearmetric.core import (
     CatalogArtifact,
     Edge,
     Evidence,
-    MergeConflictError,
     Node,
     Warning,
     merge,
@@ -113,7 +111,7 @@ def test_merge_keeps_distinct_warnings_by_subject_id():
     ]
 
 
-def test_merge_fails_on_conflicting_node_attributes():
+def test_merge_emits_disagreement_for_conflicting_node_attributes():
     left = CatalogArtifact(
         nodes=[
             Node(
@@ -135,8 +133,13 @@ def test_merge_fails_on_conflicting_node_attributes():
         ]
     )
 
-    with pytest.raises(MergeConflictError):
-        merge(left, right)
+    merged = merge(left, right)
+
+    assert merged.nodes[0].name == "orders"
+    assert any(
+        warning.code == "source_disagreement" and "node.name" in warning.message
+        for warning in merged.warnings
+    )
 
 
 def test_merge_dedupes_edges_by_kind_source_target():

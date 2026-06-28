@@ -231,7 +231,8 @@ def _load_sql_folder_project(path: Path, *, dialect: str) -> ProjectInput:
                 }
             )
         except LineageInputError:
-            dependency_names = []
+            # Unparseable files still load; build emits lineage_resolution_failed per dataset.
+            dependency_names = ()
         current = datasets[dataset_name]
         datasets[dataset_name] = ProjectDataset(
             name=current.name,

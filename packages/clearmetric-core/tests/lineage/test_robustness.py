@@ -5,10 +5,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from clearmetric.lineage import (
-    build_lineage_map,
-    trace_downstream,
-)
+from .project_helpers import build_lineage_map
 
 
 def _manifest_root() -> Path:
@@ -50,12 +47,43 @@ def test_bad_sql_file_warns_without_killing_valid_sibling(tmp_path: Path):
     assert ("column:valid.amount", "column:raw_orders.amount") in derives_from
 
 
-def test_cli_and_api_match_for_downstream_json_output():
+def test_cli_and_api_match_for_downstream_json_output(tmp_path: Path):
     fixture_root = _sql_folder_root()
-    api_result = trace_downstream(
-        fixture_root,
-        dialect="postgres",
+    sql_dir = tmp_path / "sql"
+    sql_dir.mkdir()
+    for sql_file in fixture_root.glob("*.sql"):
+        sql_dir.joinpath(sql_file.name).write_text(
+            sql_file.read_text(encoding="utf-8"),
+            encoding="utf-8",
+        )
+
+    config_path = tmp_path / "clearmetric.yaml"
+    config_path.write_text(
+        "\n".join(
+            [
+                "version: 1",
+                "dialect: postgres",
+                "sources:",
+                "  sql:",
+                "    paths:",
+                "      - ./sql",
+                "posture: strict",
+                "policy:",
+                "  rules: ./policy/rules.yaml",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    policy_dir = tmp_path / "policy"
+    policy_dir.mkdir()
+    (policy_dir / "rules.yaml").write_text("rules: []\n", encoding="utf-8")
+
+    from clearmetric.compiler.impact import impact
+
+    _compiled, api_result = impact(
+        tmp_path,
         selection="orders_base.amount",
+        direction="downstream",
     )
 
     result = subprocess.run(
@@ -63,11 +91,10 @@ def test_cli_and_api_match_for_downstream_json_output():
             sys.executable,
             "-m",
             "clearmetric.cli",
+            "--project-dir",
+            str(tmp_path),
             "impact",
             "orders_base.amount",
-            str(fixture_root),
-            "--dialect",
-            "postgres",
             "--downstream",
             "--format",
             "json",
@@ -77,6 +104,6 @@ def test_cli_and_api_match_for_downstream_json_output():
         check=False,
     )
 
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     payload = json.loads(result.stdout)
     assert payload["related_ids"] == api_result.related_ids

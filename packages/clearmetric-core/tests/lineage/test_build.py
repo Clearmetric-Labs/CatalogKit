@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from clearmetric.lineage import (
+from clearmetric.lineage import build_openlineage_export
+
+from .project_helpers import (
     build_catalog_artifact,
     build_lineage_map,
-    build_openlineage_export,
     trace_downstream,
 )
 
@@ -51,8 +52,9 @@ def test_folder_input_builds_successfully():
 
 def test_openlineage_export_contains_column_lineage_entries():
     compiled_dir = _folder_example_root()
+    artifact = build_catalog_artifact(compiled_dir, dialect="postgres")
 
-    payload = build_openlineage_export(compiled_dir, dialect="postgres")
+    payload = build_openlineage_export(artifact, job_name="sql_folder")
 
     assert payload["job"]["name"] == "sql_folder"
     assert any(entry["name"] == "orders_base" for entry in payload["datasets"])
@@ -75,7 +77,10 @@ def test_openlineage_export_groups_multiple_inputs_per_output_column(tmp_path: P
         encoding="utf-8",
     )
 
-    payload = build_openlineage_export(tmp_path, dialect="postgres")
+    payload = build_openlineage_export(
+        build_catalog_artifact(report_sql.parent, dialect="postgres"),
+        job_name=report_sql.parent.name,
+    )
 
     grouped_entries = [
         entry
@@ -113,7 +118,6 @@ def test_openlineage_export_accepts_prebuilt_artifact():
 
     payload = build_openlineage_export(artifact)
 
-    path_payload = build_openlineage_export(manifest_path, dialect="postgres")
-    assert payload["datasets"] == path_payload["datasets"]
-    assert payload["columnLineage"] == path_payload["columnLineage"]
+    assert payload["datasets"]
     assert payload["job"]["name"] == "clearmetric"
+    assert isinstance(payload["columnLineage"], list)

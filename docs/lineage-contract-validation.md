@@ -6,27 +6,37 @@
 
 ## Public API (validated)
 
+Path-based wrappers (`build_catalog_artifact(path)`, etc.) were removed. Use project loading + `_from_project` entry points, or the compiler spine for wedge workflows.
+
 ```python
+from clearmetric.compiler import compile
 from clearmetric.lineage import (
-    build_catalog_artifact,
-    build_lineage_map,
+    build_catalog_artifact_from_project,
+    build_lineage_map_from_project,
     build_openlineage_export,
-    trace_downstream,
-    trace_upstream,
+    load_project,
+    trace_downstream_from_project,
+    trace_upstream_from_project,
 )
 ```
 
 | Function | Input | Output |
 |---|---|---|
-| `build_lineage_map(project_input, dialect=...)` | dbt manifest path or SQL folder | `LineageMap` with `.nodes`, `.edges`, `.summary` |
-| `build_catalog_artifact(project_input, dialect=...)` | same | `CatalogArtifact` |
-| `trace_upstream/downstream(project_input, selection, dialect=...)` | `"model.column"` | `TraversalResult.related_ids` (canonical column IDs) |
-| `build_openlineage_export(project_input, dialect=...)` | same | OpenLineage-shaped dict |
+| `load_project(path, dialect=...)` | dbt manifest path or SQL folder | `ProjectInput` |
+| `build_lineage_map_from_project(project, dialect=...)` | `ProjectInput` | `LineageMap` |
+| `build_catalog_artifact_from_project(project, dialect=...)` | `ProjectInput` | `CatalogArtifact` |
+| `trace_*_from_project(project, selection, dialect=...)` | `"orders.amount"` or `column:orders.amount` | `TraversalResult` |
+| `build_openlineage_export(artifact, job_name=...)` | pre-built `CatalogArtifact` | OpenLineage-shaped dict |
+| `compile(project_dir)` | directory with `clearmetric.yaml` | `CompiledGraph` |
+
+Column selections are normalized via `clearmetric.core.ids.parse_column_selection`.
 
 ## Merge Assumptions for `clearmetric.powerbi`
 
 See core contract for warehouse namespace, alias map, and `match_status` rules.
 Lineage emits warehouse `table:` IDs from dbt model names (e.g. `table:orders`).
+
+Power BI remains a shipped module but is **not** part of the v0 warehouse-connected CLI source registry.
 
 ## Enterprise Drift (integration lag, not OSS gaps)
 
@@ -45,5 +55,5 @@ table:orders  --feeds-->  table:<project>.semantic_model.orders
                           match_status: resolved | ambiguous | unresolved
 ```
 
-Run modules separately; merge via `clearmetric.core.merge()` or `merge_with_warehouse()`.
+Run modules separately; merge via `clearmetric.core.merge()` or `compile()` for the wedge path.
 See [`docs/orchestration.md`](orchestration.md).

@@ -14,6 +14,12 @@ Run the full suite from the repository root:
 python -m pytest -v packages/clearmetric-core/tests tests/
 ```
 
+Wedge end-to-end (CLI subprocess + compiler API parity):
+
+```bash
+python -m pytest -v packages/clearmetric-core/tests/wedge/
+```
+
 Run repository boundary checks:
 
 ```bash
@@ -27,9 +33,30 @@ Lineage trust gate:
 ```bash
 python -m pytest -v \
   packages/clearmetric-core/tests/lineage/test_corpus_invariants.py \
-  packages/clearmetric-core/tests/lineage/test_ground_truth.py
+  packages/clearmetric-core/tests/lineage/test_ground_truth.py \
+  packages/clearmetric-core/tests/lineage/test_derivation_honesty.py
 PYTHONPATH=packages/clearmetric-core \
   python packages/clearmetric-core/scripts/sweep_lineage_coverage.py
+```
+
+Static checks (same as CI):
+
+```bash
+python -m pip install ruff pyright
+python -m ruff check .
+python -m ruff format --check .
+pyright
+```
+
+## Local wedge smoke
+
+```bash
+cd examples/wedge-jaffle
+cm scan
+cm compile --format json > graph.json
+cm impact orders.amount --upstream
+cm clean
+cm contract graph.json
 ```
 
 ## Builds
@@ -47,4 +74,15 @@ source .pkgsmoke/bin/activate
 python -m pip install packages/clearmetric-core/dist/*.whl
 cm --version
 python -c "import clearmetric.core; import clearmetric.lineage; import clearmetric.query; import clearmetric.powerbi"
+```
+
+## Release
+
+1. Bump `clearmetric.core._version.__version__` and `CHANGELOG.md`.
+2. Commit and push to `main`.
+3. Tag and push — CI publishes to PyPI on tag `clearmetric-core-v*`:
+
+```bash
+git tag clearmetric-core-v0.3.0
+git push origin clearmetric-core-v0.3.0
 ```

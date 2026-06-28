@@ -93,8 +93,8 @@ PyPI Trusted Publishing should point at `.github/workflows/publish.yml`.
 Publish by tagging:
 
 ```bash
-git tag clearmetric-core-v0.2.0
-git push origin clearmetric-core-v0.2.0
+git tag clearmetric-core-v0.3.0
+git push origin clearmetric-core-v0.3.0
 ```
 
 While ClearMetric Core is in 0.x:

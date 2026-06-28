@@ -34,11 +34,18 @@ Foundational, open-source-worthy scope only. Anything not listed here is deferre
 
 ## Success Criteria
 
-A developer can run:
+A developer can run the warehouse wedge:
 
 ```bash
-cm compile ./manifest.json --dialect postgres > warehouse.json
-python -c "from clearmetric.powerbi import build_catalog_artifact; ..."  # powerbi artifact
+cm init
+cm connect warehouse --information-schema ./warehouse_schema.json
+cm compile --format json > graph.json
+```
+
+Power BI composition remains optional via Python merge (not part of the v0 CLI source registry):
+
+```bash
+python -c "from clearmetric.powerbi import build_catalog_artifact; ..."
 # merge in Python via clearmetric.core.merge()
 ```
 

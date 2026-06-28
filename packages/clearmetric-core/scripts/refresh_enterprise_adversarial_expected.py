@@ -8,7 +8,7 @@ from collections import Counter
 from pathlib import Path
 
 import yaml
-from clearmetric.lineage import build_lineage_map
+from clearmetric.lineage import build_lineage_map_from_project, load_project
 from clearmetric.lineage.graph import dataset_from_location
 
 DEFAULT_FIXTURE_ROOT = (
@@ -23,7 +23,10 @@ DEFAULT_FIXTURE_ROOT = (
 
 def refresh_expected(fixture_root: Path, *, dialect: str = "postgres") -> Path:
     manifest_path = fixture_root / "manifest.json"
-    lineage_map = build_lineage_map(manifest_path, dialect=dialect)
+    lineage_map = build_lineage_map_from_project(
+        load_project(manifest_path, dialect=dialect),
+        dialect=dialect,
+    )
     edges = sorted(
         (edge.source_id, edge.target_id)
         for edge in lineage_map.edges

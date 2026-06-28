@@ -153,6 +153,44 @@ def leaf_name(qualified_name: str) -> str:
     return normalized.split(".")[-1]
 
 
+def parse_column_selection(selection: str) -> str:
+    """Parse a user column selection into canonical column: ID form."""
+    text = selection.strip()
+    if not text:
+        raise CanonicalIdError("Column selection cannot be empty.")
+
+    if text.startswith("column:"):
+        remainder = text[len("column:") :]
+        parts = split_qualified_identifier(remainder)
+        if len(parts) < 2:
+            raise CanonicalIdError(
+                f"Column selection must include parent and column: {selection!r}"
+            )
+        parent = ".".join(parts[:-1])
+        column = parts[-1]
+        return column_id(parent, column)
+
+    if text.startswith("column."):
+        remainder = text[len("column.") :]
+        parts = split_qualified_identifier(remainder)
+        if len(parts) < 2:
+            raise CanonicalIdError(
+                f"Column selection must include parent and column: {selection!r}"
+            )
+        parent = ".".join(parts[:-1])
+        column = parts[-1]
+        return column_id(parent, column)
+
+    parts = split_qualified_identifier(text)
+    if len(parts) < 2:
+        raise CanonicalIdError(
+            f"Column selection must include parent and column: {selection!r}"
+        )
+    parent = ".".join(parts[:-1])
+    column = parts[-1]
+    return column_id(parent, column)
+
+
 __all__ = [
     "asset_id",
     "column_id",
@@ -164,6 +202,7 @@ __all__ = [
     "normalize_identifier_part",
     "normalize_identifier_parts",
     "page_id",
+    "parse_column_selection",
     "report_id",
     "schema_name",
     "split_qualified_identifier",

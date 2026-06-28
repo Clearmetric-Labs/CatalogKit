@@ -27,15 +27,12 @@
 
 Example:
 
-```bash
-cm compile ./target/manifest.json --dialect postgres
-```
-
 ```python
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 from clearmetric.powerbi import build_catalog_artifact, merge_with_warehouse
-from clearmetric.lineage import build_catalog_artifact as build_warehouse
 
-warehouse = build_warehouse("./target/manifest.json", dialect="postgres")
+project = load_project("./target/manifest.json", dialect="postgres")
+warehouse = build_catalog_artifact_from_project(project, dialect="postgres")
 powerbi = build_catalog_artifact("./MyReport.pbip")
 merged = merge_with_warehouse(powerbi, warehouse)
 ```

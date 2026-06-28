@@ -5,13 +5,13 @@ from __future__ import annotations
 from functools import lru_cache
 
 import yaml
-from clearmetric.lineage import build_lineage_map
 from clearmetric.lineage.graph import (
     column_selection_from_id,
     derives_from_counts_by_source_dataset,
 )
 
 from .ground_truth import FIXTURES_ROOT, project_fixture_input
+from .project_helpers import build_lineage_map
 
 ORACLE_PATH = (
     FIXTURES_ROOT

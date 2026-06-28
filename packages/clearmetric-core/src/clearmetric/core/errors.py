@@ -17,3 +17,35 @@ class MergeConflictError(ClearMetricError):
 
 class AliasMapError(ClearMetricError):
     """Raised when a table alias file is invalid or unsupported."""
+
+
+class ProjectConfigError(ClearMetricError):
+    """Raised when clearmetric.yaml or project paths are invalid."""
+
+
+class ValidationError(ClearMetricError):
+    """Raised when JSON/YAML data fails schema validation."""
+
+
+class AdapterError(ClearMetricError):
+    """Raised when a source adapter fails ingestion."""
+
+
+class CompilerError(ClearMetricError):
+    """Raised when the compiler orchestration fails."""
+
+
+class StructuralCheckError(ClearMetricError):
+    """Raised when structural graph checks fail."""
+
+
+class SecurityFloorError(ClearMetricError):
+    """Raised when the security floor is violated."""
+
+
+class PolicyError(ClearMetricError):
+    """Raised when policy rules are invalid."""
+
+
+class EmitterError(ClearMetricError):
+    """Raised when output emission fails."""

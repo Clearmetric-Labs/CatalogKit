@@ -1,24 +1,25 @@
 # ClearMetric Core
 
-**Build a data catalog from your code, not a platform.** ClearMetric Core is an open-source compiler and graph engine that derives lineage, structure, and a mergeable catalog graph from the dbt projects and SQL you already have — locally, no warehouse, no platform to stand up.
+**Build a data catalog from your code, not a platform.** ClearMetric Core is an open-source compiler and graph engine that derives lineage, structure, and a mergeable catalog graph from dbt projects, SQL, and warehouse metadata — locally, with no platform to stand up.
 
 ```bash
 pip install clearmetric-core
-cm impact orders.credit_card_amount ./manifest.json --dialect postgres --upstream
+cd my-dbt-project
+cm init
+cm connect warehouse --information-schema ./warehouse_schema.json
+cm compile --format json > graph.json
+cm impact orders.amount --upstream
 ```
 
 ```
-upstream: orders.credit_card_amount
-selection_id: column:orders.credit_card_amount
-tree:
-  - column:orders.credit_card_amount
-    - column:stg_payments.amount
-      - column:raw_payments.amount
+upstream: orders.amount
+selection_id: column:orders.amount
+related_ids: []
 ```
 
-Ask any column *"what feeds this?"* or *"what breaks if I change it?"* and get a real answer, traced from your code.
+Ask any column *"what feeds this?"* or *"what breaks if I change it?"* and get a real answer, traced from your code and warehouse metadata.
 
-> **Status:** early development (0.x), release 0.2.0. Pin your versions.
+> **Status:** early development (0.x), release 0.3.0. Pin your versions.
 
 ## Why it's different
 
@@ -28,25 +29,32 @@ Most catalogs are heavy platforms you log into and maintain by hand — and they
 
 ```bash
 pip install clearmetric-core
-cm compile ./manifest.json --dialect postgres
-cm impact orders.amount ./manifest.json --dialect postgres --upstream
+cm init
+cm scan
+cm compile --format json > graph.json
+cm impact orders.amount --upstream
+cm clean
+cm contract graph.json
 ```
+
+See [`examples/wedge-jaffle/README.md`](examples/wedge-jaffle/README.md) for a full walkthrough.
 
 If another program already occupies `cm` on your PATH, use the module entry instead:
 
 ```bash
-python -m clearmetric.cli impact orders.amount ./manifest.json --dialect postgres --upstream
+python -m clearmetric.cli --project-dir . compile --format json
 ```
 
 ## Compile a catalog
 
-Every module emits the same mergeable artifact, so independent outputs combine into one catalog graph — assets, columns, lineage — that you can serialize or hand to other tools via OpenLineage.
+The compiler spine merges warehouse metadata, dbt manifests, and SQL folders into one graph artifact. Every module still emits the same mergeable artifact shape for optional composition.
 
 ```python
-from clearmetric.lineage import build_catalog_artifact, build_openlineage_export
+from pathlib import Path
+from clearmetric.compiler import compile
 
-catalog = build_catalog_artifact("./manifest.json", dialect="postgres")
-open_lineage = build_openlineage_export(catalog)  # standard format others can ingest
+compiled = compile(Path("./my-project"))
+artifact = compiled.artifact
 ```
 
 ## Modules
@@ -56,28 +64,27 @@ Python subpackages, not separate PyPI packages.
 
 | Module | What it does | Status |
 |--------|--------------|--------|
-| **`clearmetric.lineage`** | Column-level lineage, impact, catalog graph, OpenLineage export | Shipped |
+| **`clearmetric.compiler`** | Project-first orchestration: discover → adapters → merge → policy/cleaner | Shipped (wedge) |
+| **`clearmetric.lineage`** | Column-level lineage from dbt manifests and SQL folders | Shipped |
 | **`clearmetric.query`** | Maps a single SQL statement into its tables and dependencies | Shipped |
-| **`clearmetric.powerbi`** | PBIP lineage: M sources, report visuals, warehouse merge | V1 |
-| **`clearmetric.core`** | Shared artifact, canonical IDs, merge, cross-graph interop | Shipped |
+| **`clearmetric.powerbi`** | PBIP lineage (shipped module; not in v0 warehouse CLI registry) | V1 |
+| **`clearmetric.core`** | Shared artifact, canonical IDs, merge, validation | Shipped |
 
-## Roadmap
+## Shipped wedge commands
 
-Growing toward a catalog that lives in your repo and is enforced in CI — all derived from your code, no new format to adopt:
-
-- `cm init` — scaffold a ClearMetric project
-- `cm scan` — discover analyzable inputs in a repo
-- `cm clean` — remove stale generated artifacts
-- `cm contract` — validate artifact contract in CI
-- CI gate: fail a PR when a change breaks something downstream
-- Duplicate and near-duplicate model detection
-- Catalog site generation from your repo
+- `cm init` — scaffold `clearmetric.yaml` + `policy/rules.yaml`
+- `cm connect warehouse --information-schema PATH` — credential-free metadata fixture
+- `cm scan` — discover configured sources
+- `cm compile` — compile project graph to stdout
+- `cm impact` — upstream/downstream column lineage
+- `cm clean` — report-only structural/security/drift findings
+- `cm contract` — validate compiled artifact JSON in CI
 
 [Open an issue](https://github.com/ClearMetric-Labs/ClearMetric-Core/issues) if there's a primitive you wish existed.
 
 ## Limits
 
-Static analysis only — no warehouse connection. On star-heavy SQL (`SELECT *` without schema), it flags what it can't resolve rather than guessing. Correct where it can be, explicit where it can't. [Full limitations →](packages/clearmetric-core/docs/lineage/limitations.md)
+Static analysis for SQL/dbt lineage; warehouse **metadata** ingestion in v0 (no query execution). On star-heavy SQL (`SELECT *` without schema), it flags what it can't resolve rather than guessing. [Full limitations →](packages/clearmetric-core/docs/lineage/limitations.md)
 
 ## Feedback & contact
 
@@ -107,8 +114,8 @@ ClearMetric Core is a single Python package at `packages/clearmetric-core` with 
 
 ```python
 from clearmetric.core import Node, Edge, Evidence
-from clearmetric.query import build_query_map
-from clearmetric.lineage import build_lineage_map
+from clearmetric.compiler import compile
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 ```
 
 **Core rules**

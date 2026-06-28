@@ -26,7 +26,48 @@ The problem it removes: today, "what revenue means," "where it comes from," "who
 it," and "what the dashboard shows" live in four different systems that drift. ClearMetric
 makes them four views of **one graph that cannot disagree with itself.**
 
-## What it is (precisely)
+## The wedge — start narrow, let the foundation accrete (the dbt lesson)
+
+This document describes the full foundation. **Do not launch the full foundation.** dbt did
+not start as "the platform for all of analytics" — it started as one sharp, free,
+afternoon-sized tool for one specific pain (messy SQL transformations) and *earned* the
+foundation role through adoption. dbt Cloud's platform accreted *around* an already-adopted
+`dbt run`. The entire architecture below is the dbt-Cloud-scale ambition; it must enter the
+world as a dbt-Core-1.0-scale wedge.
+
+**The wedge: column-level lineage and impact analysis, from your existing SQL/dbt, free,
+local, one command.** "What breaks if I rename this column" is the sharp, legible,
+afternoon-sized win that is obviously useful before any of the rest exists. It needs only
+the resolver + lineage derivation + the graph — the smallest slice of the core — and it
+delivers value with zero authored intent, zero policy, zero setup beyond pointing at a
+project.
+
+```bash
+cm init
+cm connect warehouse --information-schema ./warehouse_schema.json
+cm scan          # point at warehouse and/or dbt and/or a SQL folder
+cm impact column.fct_orders.net_revenue --upstream   # the wedge: what breaks?
+```
+
+Shipped CLI entry point is `cm` (`python -m clearmetric.cli` if `cm` is occupied on PATH).
+
+Everything else in this document — contracts, the cleaner, policy, projections, AI context,
+governance, deployment flexibility, the paid history layer — is the foundation that grows
+*around* the wedge once it has earned attention. Lead with lineage/impact. Let the rest
+accrete. Launching the foundation first is a platform nobody adopts, because adoption
+requires a narrow, obvious win first.
+
+Two consequences this forces:
+- **The MVP's center of gravity is the wedge, not the whole core.** Module B (lineage)
+  *is* the wedge; Module A (live query) is the first thing that accretes around it. Build
+  the wedge to genuinely-works before broadening.
+- **Open source raises the bar to exactly the wedge's reliability.** Because the engine is
+  public, "does it work on real messy SQL" *is* the pitch. dbt Core won by reliably doing
+  its narrow thing. The resolver working on real SQL is therefore the whole game.
+
+---
+
+
 
 A code-first analytics control plane that compiles code-defined metrics, queries,
 lineage, metadata, and policy intent into one canonical graph of queryable nodes and
@@ -38,7 +79,7 @@ between the model and the consumer.
 
 Four phrases carry the architecture:
 
-- **Open formats, free engine, paid history.**
+- **Open-source core, paid managed history.**
 - **Logical IDs with physical bindings.**
 - **Contracts, not dashboards.**
 - **Derived metadata with confidence, not magic.**
@@ -136,16 +177,17 @@ it to expose ungoverned PII, because that capability was never built.
 ## The five layers
 
 ```
-SOURCES
+SOURCES (any — quarantined behind adapters)
   warehouse INFORMATION_SCHEMA · dbt manifest · raw SQL ·
   query logs · authored intent (YAML)
                 │
-1. COMPILER  (opinionated · strict · teaching)
-  ingest → resolve LOGICAL identity (+ physical bindings) → build graph →
-  derive (with state) → run CLEANER (built-in + user checks) →
-  validate by rule-tier → emit outputs
+            ADAPTERS  (normalize any source → canonical graph fragments)
                 │
-2. GRAPH  (truth — stores ownership refs, makes no authz decisions)
+1. COMPILER  (opinionated · strict · teaching · source-agnostic)
+  ingest fragments → resolve LOGICAL identity (+ physical bindings) → build graph →
+  derive (with state) → run CLEANER (built-in + user checks) → validate by rule-tier
+                │
+2. GRAPH  (truth — standardized · stores ownership refs · makes no authz decisions)
   typed nodes + typed edges + contracts ·
   logical canonical IDs + physical bindings · small core + appendable aspects ·
   provenance + derivation state on every fact
@@ -156,15 +198,17 @@ SOURCES
 4. PROJECTION  (lenses — computed per identity)
   view = contract/query over graph + persona lens, filtered by (3)
                 │
-5. CONSUMERS  (you do not own these)
-  BI frontend · AI agent context · catalog · lineage explorer ·
-  compiled policy artifacts (Snowflake / BigQuery / Postgres RLS · OPA bundle)
+            EMITTERS  (shape graph slice → any target format)
+                │
+5. TARGETS (any — quarantined behind emitters)
+  docs (MD/HTML) · catalog · AI context pack · BI frontend contract ·
+  lineage explorer · OpenLineage · compiled warehouse RLS / OPA bundle
 ```
 
-One sentence: the compiler turns sources into one canonical graph of typed nodes and
-**contracts**, runs the **cleaner** over it, and every consumer reaches it only through
-the projection layer, which serves the graph filtered by the policy layer for the asking
-identity.
+One sentence: adapters normalize any source into one standardized graph; the source-agnostic
+core resolves, derives, cleans, and governs that graph; projections filter it per identity;
+and emitters shape the result into any target — the core in the middle knowing nothing about
+either end.
 
 ---
 
@@ -536,7 +580,7 @@ the same layer.
 A core validated against zero modules is a hypothesis. Build the two modules *with* the
 core so each hardens it; fix the core whenever a module makes it awkward, while cheap.
 
-### Core (free, local — engine source-protected; formats open)
+### Core (open source, Apache 2.0, local — engine and formats both open)
 ```
 project schema · logical IDs + bindings · compiler · graph store ·
 node/edge/aspect model · contract primitive · provenance + derivation-state ·
@@ -567,17 +611,19 @@ Output:  compiled graph JSON · impact CLI · query endpoint ·
          minimal catalog JSON · frontend contract JSON · cleaner report
 ```
 
-### First demo
+### First demo (v0 shipped subset)
+
 ```bash
-clearmetric scan
-clearmetric compile
-clearmetric clean                       # built-in + any user checks
-clearmetric impact column.fct_orders.net_revenue
-clearmetric serve
-clearmetric query query.executive.revenue_by_month
+cm init
+cm connect warehouse --information-schema ./warehouse_schema.json
+cm scan
+cm compile --format json > graph.json
+cm clean
+cm impact column.fct_orders.net_revenue --upstream
+cm contract graph.json
 ```
-Then show the same metric powering: live query result · lineage traversal · catalog
-projection. That proves the thesis.
+
+Deferred from v0 demo: `serve`, `query`, full user-defined cleaner checks, live Snowflake metadata.
 
 ### Explicitly NOT in the MVP (keep attachment placeholders)
 ```
@@ -608,170 +654,166 @@ usage:    { tracking_enabled: false }
 
 ---
 
-## Deployment & input flexibility — the core is portable by design
+## The source-agnostic core — adapters in, emitters out, core knows neither
 
-The core must not assume *where* it runs or *what* it reads from. Both are kept flexible by
-the same move that keeps everything else flexible: **the compiled graph artifact is the
-contract, and everything around it is interchangeable.** One compiler, one graph format;
-the inputs that feed it and the runtimes that host it are pluggable.
-
-### Input flexibility — adapters in, one graph out
-
-The compiler never hard-codes a source. Every source is an **ingestion adapter** that
-produces graph fragments in the canonical format; the compiler merges them. Core ships the
-common adapters; new sources are added as adapters without touching the core.
+**The core does not care where inputs come from or where outputs go.** It operates *only*
+on the standardized graph. Source-specific concerns are absorbed by **adapters** on the way
+in; target-specific concerns are absorbed by **emitters** on the way out. Between them sits
+a core that knows nothing about Snowflake, dbt, Power BI, Markdown, or any LLM — it knows
+only nodes, edges, contracts, aspects, and provenance. This is the single most important
+boundary in the system: it is what makes the primitives genuinely reusable instead of
+secretly coupled to one stack.
 
 ```
-INGESTION ADAPTERS (pluggable)              →  one canonical graph
-  warehouse INFORMATION_SCHEMA (Snowflake,
-    BigQuery, Postgres, Databricks, ...)
-  dbt manifest
-  raw SQL folder (sqlglot)
-  query logs
-  authored intent (YAML)
-  <user / future adapter>
+  SOURCES (any)              ADAPTERS            STANDARDIZED CORE           EMITTERS           TARGETS (any)
+  ───────────               (normalize in)       ─────────────────         (shape out)         ───────────
+  warehouse schema    ─┐                         ┌───────────────┐                        ┌─→  docs (MD/HTML)
+  dbt manifest         ├─→  ingestion adapter ─→ │  ONE GRAPH     │ ─→ projection/emit ─→  ├─→  catalog
+  raw SQL              │    (→ graph fragments   │  nodes·edges·  │    (graph slice →      ├─→  AI context pack
+  query logs           │     in canonical form)  │  contracts·    │     target format)     ├─→  frontend contract
+  authored YAML        │                         │  aspects·      │                        ├─→  OpenLineage
+  <any future source> ─┘                         │  provenance    │                        ├─→  warehouse RLS / OPA
+                                                 └───────────────┘                        └─→  <any future target>
 ```
 
-Consequences that matter:
-- A team on **dbt** and a team on **raw SQL with no dbt** both produce the same graph —
-  the wedge segment (non-dbt shops) is served by an adapter, not a different product.
-- Adding a warehouse or a source is an adapter, not a core change. **Input is an extension
-  axis, governed by the same derivation-state honesty** (each adapter stamps
-  status/confidence/source so a weak source degrades visibly, never silently).
-- The graph format is the same regardless of what fed it, so downstream
-  (cleaner, policy, projection, consumers) never knows or cares about the source.
+### The contract that makes this hold
 
-### Deployment flexibility — one artifact, many runtimes
+- **Adapters normalize IN.** An adapter's only job is to read a source and emit graph
+  fragments in the canonical format, stamped with derivation state
+  (status/confidence/source). The core receives only canonical fragments. It never parses
+  Snowflake DDL or a dbt manifest itself — the adapter did that and handed over standard
+  nodes/edges.
+- **The core touches only the standard graph.** Identity resolution, lineage, the cleaner,
+  policy, contracts — all operate on canonical nodes by canonical ID. None of them contains
+  a branch on "if source == snowflake." Remove every adapter and the core still compiles,
+  validates, and queries a graph; it simply has nothing in it.
+- **Emitters shape OUT.** An emitter takes a graph slice (already filtered by policy via a
+  projection) and serializes it to a target format — Markdown docs, an HTML catalog, an AI
+  context pack, a frontend contract, OpenLineage events, a warehouse RLS policy. The core
+  never knows the target exists. A docs page and an AI context pack are the *same* core
+  operation (projection) with *different emitters*.
+- **One standardized format is the spine.** Because everything in is normalized to the
+  canonical graph and everything out is emitted from it, the graph format is the universal
+  interchange. Adapters and emitters are the only source/target-aware code; they are
+  pluggable leaves, never core.
 
-The same compiled graph runs in every deployment shape because the artifact is identical;
-only the runtime around it changes.
+### Why this is the whole point
 
-```
-COMPILE (open engine, runs anywhere)
-  clearmetric compile  →  graph.json  (the portable deploy unit)
+This is what "infrastructure primitives" actually means: the primitives operate on a
+standard, and the messy reality of specific warehouses and specific output targets is
+quarantined at the edges. Consequences:
 
-RUN IT (pick any — same artifact):
-  local        clearmetric serve            (laptop / CI — single player, ephemeral)
-  self-hosted  deploy graph.json to your own infra (air-gapped / federal-friendly)
-  managed      clearmetric deploy --to clearmetric.ai
-                                            (paid: persisted history, team, SSO, audit)
-```
+- **Input-agnostic by construction.** A dbt shop, a raw-SQL shop, and a warehouse-only shop
+  all produce the same graph — different adapters, identical core, identical downstream.
+  Supporting a new warehouse or source is a new adapter, never a core change.
+- **Output-agnostic by construction.** Automated documentation, a catalog, AI context, a BI
+  frontend contract, and compiled policy are all emitters over the same graph — different
+  emitters, identical core. Supporting a new output is a new emitter, never a core change.
+- **Adapters and emitters are the same kind of extension as everything else.** They join the
+  extension axes: a source is "input you normalize," a target is "output you emit," and both
+  are pluggable leaves governed by the same standard. The core's surface stays small and
+  stable precisely because source and target variability live at the edges, not the center.
 
-Rules that keep this from forking into two products:
-- **One compiler, never two.** Compilation runs the same open engine whether local, in
-  CI, or invoked by the hosted instance. The hosted product does **not** reinterpret the
-  graph — it persists, serves, and wraps it with the multiplayer layer. No separate hosted
-  compiler, ever.
-- **The artifact is the only contract between local and hosted.** As long as the open
-  engine emits a stable graph format and the hosted instance consumes that same format,
-  "deploy" is a push, the two halves upgrade independently, and a user can run fully local,
-  fully self-hosted, or compile-local-then-host-serve with nothing about the graph
-  changing.
-- **Compile-anywhere, source-of-truth-is-what-was-deployed.** Users may compile locally
-  and push (CI / dev-first motion) **or** connect a repo and let the managed instance
-  compile on commit (managed motion) — same engine binary in both. The hosted instance's
-  truth is whatever artifact was deployed to it.
-- **Portable in and out.** The artifact a user deploys is the artifact they can leave with
-  (open formats, the anti-lock-in guarantee). Deployment flexibility and the no-lock-in
-  promise are the same property.
+### Warehouse: a first-class adapter, not a core dependency
 
-### Why this is "core enough"
+The warehouse connection is important to the *product* but it enters the core as an
+**adapter** like any other — it does not privilege the core with warehouse-specific logic.
+A warehouse adapter does three jobs, all of which produce or validate standard graph facts:
 
-Flexibility of input and deployment is not a feature bolted on later — it falls out of the
-artifact-as-contract design the rest of the architecture already rests on. The graph does
-not know its source (adapters absorb that) and does not know its runtime (the artifact is
-identical everywhere). So the core stays small and stable while *where it reads from* and
-*where it runs* both extend freely — federal air-gapped self-host, a developer's laptop,
-and the paid managed instance are the same engine and the same graph, differing only in
-the runtime wrapped around the artifact.
+1. **Metadata source** — reads INFORMATION_SCHEMA (databases, schemas, tables, columns,
+   types, views, comments, freshness where available) and emits **physical bindings** onto
+   logical nodes. This is what makes identity concrete.
+2. **Validation source** — confirms against live reality: does this table/column still
+   exist, did the schema drift, does compiled SQL run, does a contract's output match. This
+   is strictly stronger than static parsing and is the warehouse's sharpest contribution.
+3. **Runtime target** — executes a compiled query contract against the warehouse and returns
+   results. (This is an *emitter/runtime* concern — the live-query path — and is the widest,
+   most expensive part; see staging below.)
+
+Crucially, jobs 1 and 2 are **read-only metadata/validation** and cheap; job 3 (live
+execution) is the expensive runtime. The core treats all three as adapter/emitter
+capabilities, not core logic — so "warehouse-connected" is an identity of the *product*
+delivered through the *edges*, while the core stays source-agnostic.
+
+### Deployment is the same principle, applied to runtime
+
+The graph artifact is also the contract between *where it compiles* and *where it runs*. One
+open compiler produces one `graph.json`; the runtime around it varies (local / self-hosted /
+managed) without the graph changing. One compiler, never two — the hosted product persists
+and serves the same artifact, never reinterprets it. Portable in and out is the anti-lock-in
+guarantee: the artifact you deploy is the artifact you can leave with.
 
 ---
 
 
 
-## Distribution — open spec, free engine, paid history
 
-Three layers, each treated according to where its value comes from. The mistake to avoid
-is calling the whole thing "open source": only one layer is, and claiming more than that
-is a false claim the audience will catch.
 
-### Layer 1 — Open formats (real OSS, Apache 2.0)
+## Distribution — open-source core, paid managed layer (the dbt pattern)
 
-The value of the formats is in being *adopted*, so they are genuinely open. Published as a
-separate `clearmetric-spec` repo under Apache 2.0:
+The decision: **open-source the entire local core, engine included, under Apache 2.0.
+Charge for the operational system-of-record around the graph over time.** This follows the
+path dbt proved — dbt Core was Apache 2.0 from day one, which is *why* it became the
+standard (free, inspectable, no procurement, bottom-up adoption), and the revenue came
+from the operational layer (dbt Cloud), never from the engine.
 
-```
-graph schema · node / edge / aspect schema · contract schema ·
-metric & query YAML format · derivation-state format · finding / cleaner-report format ·
-policy-as-data format · projection / AI-context-pack format ·
-OpenAPI spec for the local + runtime API · example projects · reference fixtures
-```
+For a foundation play, an open engine is not the moat given away — it is the only path
+*to* the moat. A closed engine would have prevented dbt from ever becoming dbt. The moat
+is being the adopted default *and* owning the system-of-record where history accumulates —
+neither of which a closed engine helps with, and both of which open adoption accelerates.
+This also resolves the false tension between "don't let a better-distributed player take
+it" and "make it free": open the engine (adoption), keep the operational layer paid
+(revenue + the real, fork-proof moat).
 
-This is the part you may truthfully call open source. It does all the work openness needs
-to do: it makes every artifact **portable**, and it backs the anti-lock-in promise —
-*even if ClearMetric disappears, your graph, contracts, lineage, policy intent, findings,
-and AI-context packs are documented JSON/YAML you own.* That value holds at any adoption
-level and the formats cost nothing to keep open; publishing them is near-free and
-effectively one-way, so traction does not change whether opening them was correct.
+### Open — Apache 2.0, `clearmetric-core` (and the spec)
 
-Artifacts emit in these open formats plus established standards — **OpenLineage, JSON
-Schema, OpenAPI, OPA bundles** (note: OSI is a *semantic spec*, not an artifact format).
-
-### Layer 2 — Free engine (source-protected, not OSS)
-
-The value of the engine is in being *hard*, so it is protected. Free to run, not free to
-fork-and-host. This is the **product**: identity resolver, SQL/dbt lineage compiler,
-metric/query compiler, duplicate detector, cleaner runtime, policy *evaluator*, projection
-engine, warehouse adapters, runtime query execution. A competitor reading the open formats
-still has to build all of this.
-
-The formats are the contract; the engine is the product. Open the contract, protect the
-product.
-
-Engine-license dial (a separate, deferrable, one-directional decision — start protective,
-loosen later if adoption justifies it; never the reverse):
-- **closed binary** — best protection, lower trust;
-- **source-available / fair-source** (FSL-style, converts to OSS after ~2 years) — better
-  trust, still blocks a hosted competitor;
-- **full OSS engine** — only once distribution, hosted history, and momentum make the
-  protection unnecessary.
-
-Whatever the dial, **say "open formats, free engine," never "open-source product"** unless
-and until the engine itself is under an OSI-approved license.
-
-### Layer 3 — Paid managed (the business and the moat)
-
-The value of the hosted layer is *accumulated*, so it is paid and it is durable. Hosted
-graph **history** (the persisted, time-versioned graph — what a metric meant last quarter,
-who changed what, the decision trail), collaboration, SSO/RBAC at team scale, audit,
-managed runtime, policy *deployment* to warehouses, enterprise connectors.
-
-Why this is distribution-resistant: the moat is not the code, it is the history living in
-*customers'* hosted instances. A better-distributed player can fork the free engine, but
-cannot fork the accumulated graph history your customers depend on. **The engine is the
-commodity you give away; the history is the moat you keep** — and it is precisely the part
-frontier models cannot reconstruct, so it is also the part that does not compress as models
-improve. Moat, paid tier, and model-resistance are the same thing.
-
-### Repo structure (makes the boundary physical, not a policy to remember)
+The full local core. "Core" is accurate here because the core engine genuinely is open
+(the dbt Core / Cube Core / Metabase convention):
 
 ```
-clearmetric-spec      Apache 2.0 · public · schemas · OpenAPI · examples · fixtures
-clearmetric-cli       free binary · source-protected · compile · clean · impact · query
-clearmetric-engine    private · resolver · lineage · compiler internals · check runtime
-clearmetric-cloud     paid · hosted history · collaboration · audit · policy deployment
+local compiler · identity resolver · graph builder ·
+SQL/dbt lineage derivation · metric/query compiler · contract engine ·
+cleaner / check engine · policy evaluator · projection engine ·
+graph + node/edge/aspect schema · contract & derivation-state formats ·
+policy-as-data format · CLI · graph query API · ingestion adapters · examples
 ```
 
-Separate repos with separate licenses so the boundary cannot erode by gradual blur — the
-engine physically cannot leak into the open repo.
+Everything a developer needs to adopt ClearMetric as a standard is free and inspectable.
+Artifacts emit in open formats — **OpenLineage, JSON Schema, OpenAPI, OPA bundles** (OSI is
+a *semantic spec*, not an artifact format) — so the org owns its graph and can always
+leave. Because the engine is open, the quality bar is the pitch: the code being public
+means the resolver simply has to work on real, messy SQL — there is no hidden secret sauce
+to hide behind.
+
+### Paid — managed system-of-record (`clearmetric-cloud`)
+
+The value here is *accumulated*, so it is paid and fork-proof: hosted graph **history**
+(the persisted, time-versioned graph — what a metric meant last quarter, who changed what,
+the decision trail), collaboration, SSO/RBAC at team scale, audit, managed runtime, policy
+*deployment* to warehouses, enterprise connectors, support.
+
+Why this is the durable moat even with the engine fully open: a better-distributed player
+can fork the open engine, but cannot fork the history living in *customers'* instances —
+and that history is exactly the part frontier models cannot reconstruct, so it does not
+compress as models improve. The commercial opportunity is never the first `compile`
+command; it is the system of record around the graph over time. **Moat, paid tier, and
+model-resistance are the same thing.**
+
+### Repo structure
+
+```
+clearmetric-core     Apache 2.0 · public · the full local engine + CLI + formats
+clearmetric-spec     Apache 2.0 · public · schemas · OpenAPI · examples · fixtures
+                     (may live inside core initially; split out if it earns its own life)
+clearmetric-cloud    paid · hosted history · collaboration · audit · policy deployment
+```
 
 ### What the docs/site should say
 
-> ClearMetric uses open, documented artifact formats. Your analytics graph, contracts,
-> lineage, policy intent, findings, and AI-context packs are portable JSON/YAML artifacts
-> that you own. The local compiler is free to use; the managed platform is optional.
-
-Not: *"ClearMetric is open source"* — unless the engine is under an OSI-approved license.
+ClearMetric Core is open source (Apache 2.0): the local compiler, graph, lineage, cleaner,
+and CLI are free, inspectable, and yours. The managed platform — hosted history,
+collaboration, governance at team scale — is optional and paid. (This claim is now true:
+the engine is OSS, so "open source" is accurate, not overclaimed.)
 
 ---
 

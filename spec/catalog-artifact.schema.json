@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearmetric.dev/spec/catalog-artifact.schema.json",
+  "title": "ClearMetric Catalog Artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "nodes", "edges", "warnings"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/warning" }
+    }
+  },
+  "$defs": {
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": ["string", "null"] },
+        "location": { "type": ["string", "null"] },
+        "expression": { "type": ["string", "null"] },
+        "confidence": { "$ref": "#/$defs/confidence" }
+      }
+    },
+    "derivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "confidence", "source", "errors"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["complete", "partial", "failed", "skipped"]
+        },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "source": { "type": "string", "minLength": 1 },
+        "errors": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "physical_binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["warehouse"],
+      "properties": {
+        "warehouse": { "type": "string", "minLength": 1 },
+        "database": { "type": ["string", "null"] },
+        "schema": { "type": ["string", "null"] },
+        "table": { "type": ["string", "null"] },
+        "column": { "type": ["string", "null"] }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "name", "evidence"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "table",
+            "cte",
+            "column",
+            "model",
+            "report",
+            "asset",
+            "visual",
+            "page",
+            "measure"
+          ]
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "qualified_name": { "type": ["string", "null"] },
+        "schema": { "type": ["string", "null"] },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "derivation": {
+          "oneOf": [{ "$ref": "#/$defs/derivation" }, { "type": "null" }]
+        },
+        "bindings": {
+          "oneOf": [
+            {
+              "type": "array",
+              "items": { "$ref": "#/$defs/physical_binding" }
+            },
+            { "type": "null" }
+          ]
+        },
+        "aspects": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": true
+            },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source_id", "target_id", "confidence", "evidence"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["depends_on", "feeds", "derives_from", "references", "joins"]
+        },
+        "source_id": { "type": "string", "minLength": 1 },
+        "target_id": { "type": "string", "minLength": 1 },
+        "label": { "type": ["string", "null"] },
+        "confidence": { "$ref": "#/$defs/confidence" },
+        "match_status": {
+          "type": ["string", "null"],
+          "enum": ["resolved", "ambiguous", "unresolved", null]
+        },
+        "evidence": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/evidence" }
+        },
+        "derivation": {
+          "oneOf": [{ "$ref": "#/$defs/derivation" }, { "type": "null" }]
+        }
+      }
+    },
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "location": { "type": ["string", "null"] },
+        "subject_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}
