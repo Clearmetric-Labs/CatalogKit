@@ -13,11 +13,8 @@ from _sqlglot_baseline import (
     build_sources_by_name,
     load_fixture,
 )
-from clearmetric.lineage import (
-    build_catalog_artifact_from_project,
-    load_project,
-    trace_downstream_from_artifact,
-)
+from clearmetric.graph import trace_downstream_from_artifact
+from clearmetric.lineage import build_catalog_artifact_from_project, load_project
 
 WORKSPACE_ROOT = Path(__file__).resolve().parents[3]
 JAFFLE_MANIFEST = (

@@ -33,7 +33,7 @@ If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …
 - **Catalog slice** — `compile --format catalog` emits table/column/model nodes only
 - **Cleaner + security floor** — structural checks, schema drift warnings, and a non-bypassable security floor at compile time
 
-**Deferred** (foundation accretes around the wedge): live query endpoint, metrics/query YAML, `serve`, user-defined checks, live warehouse connectors, full policy compiler. See [`docs/v1-boundary.md`](docs/v1-boundary.md).
+**Gated** until [adoption-gate.md](docs/adoption-gate.md) passes with external evidence: metrics/query YAML, intent adapter, `cm query`/`serve`, policy-gated exports, user-defined checks, live warehouse connectors, full policy compiler. See [`docs/future-roadmap-gated.md`](docs/future-roadmap-gated.md) and [`docs/v1-boundary.md`](docs/v1-boundary.md).
 
 ## Why it's different
 
@@ -82,7 +82,8 @@ One install (`pip install clearmetric-core`) — Python subpackages, not separat
 
 | Module | Role | Wedge |
 |--------|------|-------|
-| **`clearmetric.lineage`** | Column-level lineage from dbt + SQL (**Module B — the wedge**) | Shipped |
+| **`clearmetric.graph`** | `GraphView`, impact traversal, traversal render, selectors | Shipped (Phase 0) |
+| **`clearmetric.lineage`** | SQL/dbt artifact build (**Module B — parse**) | Shipped |
 | **`clearmetric.compiler`** | `build_graph`, `check_graph`, `enforce_graph`, CLI orchestration | Shipped |
 | **`clearmetric.adapters`** | INFORMATION_SCHEMA JSON, dbt manifest, SQL folders | Shipped |
 | **`clearmetric.core`** | Artifact, canonical IDs, merge, bindings interop | Shipped |
@@ -99,7 +100,7 @@ One install (`pip install clearmetric-core`) — Python subpackages, not separat
 | `cm init` | Scaffold `clearmetric.yaml` + `policy/rules.yaml` |
 | `cm connect warehouse --information-schema PATH` | Attach local metadata export |
 | `cm scan` | List configured sources (warehouse, dbt, sql, optional aliases) |
-| `cm compile --format json\|text\|openlineage\|catalog` | Build + enforce graph to stdout |
+| `cm compile --format json\|text\|catalog\|openlineage` | Build + enforce graph to stdout |
 | `cm impact SELECTION --upstream\|--downstream` | Column lineage (enforced graph) |
 | `cm clean` | Report findings; exit 1 on **errors only** |
 | `cm contract ARTIFACT.json` | Schema validate + strict enforce (CI) |

@@ -1,9 +1,8 @@
 # Backbone v2 Roadmap
 
-> **This is NOT the Wedge v1 execution plan.**  
-> **Start here only after Wedge v1 is green.**  
-> Wedge v1 proves: warehouse metadata exports + dbt/SQL → one graph → lineage, impact, cleaner findings, catalog output.  
-> Backbone v2 centralizes traversal, adds contracts/policy-gated projections, and optionally runtime — when users ask for more.
+> **This is NOT the active execution plan.**  
+> **Active scope:** Wedge v1 + Phase 0 consolidation (see CHANGELOG 0.5.1).  
+> **Gated work:** [`future-roadmap-gated.md`](future-roadmap-gated.md) — starts only after [`adoption-gate.md`](adoption-gate.md) passes.
 
 **Status:** Working roadmap only — not an active execution plan until Wedge v1 ships. Promote unchanged to [docs/backbone-v2-roadmap.md](docs/backbone-v2-roadmap.md) in the repo when Wedge v1 is green. Do not edit this roadmap again unless implementation exposes a real contradiction.
 
@@ -160,12 +159,16 @@ Happy-path unit tests alone are insufficient for Phase 3 sign-off.
 
 ```
 clearmetric/graph/
-  view.py       # GraphView.from_artifact, node/edges/nodes
-  traverse.py   # unbounded traverse, neighbors
+  view.py       # GraphView, view_of
+  traverse.py   # walk_related, neighbors, build_traversal_subgraph
+  impact.py     # trace_*_from_artifact
+  render.py     # impact text/mermaid renderers
+  subjects.py   # column/dataset helpers for impact + OpenLineage
+  selector.py   # selector grammar (Phase 5 breadth; registry exists)
   __init__.py
 ```
 
-**No selector in Phase 0.** Selector grammar is Phase 5 only. Phase 0 checks filter by `node.kind` inline — do not build `graph/selector.py` early.
+**Selector:** `graph/selector.py` supports CheckSpec scoping only; full graph query API is Phase 5.
 
 ### Delete
 
@@ -187,7 +190,7 @@ PIPELINE_STAGES = ("discover", "ingest", "merge", "bind")
 
 Extend with `link`, `compile_contracts` when Phases 2 and 4a start — not before.
 
-### Exit criteria
+### Exit criteria (complete in 0.5.1)
 
 - Zero adjacency logic outside `clearmetric.graph`
 - `ground_truth.py` — identical `related_ids` pre/post
@@ -210,7 +213,7 @@ No adapter yet — hand-built fixtures in tests.
 
 **Gate:** Adoption gate + Phase 1.
 
-[adapters/intent.py](packages/clearmetric-core/src/clearmetric/adapters/intent.py), [spec/intent.schema.json](spec/intent.schema.json), [compiler/link_metrics.py](packages/clearmetric-core/src/clearmetric/compiler/link_metrics.py).
+[adapters/intent.py](packages/clearmetric-core/src/clearmetric/adapters/intent.py), [spec/intent.schema.json](spec/intent.schema.json), `compiler/link_metrics.py` (add at gate).
 
 **Batch validation:** scan all YAML → collect errors → single `AdapterError` with full list.
 
@@ -221,7 +224,7 @@ No adapter yet — hand-built fixtures in tests.
 **Gate:** Adoption gate + Phase 1 (can overlap Phase 2 tail).
 
 - Rewrite [policy/evaluate.py](packages/clearmetric-core/src/clearmetric/policy/evaluate.py) → `evaluate_node`
-- Add [policy/gate.py](packages/clearmetric-core/src/clearmetric/policy/gate.py)
+- Re-add `policy/gate.py` thin wrapper (removed from wedge tree)
 - **Delete** `project_graph` (ungated generic projection)
 - **Keep** unfiltered admin catalog: `compile --format catalog` — no identity, same wedge semantics
 - **Add** `compile --format consumer-catalog --identity ID` — policy-gated via `project_for_emit`
@@ -249,8 +252,7 @@ Document both in CHANGELOG when Phase 3 ships. Early adopters' catalog workflows
 
 **Gate:** Adoption gate + Phase 2.
 
-- [compiler/compile_contracts.py](packages/clearmetric-core/src/clearmetric/compiler/compile_contracts.py)
-- [emitters/frontend_contract.py](packages/clearmetric-core/src/clearmetric/emitters/frontend_contract.py)
+- Re-add `compiler/compile_contracts.py` and `emitters/frontend_contract.py` (removed from wedge tree)
 - `compiled_sql` on query nodes; `CompilerError` on failure
 
 **No** DuckDB, **no** `cm query`, **no** HTTP server.
@@ -261,7 +263,7 @@ Document both in CHANGELOG when Phase 3 ships. Early adopters' catalog workflows
 
 **Gate:** Phase 4a shipped + explicit runtime pull.
 
-- `clearmetric.runtime`, DuckDB `[runtime]` extra, `cm query`, `cm serve`
+- Re-add `clearmetric.runtime` package, DuckDB `[runtime]` extra, `cm query`, `cm serve`
 - Widest maintenance surface — defer until contracts prove value
 
 ---

@@ -18,7 +18,6 @@ MODULE_ROOTS = {
     "cleaner": SRC_ROOT / "cleaner",
     "policy": SRC_ROOT / "policy",
     "projection": SRC_ROOT / "projection",
-    "runtime": SRC_ROOT / "runtime",
     "cli": SRC_ROOT / "cli",
 }
 ALLOWED_MODULES_BY_SUBPACKAGE = {
@@ -30,33 +29,25 @@ ALLOWED_MODULES_BY_SUBPACKAGE = {
     "adapters": {"clearmetric.core", "clearmetric.lineage"},
     "emitters": {
         "clearmetric.core",
-        "clearmetric.lineage",
         "clearmetric.compiler",
         "clearmetric.projection",
-        "clearmetric.policy",
         "clearmetric.graph",
     },
     "cleaner": {"clearmetric.core", "clearmetric.graph"},
     "policy": {"clearmetric.core", "clearmetric.policy", "clearmetric.projection"},
     "projection": {"clearmetric.core", "clearmetric.policy"},
-    "runtime": {"clearmetric.core", "clearmetric.runtime"},
     "compiler": {
         "clearmetric.core",
         "clearmetric.adapters",
         "clearmetric.cleaner",
         "clearmetric.policy",
-        "clearmetric.projection",
-        "clearmetric.lineage",
         "clearmetric.graph",
-        "clearmetric.query",
     },
     "cli": {
         "clearmetric.core",
         "clearmetric.cli",
         "clearmetric.compiler",
         "clearmetric.emitters",
-        "clearmetric.cleaner",
-        "clearmetric.runtime",
     },
 }
 SHARED_CLASS_NAMES = {"Node", "Edge", "Evidence", "Warning"}
@@ -128,6 +119,65 @@ def test_cli_does_not_import_lineage_or_powerbi():
     source = cli_path.read_text(encoding="utf-8")
     assert "clearmetric.lineage" not in source
     assert "clearmetric.powerbi" not in source
+    assert "clearmetric.runtime" not in source
+
+
+def test_runtime_module_not_shipped():
+    assert not (SRC_ROOT / "runtime").exists()
+
+
+def test_lineage_build_does_not_define_traversal():
+    build_path = MODULE_ROOTS["lineage"] / "build.py"
+    source = build_path.read_text(encoding="utf-8")
+    assert "def trace_upstream_from_artifact" not in source
+    assert "def trace_downstream_from_artifact" not in source
+    assert "def build_openlineage_export_from_artifact" not in source
+
+
+def test_lineage_public_api_is_build_only():
+    init_path = MODULE_ROOTS["lineage"] / "__init__.py"
+    source = init_path.read_text(encoding="utf-8")
+    for banned in (
+        "trace_upstream_from_artifact",
+        "trace_downstream_from_artifact",
+        "TraversalResult",
+        "build_openlineage",
+    ):
+        assert banned not in source
+
+
+def test_lineage_render_does_not_define_traversal():
+    text_path = MODULE_ROOTS["lineage"] / "render" / "text.py"
+    source = text_path.read_text(encoding="utf-8")
+    assert "def render_traversal_tree" not in source
+    assert not (MODULE_ROOTS["lineage"] / "render" / "mermaid.py").exists()
+
+
+def test_emitters_do_not_import_lineage():
+    emitters_root = MODULE_ROOTS["emitters"]
+    violations: list[str] = []
+    for path in emitters_root.rglob("*.py"):
+        if _is_ignored_package_path(path):
+            continue
+        source = path.read_text(encoding="utf-8")
+        if "clearmetric.lineage" in source:
+            violations.append(f"{path}: references clearmetric.lineage")
+    assert violations == []
+
+
+def test_cli_compile_formats_are_wedge_only():
+    cli_path = MODULE_ROOTS["cli"] / "__init__.py"
+    source = cli_path.read_text(encoding="utf-8")
+    for banned in (
+        "consumer-catalog",
+        "frontend-contract",
+        "ai-context",
+        "_run_query",
+        "_run_serve",
+        'command == "query"',
+        'command == "serve"',
+    ):
+        assert banned not in source
 
 
 def test_lineage_does_not_import_compiler_or_adapters():

@@ -242,6 +242,12 @@ structural checks and the security floor always apply on enforce paths.
 Catalog output uses `project_catalog_assets()` (table/column/model nodes, pruned edges) via
 `compile --format catalog` only — not a separate CLI command.
 
+## Graph read API
+
+- **`clearmetric.graph`** — `GraphView`, impact traversal (`trace_*_from_artifact`), traversal renderers
+- **`clearmetric.lineage`** — SQL/dbt artifact build only (no traversal or OpenLineage serialization)
+- **`clearmetric.emitters.openlineage`** — OpenLineage payload from a pre-built artifact
+
 ## Failure Policy
 
 | Situation | Behavior |

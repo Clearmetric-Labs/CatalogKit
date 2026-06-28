@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from clearmetric.lineage import build_openlineage_export
+from clearmetric.emitters.openlineage import build_openlineage_payload
 
 from .project_helpers import (
     build_catalog_artifact,
@@ -54,7 +54,7 @@ def test_openlineage_export_contains_column_lineage_entries():
     compiled_dir = _folder_example_root()
     artifact = build_catalog_artifact(compiled_dir, dialect="postgres")
 
-    payload = build_openlineage_export(artifact, job_name="sql_folder")
+    payload = build_openlineage_payload(artifact, job_name="sql_folder")
 
     assert payload["job"]["name"] == "sql_folder"
     assert any(entry["name"] == "orders_base" for entry in payload["datasets"])
@@ -77,7 +77,7 @@ def test_openlineage_export_groups_multiple_inputs_per_output_column(tmp_path: P
         encoding="utf-8",
     )
 
-    payload = build_openlineage_export(
+    payload = build_openlineage_payload(
         build_catalog_artifact(report_sql.parent, dialect="postgres"),
         job_name=report_sql.parent.name,
     )
@@ -116,7 +116,7 @@ def test_openlineage_export_accepts_prebuilt_artifact():
     manifest_path = _example_root() / "manifest.json"
     artifact = build_catalog_artifact(manifest_path, dialect="postgres")
 
-    payload = build_openlineage_export(artifact)
+    payload = build_openlineage_payload(artifact)
 
     assert payload["datasets"]
     assert payload["job"]["name"] == "clearmetric"

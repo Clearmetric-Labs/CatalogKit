@@ -29,7 +29,8 @@ If `cm` is occupied: `python -m clearmetric.cli --project-dir . compile --format
 
 | Module | Purpose |
 |--------|---------|
-| `clearmetric.lineage` | Column lineage (**Module B — wedge**) |
+| `clearmetric.lineage` | SQL/dbt artifact build (**Module B — parse only**) |
+| `clearmetric.graph` | `GraphView`, impact trace, traversal render |
 | `clearmetric.compiler` | Build, validate, impact orchestration |
 | `clearmetric.adapters` | Warehouse JSON, dbt, SQL ingestion |
 | `clearmetric.core` | Artifact, IDs, merge, bindings interop |

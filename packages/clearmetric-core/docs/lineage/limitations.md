@@ -2,6 +2,13 @@
 
 `clearmetric.lineage` is intentionally deterministic and headless.
 
+## Corpus and resolver correctness (ongoing)
+
+Resolver correctness is validated by adversarial fixtures under `tests/fixtures/lineage/`,
+oracle tests (`test_value_lineage_oracle.py`), and ground-truth probes (`ground_truth.py`).
+This work runs in parallel with wedge shipping — GraphView consolidation does not replace it.
+When coverage changes, update this document honestly.
+
 ## Supported Input
 
 `clearmetric.lineage` accepts exactly one project input per invocation:

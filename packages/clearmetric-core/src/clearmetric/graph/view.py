@@ -44,3 +44,7 @@ class GraphView:
         if kind is None:
             return list(self.artifact.edges)
         return list(self._edges_by_kind.get(kind, ()))
+
+
+def view_of(artifact: CatalogArtifact) -> GraphView:
+    return GraphView.from_artifact(artifact)

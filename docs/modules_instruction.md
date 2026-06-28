@@ -68,7 +68,8 @@ and hosted orchestration remain out of scope.
 - `clearmetric.adapters` / `clearmetric.emitters` — source ingestion + output formats. Done (v1).
 - `clearmetric.policy` / `clearmetric.cleaner` / `clearmetric.projection` — security floor, posture checks, catalog slice. Done (v1).
 - `clearmetric.query` — single-statement SQL structure. Done.
-- `clearmetric.lineage` — project-level lineage. Done.
+- `clearmetric.graph` — `GraphView`, impact traversal, traversal render. Done (Phase 0).
+- `clearmetric.lineage` — SQL/dbt artifact build (parse only). Done.
 - `clearmetric.powerbi` — PBIP file lineage (shipped; not warehouse CLI registry). Done (V1).
 
 ## Wedge phasing

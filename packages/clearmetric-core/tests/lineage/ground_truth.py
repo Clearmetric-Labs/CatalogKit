@@ -6,13 +6,15 @@ from pathlib import Path
 
 import yaml
 from clearmetric.core import CatalogArtifact
-from clearmetric.graph import dataset_from_location
+from clearmetric.graph import (
+    dataset_from_location,
+    trace_downstream_from_artifact,
+    trace_upstream_from_artifact,
+)
 from clearmetric.lineage import (
     ProjectInput,
     build_catalog_artifact_from_project,
     load_project,
-    trace_downstream_from_artifact,
-    trace_upstream_from_artifact,
 )
 
 FIXTURES_ROOT = Path(__file__).resolve().parent.parent / "fixtures" / "lineage"

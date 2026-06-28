@@ -1,4 +1,4 @@
-"""Public artifact models for clearmetric-core."""
+"""Public artifact models for clearmetric.lineage."""
 
 from __future__ import annotations
 
@@ -19,16 +19,12 @@ class LineageSummary(BaseModel):
     warning_count: int
 
 
-class TraversalResult(BaseModel):
-    selection: str
-    selection_id: str
-    related_ids: list[str] = Field(default_factory=list)
-    warnings: list[Warning] = Field(default_factory=list)
-
-
 class LineageMap(BaseModel):
     version: str = "1"
     summary: LineageSummary
     nodes: list[Node] = Field(default_factory=list)
     edges: list[Edge] = Field(default_factory=list)
     warnings: list[Warning] = Field(default_factory=list)
+
+
+__all__ = ["InputKind", "LineageMap", "LineageSummary"]

@@ -62,27 +62,56 @@ re-implementing its own private, drifting copy of the truth. Specifically:
 
 ## What you build on it
 
-The backbone is one graph; these are consumers of it, not separate products:
+The backbone is one graph; these are consumers of it, not separate products. The marker
+shows what the **first release (v1)** populates versus what **accretes** later — but note the
+principle below: *all the primitives live in the backbone from day one; the consumers ship in
+waves.*
 
-- **Lineage & impact** — column-level lineage and "what breaks if I change this" as a
-  traversal of the graph.
-- **Catalog & metadata** — a browsable view of every table, column, model, and its
+- **Lineage & impact** *(v1)* — column-level lineage and "what breaks if I change this" as a
+  traversal of the graph. The headline output.
+- **Catalog & metadata** *(v1)* — a browsable view of every table, column, model, and its
   provenance.
-- **Schema-drift detection** — the graph validated against warehouse reality, surfacing
-  where definitions and data have diverged.
-- **Governed query contracts** — bindable contracts a BI frontend (React, Streamlit,
-  Evidence, an internal app) builds on, so you own the presentation and the backbone owns the
-  correctness.
-- **AI-agent context** — a governed, policy-filtered slice of the graph, serialized for an
-  LLM you bring (your model, your key).
-- **Access governance** — RBAC, RLS, masking, and AI-permission as policy over graph nodes,
-  compiled down to real warehouse policies.
-- **Automated documentation** — docs emitted from the graph, structurally always-fresh
-  because they're derived, with authored meaning layered on.
+- **Schema-drift detection** *(v1)* — the graph validated against warehouse metadata,
+  surfacing where definitions and reality have diverged.
+- **Cleaner / structural checks** *(v1)* — dangling references, broken lineage, dead assets.
+- **OpenLineage / interop export** *(v1-cheap)* — emit the graph to existing tools (DataHub,
+  Marquez); makes the backbone interoperable.
+- **Automated documentation** *(accretes)* — docs emitted from the graph, structurally
+  always-fresh because they're derived, with authored meaning layered on.
+- **Governed query contracts** *(accretes)* — bindable contracts a BI frontend (React,
+  Streamlit, Evidence, an internal app) builds on, so you own the presentation and the
+  backbone owns the correctness.
+- **AI-agent context** *(accretes)* — a governed, policy-filtered slice of the graph,
+  serialized for an LLM you bring (your model, your key).
+- **Access governance** *(accretes)* — RBAC, RLS, masking, and AI-permission as policy over
+  graph nodes, compiled down to real warehouse policies.
+- **Query runtime** *(accretes, optional)* — execute compiled contracts against the data.
 
 Each is a view, traversal, projection, or emission of the same backbone. Adding a new one is
 additive — it reads the graph it never owns. That open-endedness *is* the product: the
 backbone is the durable thing; what you build on it is unbounded.
+
+### Primitives present, consumers accrete (the key distinction)
+
+There are two different questions, and conflating them is the trap:
+
+- **Is the primitive defined in the backbone?** — *All of them, from day one.* The graph
+  model, canonical identity and bindings, the contract primitive, aspects, derivation state,
+  the policy model, projections, and the extension axes are all part of the backbone's
+  architecture immediately. The backbone is the complete substrate; nothing about it is
+  "added later."
+- **Is the primitive populated / exercised by a v1 consumer?** — *Only some.* The contract
+  primitive exists in the graph model, but no metric or query nodes flow through it until the
+  governed-contracts consumer ships. The policy model is defined, but no rules are evaluated
+  until the governance consumer ships. v1 populates table/column/model nodes and
+  `derives_from` lineage, and the four v1 consumers read exactly that.
+
+So: **the backbone in v1 already contains every primitive the full architecture describes.**
+What grows over time is not the backbone — it's the set of consumers that put authored
+content into it (metrics, policy, contracts) and read it back out (docs, AI context, runtime).
+The substrate is whole on day one; the things standing on it arrive in waves. This is what
+lets a new consumer be purely additive: the primitive it needs was always there, waiting for
+something to use it.
 
 ---
 

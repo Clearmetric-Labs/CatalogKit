@@ -18,13 +18,17 @@ connector, query execution, or credential-based ingestion in v1.
 | Validation | `clearmetric.compiler.validate` | `check_graph`, `enforce_graph` |
 | Checks | `clearmetric.cleaner` | Structural checks + merge/drift warnings via posture |
 | Security floor | `clearmetric.policy` | Enforced at compile/contract; not a full policy compiler |
+| Graph traversal | `clearmetric.graph` | Impact trace, selectors, traversal render; lineage builds artifacts only |
 | Catalog slice | `clearmetric.projection` + emitters | `compile --format catalog` (table/column/model only) |
+| OpenLineage export | `clearmetric.emitters` | `compile --format openlineage` (ungated admin export) |
 | CLI | `clearmetric.cli` | `init`, `connect warehouse`, `scan`, `compile`, `impact`, `clean`, `contract` |
 
 ### Out of scope (v1 wedge)
 
 - Live Snowflake or other warehouse connectors
-- `serve`, query endpoint, metrics/query YAML compiler
+- `serve`, `cm query`, query endpoint, metrics/query YAML / intent adapter in CLI
+- `compile --format consumer-catalog`, `frontend-contract`, `ai-context` (identity-gated exports)
+- `cm impact --identity` governance preview
 - `cm catalog` as a separate command (use `compile --format catalog`)
 - User-defined cleaner checks and graph query API
 - Policy compiler to warehouse RLS / OPA
@@ -45,7 +49,7 @@ cm contract graph.json
 
 See [`examples/wedge-jaffle/README.md`](../examples/wedge-jaffle/README.md).
 
-Backbone v2 features (metrics/queries, policy-gated `consumer-catalog`, optional `cm query`/`serve`) are documented in [`backbone-v2-roadmap.md`](backbone-v2-roadmap.md) and gated by [`adoption-gate.md`](adoption-gate.md). The wedge commands above are unchanged when those features are unused.
+Gated post-wedge work (metrics/queries, runtime, policy-gated exports) is documented in [`future-roadmap-gated.md`](future-roadmap-gated.md) and requires [`adoption-gate.md`](adoption-gate.md) evidence before shipping. Backbone Phase 0 (GraphView consolidation) is complete in 0.5.1; see [`backbone-v2-roadmap.md`](backbone-v2-roadmap.md) for sequencing.
 
 ---
 

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+from clearmetric.core.errors import GraphError
 from clearmetric.lineage.errors import LineageInputError
 
 from .ground_truth import load_built_fixture
@@ -32,7 +33,7 @@ def test_unknown_traversal_selection_fails_loudly():
         / "sql_folder"
     )
 
-    with pytest.raises(LineageInputError):
+    with pytest.raises(GraphError):
         trace_upstream(
             compiled_dir,
             dialect="postgres",

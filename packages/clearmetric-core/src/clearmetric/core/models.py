@@ -98,3 +98,10 @@ class CatalogArtifact(BaseModel):
     nodes: list[Node] = Field(default_factory=list)
     edges: list[Edge] = Field(default_factory=list)
     warnings: list[Warning] = Field(default_factory=list)
+
+
+class TraversalResult(BaseModel):
+    selection: str
+    selection_id: str
+    related_ids: list[str] = Field(default_factory=list)
+    warnings: list[Warning] = Field(default_factory=list)

@@ -5,13 +5,15 @@ from __future__ import annotations
 from pathlib import Path
 
 from clearmetric.core import CatalogArtifact
+from clearmetric.graph import (
+    trace_downstream_from_artifact,
+    trace_upstream_from_artifact,
+)
 from clearmetric.lineage import (
     ProjectInput,
     build_catalog_artifact_from_project,
     build_lineage_map_from_project,
     load_project,
-    trace_downstream_from_artifact,
-    trace_upstream_from_artifact,
 )
 
 

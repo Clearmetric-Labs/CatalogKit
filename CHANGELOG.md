@@ -2,9 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.5.1 - 2026-06-28
+
+### Changed (Wedge v1 + Phase 0 consolidation)
+
+- **Impact traversal** moved to `clearmetric.graph.impact`; `clearmetric.lineage` builds artifacts only
+- **OpenLineage serialization** moved to `clearmetric.emitters.openlineage` (ungated wedge export)
+- **`TraversalResult`** lives in `clearmetric.core.models` (not re-exported from `clearmetric.lineage`)
+- **Wedge pipeline** — `discover → ingest → merge → bind` only (no intent/link/compile_contracts in default build)
+- **Wedge adapters** — warehouse, dbt, sql only in public registry
+- **CLI surface trimmed** — removed `cm query`, `cm serve`, `--identity`, and gated compile formats (`consumer-catalog`, `frontend-contract`, `ai-context`)
+- **Boundary tests** — CLI must not import runtime; lineage build/render must not define traversal or OpenLineage export; emitters must not import lineage
+- **Traversal render** — `render_traversal_tree` / `render_traversal_mermaid` in `clearmetric.graph.render` (not `clearmetric.lineage`)
+- **`discover()`** — reuses `enabled_sources()` from adapter registry (single source of truth for configured sources)
+- **Removed dead gated tree** — `clearmetric.runtime`, `compiler/compile_contracts.py`, `compiler/link_metrics.py`, `policy/gate.py`, unused emitter modules
+
+### Docs
+
+- Active scope: wedge + Phase 0; gated roadmap in [`docs/future-roadmap-gated.md`](docs/future-roadmap-gated.md)
+
 ## 0.5.0 - 2026-06-27
 
-### Added (Backbone v2)
+### Added (Backbone v2 — partially reverted from public CLI in 0.5.1)
 
 - **`clearmetric.graph`** — canonical `GraphView`, traversal helpers, selector grammar (Phase 0/5)
 - **Contract nodes** — `metric` / `query` kinds, `core/contracts.py`, `compiler/contracts.py` validation (Phase 1)

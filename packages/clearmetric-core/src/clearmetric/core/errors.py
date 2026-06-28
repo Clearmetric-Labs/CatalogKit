@@ -57,7 +57,3 @@ class GraphError(ClearMetricError):
 
 class SelectorError(ClearMetricError):
     """Raised when a graph selector expression is invalid."""
-
-
-class QueryExecutionError(ClearMetricError):
-    """Raised when query execution fails."""

@@ -10,13 +10,15 @@ Path-based wrappers (`build_catalog_artifact(path)`, etc.) were removed. Use pro
 
 ```python
 from clearmetric.compiler import compile
+from clearmetric.emitters.openlineage import build_openlineage_payload
+from clearmetric.graph import (
+    trace_downstream_from_artifact,
+    trace_upstream_from_artifact,
+)
 from clearmetric.lineage import (
     build_catalog_artifact_from_project,
     build_lineage_map_from_project,
-    build_openlineage_export,
     load_project,
-    trace_downstream_from_artifact,
-    trace_upstream_from_artifact,
 )
 ```
 
@@ -25,8 +27,8 @@ from clearmetric.lineage import (
 | `load_project(path, dialect=...)` | dbt manifest path or SQL folder | `ProjectInput` |
 | `build_lineage_map_from_project(project, dialect=...)` | `ProjectInput` | `LineageMap` |
 | `build_catalog_artifact_from_project(project, dialect=...)` | `ProjectInput` | `CatalogArtifact` |
-| `trace_*_from_artifact(artifact, selection)` | `"orders.amount"` or `column:orders.amount` | `TraversalResult` |
-| `build_openlineage_export(artifact, job_name=...)` | pre-built `CatalogArtifact` | OpenLineage-shaped dict |
+| `trace_*_from_artifact(artifact, selection)` | pre-built `CatalogArtifact` | `TraversalResult` — **`clearmetric.graph`** |
+| `build_openlineage_payload(artifact, job_name=...)` | pre-built `CatalogArtifact` | OpenLineage-shaped dict — **`clearmetric.emitters.openlineage`** |
 | `compile(project_dir)` | directory with `clearmetric.yaml` | `CompiledGraph` |
 
 Column and contract selections are normalized via `clearmetric.core.ids.parse_impact_selection` (columns, metrics, queries). Traversal uses `clearmetric.graph` internally.

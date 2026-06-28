@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from clearmetric.core import (
     CanonicalIdError,
@@ -18,28 +17,18 @@ from clearmetric.core import (
     merge,
     normalize_identifier,
     normalize_identifier_part,
-    parse_impact_selection,
     schema_name,
     split_qualified_identifier,
     table_id,
 )
 from clearmetric.core.models import Confidence, DerivationStatus
-from clearmetric.graph import (
-    column_selection_from_id,
-    dataset_from_location,
-    derives_from_edges,
-    impact_dataset_name,
-    impact_edge_kind,
-    view_of,
-    walk_related,
-    warnings_for_subject,
-)
+from clearmetric.graph import dataset_from_location
 from sqlglot.lineage import Node as SqlglotLineageNode
 from sqlglot.lineage import lineage
 
 from .errors import LineageContractError, LineageInputError
 from .loaders import ProjectDataset, ProjectInput
-from .models import LineageMap, LineageSummary, TraversalResult
+from .models import LineageMap, LineageSummary
 from .sql_analyzer import (
     analyze_sql_statement,
     filter_value_lineage_refs,
@@ -86,105 +75,6 @@ def build_lineage_map_from_project(
         edges=built.artifact.edges,
         warnings=built.artifact.warnings,
     )
-
-
-def trace_upstream_from_artifact(
-    artifact: CatalogArtifact,
-    *,
-    selection: str,
-) -> TraversalResult:
-    selection_id = parse_impact_selection(selection)
-    _require_impact_selection(artifact, selection=selection, selection_id=selection_id)
-    edge_kind = impact_edge_kind(selection_id)
-    view = view_of(artifact)
-    return TraversalResult(
-        selection=selection,
-        selection_id=selection_id,
-        related_ids=walk_related(
-            view, selection_id, direction="upstream", edge_kind=edge_kind
-        ),
-        warnings=warnings_for_subject(
-            artifact,
-            selection_id,
-            dataset_name=impact_dataset_name(selection_id),
-        ),
-    )
-
-
-def trace_downstream_from_artifact(
-    artifact: CatalogArtifact,
-    *,
-    selection: str,
-) -> TraversalResult:
-    selection_id = parse_impact_selection(selection)
-    _require_impact_selection(artifact, selection=selection, selection_id=selection_id)
-    edge_kind = impact_edge_kind(selection_id)
-    view = view_of(artifact)
-    return TraversalResult(
-        selection=selection,
-        selection_id=selection_id,
-        related_ids=walk_related(
-            view, selection_id, direction="downstream", edge_kind=edge_kind
-        ),
-        warnings=warnings_for_subject(
-            artifact,
-            selection_id,
-            dataset_name=impact_dataset_name(selection_id),
-        ),
-    )
-
-
-def build_openlineage_export_from_artifact(
-    artifact: CatalogArtifact,
-    *,
-    job_name: str,
-) -> dict[str, Any]:
-    input_fields_by_output: dict[tuple[str, str], set[tuple[str, str, str]]] = {}
-    for edge in derives_from_edges(view_of(artifact)):
-        output_dataset, output_column = column_selection_from_id(edge.source_id)
-        input_dataset, input_column = column_selection_from_id(edge.target_id)
-        input_fields_by_output.setdefault((output_dataset, output_column), set()).add(
-            ("clearmetric", input_dataset, input_column)
-        )
-
-    export_entries = [
-        {
-            "dataset": output_dataset,
-            "column": output_column,
-            "inputFields": [
-                {
-                    "namespace": namespace,
-                    "name": input_dataset,
-                    "field": input_column,
-                }
-                for namespace, input_dataset, input_column in sorted(input_fields)
-            ],
-        }
-        for (output_dataset, output_column), input_fields in sorted(
-            input_fields_by_output.items()
-        )
-    ]
-
-    datasets = [
-        {
-            "namespace": "clearmetric",
-            "name": node.qualified_name or node.name,
-            "kind": node.kind,
-        }
-        for node in sorted(
-            artifact.nodes, key=lambda item: item.qualified_name or item.name
-        )
-        if node.kind == "table"
-    ]
-
-    return {
-        "job": {
-            "namespace": "clearmetric",
-            "name": job_name,
-        },
-        "datasets": datasets,
-        "columnLineage": export_entries,
-    }
 
 
 def _build_lineage(project: ProjectInput, *, dialect: str) -> BuiltLineage:
@@ -1005,16 +895,3 @@ def _stamp_derivation(
         )
 
     return artifact.model_copy(update={"nodes": stamped_nodes, "edges": stamped_edges})
-
-
-def _require_impact_selection(
-    artifact: CatalogArtifact,
-    *,
-    selection: str,
-    selection_id: str,
-) -> None:
-    if any(node.id == selection_id for node in artifact.nodes):
-        return
-    raise LineageInputError(
-        f"Selection {selection!r} does not match any graph node."
-    )
