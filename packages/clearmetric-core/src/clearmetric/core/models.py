@@ -45,6 +45,22 @@ class Warning(BaseModel):
     subject_id: str | None = None
 
 
+def filter_warnings_for_ids(
+    warnings: list[Warning],
+    allowed_ids: set[str],
+    *,
+    clear_warnings: bool = False,
+) -> list[Warning]:
+    """Keep graph-level warnings and warnings whose subject is in allowed_ids."""
+    if clear_warnings:
+        return []
+    filtered: list[Warning] = []
+    for warning in warnings:
+        if warning.subject_id is None or warning.subject_id in allowed_ids:
+            filtered.append(warning)
+    return filtered
+
+
 class DerivationState(BaseModel):
     status: DerivationStatus
     confidence: Confidence

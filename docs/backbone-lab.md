@@ -78,11 +78,15 @@ Wedge compile formats (`json`, `text`, `catalog`, `openlineage`) never require `
 
 ## Invariants (lab code)
 
-- `policy.gate` is the sole node-level authz entry for projection and runtime execute
-- `gated_context` is called only from `emitters.registry` on consumer-lane compile
+- `policy.gate`, `policy.require_allow`, and `policy.filter_allow_only_ids` are the authz surface (RBAC/RLS/masking decisions)
+- `projection.apply_policy` is the sole consumer node preparation path (strip governance aspects, filter warnings via `core.filter_warnings_for_ids`)
+- `gated_context` is only used by compile-time consumer emit dispatch in `emitters.registry`
+- Runtime query execution uses `require_gated_identity` + `load_rules` + `require_allow` at the runtime boundary (not `gated_context`)
+- Emitters serialize only — no policy, no aspect stripping, no projection in serializers
 - Missing `compiled_sql` → loud error at runtime (no raw SQL fallback)
 - Missing fixture seed → loud `QueryExecutionError`
 - Policy exceptions → deny; empty rules → deny
+- `cm impact --identity` requires `require_gated_identity`; gates the selection node with `require_allow` (loud deny) and filters related ids to `allow` only
 - Admin `catalog` and `openlineage` remain ungated and raw JSON
 - `cm serve` binds loopback only; single identity at startup is a local debug shortcut, not the production auth model
 - Lab CLI and formats are hidden unless `CM_EXPERIMENTAL=1`

@@ -5,13 +5,19 @@ from __future__ import annotations
 from pathlib import Path
 
 from clearmetric.core import TraversalResult
+from clearmetric.core.models import CatalogArtifact
 from clearmetric.graph import (
     TraversalDirection,
     trace_downstream_from_artifact,
     trace_upstream_from_artifact,
     view_of,
 )
-from clearmetric.policy import gate, load_rules
+from clearmetric.policy import (
+    filter_allow_only_ids,
+    load_rules,
+    require_allow,
+    require_gated_identity,
+)
 
 from .compile import compile
 from .models import CompiledGraph
@@ -19,19 +25,21 @@ from .models import CompiledGraph
 
 def _filter_traversal_by_identity(
     result: TraversalResult,
-    artifact,
+    artifact: CatalogArtifact,
     *,
     identity: str,
     rules_path: str | Path,
 ) -> TraversalResult:
     rules = load_rules(rules_path)
     view = view_of(artifact)
-    filtered_ids: list[str] = []
-    for node_id in result.related_ids:
-        node = view.node(node_id)
-        decision = gate(node=node, identity=identity, rules=rules)
-        if decision not in {"deny", "filter"}:
-            filtered_ids.append(node_id)
+    selection_node = view.node(result.selection_id)
+    require_allow(node=selection_node, identity=identity, rules=rules)
+    filtered_ids = filter_allow_only_ids(
+        node_ids=result.related_ids,
+        resolve_node=view.node,
+        identity=identity,
+        rules=rules,
+    )
     return result.model_copy(update={"related_ids": filtered_ids})
 
 
@@ -52,6 +60,7 @@ def impact(
         result = trace_downstream_from_artifact(artifact, selection=selection)
 
     if identity is not None:
+        identity = require_gated_identity(identity)
         result = _filter_traversal_by_identity(
             result,
             artifact,

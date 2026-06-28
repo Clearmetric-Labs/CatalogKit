@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
+
 from clearmetric.core.errors import PolicyDeniedError, SecurityFloorError
 from clearmetric.core.models import CatalogArtifact, Node
 from clearmetric.policy.floor import validate_security_floor
@@ -31,4 +33,19 @@ def require_allow(*, node: Node, identity: str, rules: PolicyRulesFile) -> None:
         raise PolicyDeniedError(f"{node.id} denied by policy for identity {identity!r}")
 
 
-__all__ = ["gate", "require_allow"]
+def filter_allow_only_ids(
+    *,
+    node_ids: list[str],
+    resolve_node: Callable[[str], Node],
+    identity: str,
+    rules: PolicyRulesFile,
+) -> list[str]:
+    """Return node ids visible to identity (gate decision allow only)."""
+    allowed: list[str] = []
+    for node_id in node_ids:
+        if gate(node=resolve_node(node_id), identity=identity, rules=rules) == "allow":
+            allowed.append(node_id)
+    return allowed
+
+
+__all__ = ["filter_allow_only_ids", "gate", "require_allow"]

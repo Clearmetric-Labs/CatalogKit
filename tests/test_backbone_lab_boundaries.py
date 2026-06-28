@@ -85,3 +85,27 @@ def test_experimental_query_command_requires_env():
         env={k: v for k, v in os.environ.items() if k != "CM_EXPERIMENTAL"},
     )
     assert result.returncode != 0
+
+
+def test_experimental_serve_command_requires_env():
+    result = subprocess.run(
+        [sys.executable, "-m", "clearmetric.cli", "serve", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+        env={k: v for k, v in os.environ.items() if k != "CM_EXPERIMENTAL"},
+    )
+    assert result.returncode != 0
+    assert "Traceback" not in result.stderr
+
+
+def test_normal_impact_help_hides_identity_flag():
+    result = subprocess.run(
+        [sys.executable, "-m", "clearmetric.cli", "impact", "--help"],
+        capture_output=True,
+        text=True,
+        check=False,
+        env={k: v for k, v in os.environ.items() if k != "CM_EXPERIMENTAL"},
+    )
+    assert result.returncode == 0
+    assert "--identity" not in result.stdout

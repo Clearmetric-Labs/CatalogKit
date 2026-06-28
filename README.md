@@ -62,7 +62,7 @@ from pathlib import Path
 from clearmetric.compiler import build_graph, check_graph, compile
 
 compiled = compile(Path("./my-project"))          # build + enforce
-built = build_graph(Path("./my-project"))           # ingest + merge + bind only
+built = build_graph(Path("./my-project"))           # build pipeline without enforce
 report = check_graph(built.artifact, posture=built.project.posture)  # report-only (same path as cm clean)
 ```
 

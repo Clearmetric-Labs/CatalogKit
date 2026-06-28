@@ -2,27 +2,15 @@
 
 from __future__ import annotations
 
-from clearmetric.core.models import CatalogArtifact, Edge, Node, Warning
+from clearmetric.core.models import (
+    CatalogArtifact,
+    Edge,
+    Node,
+    filter_warnings_for_ids,
+)
 
 from .selector import SelectorPredicate, matches_selector, parse_selector
 from .view import GraphView
-
-
-def _filter_warnings(
-    warnings: list[Warning],
-    allowed_ids: set[str],
-    *,
-    clear_warnings: bool,
-) -> list[Warning]:
-    if clear_warnings:
-        return []
-    filtered: list[Warning] = []
-    for warning in warnings:
-        if warning.subject_id is None:
-            filtered.append(warning)
-        elif warning.subject_id in allowed_ids:
-            filtered.append(warning)
-    return filtered
 
 
 def _artifact_from_nodes(
@@ -37,7 +25,7 @@ def _artifact_from_nodes(
         for edge in view.edges()
         if edge.source_id in allowed_ids and edge.target_id in allowed_ids
     ]
-    warnings = _filter_warnings(
+    warnings = filter_warnings_for_ids(
         view.artifact.warnings, allowed_ids, clear_warnings=clear_warnings
     )
     return CatalogArtifact(

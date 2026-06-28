@@ -23,7 +23,8 @@ def validate_contract_nodes(artifact: CatalogArtifact) -> None:
     for node in artifact.nodes:
         try:
             contract = contract_for_node(node)
-        except ArtifactValidationError:
+        except ArtifactValidationError as exc:
+            violations.append(f"{node.id} invalid contract aspect: {exc}")
             continue
         if contract is None:
             if node.kind in {"metric", "query"}:

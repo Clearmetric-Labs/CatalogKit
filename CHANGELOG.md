@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.1 - 2026-06-28
+
+### Fixed (Backbone boundary QA — experimental lab, wedge outputs stable)
+
+- **Impact `--identity`** — `require_gated_identity` at API boundary; `require_allow` on selection node (loud `PolicyDeniedError`); related ids filtered via `filter_allow_only_ids` (allow only)
+- **`apply_policy`** — strips governance aspects on all surviving nodes; filters warnings via `filter_warnings_for_ids`
+- **`compile_query_contracts`** — batches malformed query aspect errors with SQL compile errors
+- **`validate_contract_nodes`** — loud batch for invalid contract aspects (no silent skip)
+- **`execute_project_query`** — `require_gated_identity` at runtime API boundary
+
+### Changed
+
+- **`core.filter_warnings_for_ids`** — single warning visibility helper for graph select and projection
+- **`policy.filter_allow_only_ids`** — centralized allow-only visibility for governance preview
+- **`ai_context` emitter** — removed duplicate `strip_sensitive_aspects` (projection owns consumer-safe output)
+
+### Docs
+
+- [docs/e2e-readiness.md](docs/e2e-readiness.md), updated [docs/backbone-lab.md](docs/backbone-lab.md) invariants, README `build_graph` comment
+
 ## 0.7.0 - 2026-06-28
 
 ### Changed (Backbone Scaffold — experimental lab, wedge outputs stable)

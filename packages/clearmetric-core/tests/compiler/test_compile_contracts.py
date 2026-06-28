@@ -45,6 +45,24 @@ def test_compile_query_contracts_lists_all_sql_errors():
     assert "query:bad2" in message
 
 
+def test_compile_query_contracts_batches_invalid_aspect_and_sql_errors():
+    artifact = _artifact(
+        Node(
+            id="query:bad_aspect",
+            kind="query",
+            name="bad_aspect",
+            aspects={"query": {"sql": 123, "depends_on": []}},
+        ),
+        _query_node("query:bad_sql", sql="SELECT FROM"),
+    )
+    with pytest.raises(CompilerError) as exc:
+        compile_query_contracts(artifact, dialect="postgres")
+    message = str(exc.value)
+    assert "query:bad_aspect" in message
+    assert "invalid aspects.query" in message
+    assert "query:bad_sql" in message
+
+
 def test_compile_query_contracts_missing_aspect_fails_pass1():
     artifact = _artifact(
         Node(id="query:missing", kind="query", name="missing", aspects={})

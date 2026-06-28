@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 from clearmetric.core.models import CatalogArtifact
-from clearmetric.policy.models import strip_sensitive_aspects
 
 
 def serialize_ai_context(artifact: CatalogArtifact) -> dict:
     nodes = []
     for node in artifact.nodes:
-        aspects = strip_sensitive_aspects(node.aspects or {})
+        aspects = dict(node.aspects or {})
         aspects.pop("_policy_masked", None)
         entry: dict = {
             "id": node.id,

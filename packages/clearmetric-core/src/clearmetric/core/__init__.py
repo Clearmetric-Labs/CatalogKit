@@ -62,6 +62,7 @@ from .models import (
     PhysicalBinding,
     TraversalResult,
     Warning,
+    filter_warnings_for_ids,
 )
 from .project import ClearMetricProject, load_project_aliases, load_project_config
 from .serialize import render_json
@@ -97,6 +98,7 @@ __all__ = [
     "cte_id",
     "Edge",
     "Evidence",
+    "filter_warnings_for_ids",
     "leaf_name",
     "load_artifact_file",
     "load_project_aliases",

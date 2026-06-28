@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 from clearmetric.compiler.compile import compile as compile_project
 from clearmetric.core.errors import PolicyError
+from clearmetric.core.models import CatalogArtifact, Node
 from clearmetric.emitters.registry import emit_compile
 
 from tests.backbone_lab.helpers import setup_backbone_lab_project
@@ -72,3 +73,58 @@ def test_emit_compile_consumer_formats_use_envelope(tmp_path: Path):
         node["id"] == "metric:executive_revenue"
         for node in ai_context["payload"]["nodes"]
     )
+
+
+def test_emit_compile_consumer_payload_has_no_governance_leak(tmp_path: Path):
+    from clearmetric.compiler.models import CompiledGraph
+    from clearmetric.core.models import Warning
+    from clearmetric.core.project import load_project_config
+
+    project_dir = setup_backbone_lab_project(tmp_path / "lab")
+    project = load_project_config(project_dir)
+    artifact = CatalogArtifact(
+        nodes=[
+            Node(
+                id="column:orders.amount",
+                kind="column",
+                name="amount",
+                aspects={
+                    "classification": "internal",
+                    "policy_refs": ["policy/orders"],
+                },
+            ),
+            Node(id="table:orders", kind="table", name="orders"),
+        ],
+        warnings=[
+            Warning(code="table-warn", message="secret", subject_id="table:orders"),
+            Warning(code="global", message="ok", subject_id=None),
+        ],
+    )
+    compiled = CompiledGraph(
+        artifact=artifact,
+        project=project,
+        project_dir=project_dir,
+        sources_run=["warehouse"],
+    )
+    consumer = json.loads(
+        emit_compile("consumer-catalog", compiled, identity="analyst")
+    )
+    payload = consumer["payload"]
+    visible_ids = {node["id"] for node in payload["nodes"]}
+    assert "table:orders" not in visible_ids
+    for node in payload["nodes"]:
+        aspects = node.get("aspects") or {}
+        assert "classification" not in aspects
+        assert "policy_refs" not in aspects
+    warning_subjects = {
+        warning.get("subject_id")
+        for warning in payload.get("warnings", [])
+        if warning.get("subject_id") is not None
+    }
+    assert "table:orders" not in warning_subjects
+
+    ai_context = json.loads(emit_compile("ai-context", compiled, identity="analyst"))
+    for node in ai_context["payload"]["nodes"]:
+        aspects = node.get("aspects") or {}
+        assert "classification" not in aspects
+        assert "policy_refs" not in aspects

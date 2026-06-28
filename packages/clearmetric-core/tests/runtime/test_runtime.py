@@ -11,6 +11,7 @@ from clearmetric.compiler.compile import compile as compile_project
 from clearmetric.core.errors import (
     CompilerError,
     PolicyDeniedError,
+    PolicyError,
     QueryExecutionError,
 )
 from clearmetric.runtime import execute_project_query
@@ -56,6 +57,20 @@ def test_execute_project_query_denied_identity_raises(tmp_path: Path):
             query_selection="query:executive_revenue",
             project_dir=project_dir,
         )
+
+
+def test_execute_project_query_blank_identity_raises(tmp_path: Path):
+    project_dir = setup_backbone_lab_project(tmp_path / "lab")
+    compiled = compile_project(project_dir)
+    for bad_identity in (None, ""):
+        with pytest.raises(PolicyError, match="requires identity"):
+            execute_project_query(
+                compiled.artifact,
+                identity=bad_identity,  # type: ignore[arg-type]
+                rules_path=compiled.project.policy.rules,
+                query_selection="query:executive_revenue",
+                project_dir=project_dir,
+            )
 
 
 def test_execute_project_query_missing_compiled_sql_raises(tmp_path: Path):

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from clearmetric.core.contracts import parse_query_contract
 from clearmetric.core.errors import CompilerError
+from clearmetric.core.errors import ValidationError as ArtifactValidationError
 from clearmetric.core.models import CatalogArtifact, Node
 from clearmetric.query.parser import parse_statement
 
@@ -21,7 +22,11 @@ def compile_query_contracts(
         if node.kind != "query":
             continue
 
-        contract = parse_query_contract(node.aspects)
+        try:
+            contract = parse_query_contract(node.aspects)
+        except ArtifactValidationError as exc:
+            errors.append(f"{node.id}: invalid aspects.query: {exc}")
+            continue
         if contract is None:
             errors.append(f"{node.id}: query node missing aspects.query")
             continue
