@@ -17,7 +17,9 @@ from tests.wedge.helpers import run_cm_subprocess
 def test_mvp_demo_same_canonical_id_flow(tmp_path: Path):
     project_dir = setup_backbone_lab_project(tmp_path / "lab")
 
-    compile_json = run_cm_subprocess(project_dir, "compile", "--format", "json", experimental=True)
+    compile_json = run_cm_subprocess(
+        project_dir, "compile", "--format", "json", experimental=True
+    )
     assert compile_json.returncode == 0, compile_json.stderr
     graph = json.loads(compile_json.stdout)
     graph_ids = {node["id"] for node in graph["nodes"]}
