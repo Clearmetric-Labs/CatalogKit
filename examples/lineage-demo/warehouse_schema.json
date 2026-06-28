@@ -1,0 +1,47 @@
+{
+  "warehouse": "jaffle",
+  "tables": [
+    {
+      "name": "raw_customers",
+      "columns": [
+        {"name": "id", "data_type": "number"},
+        {"name": "first_name", "data_type": "text"}
+      ]
+    },
+    {
+      "name": "raw_orders",
+      "columns": [
+        {"name": "id", "data_type": "number"},
+        {"name": "amount", "data_type": "number"}
+      ]
+    },
+    {
+      "name": "raw_payments",
+      "columns": [
+        {"name": "id", "data_type": "number"},
+        {"name": "amount", "data_type": "number"},
+        {"name": "payment_method", "data_type": "text"}
+      ]
+    },
+    {
+      "name": "stg_customers",
+      "columns": [{"name": "customer_id", "data_type": "number"}]
+    },
+    {
+      "name": "stg_orders",
+      "columns": [{"name": "order_id", "data_type": "number"}]
+    },
+    {
+      "name": "stg_payments",
+      "columns": [{"name": "amount", "data_type": "number"}]
+    },
+    {
+      "name": "orders",
+      "columns": [{"name": "amount", "data_type": "number"}]
+    },
+    {
+      "name": "customers",
+      "columns": [{"name": "customer_lifetime_value", "data_type": "number"}]
+    }
+  ]
+}

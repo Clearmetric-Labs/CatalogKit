@@ -80,6 +80,7 @@ secrets.yml
 graph.json
 catalog.json
 warehouse_schema.json
+!examples/**/warehouse_schema.json
 consumer-catalog.json
 frontend-contract.json
 openlineage.json
