@@ -6,6 +6,7 @@ ClearMetric Core v1 is a **local compiler**, not a live metadata platform.
 
 - Column lineage depends on parseable compiled SQL and known upstream schemas.
 - Bare `SELECT *` expands only when exactly one resolvable source has known columns; joins and unknown schemas suppress expansion.
+- Star expansion requires a declared upstream column set (seed, source, warehouse metadata, or dbt `columns:`), not columns inferred from upstream SQL-folder models.
 - UNION branches and some set operations emit `unresolved_lineage` rather than inventing positional merges.
 - Warehouse binding uses qualified names and suffix matching; ambiguous unqualified names refuse to bind.
 

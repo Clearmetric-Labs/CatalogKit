@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "project_name": "alias_case"
+  },
+  "nodes": {
+    "model.alias_case.orders_mart": {
+      "resource_type": "model",
+      "package_name": "alias_case",
+      "name": "orders_mart",
+      "alias": "orders",
+      "schema": "analytics",
+      "database": "warehouse",
+      "compiled_code": "select id from {{ ref('raw_orders') }}",
+      "depends_on": {
+        "nodes": ["seed.alias_case.raw_orders"]
+      },
+      "columns": {
+        "id": { "name": "id" }
+      }
+    },
+    "seed.alias_case.raw_orders": {
+      "resource_type": "seed",
+      "package_name": "alias_case",
+      "name": "raw_orders",
+      "schema": "analytics",
+      "database": "warehouse",
+      "columns": {
+        "id": { "name": "id" }
+      }
+    }
+  }
+}

@@ -98,20 +98,31 @@ def resolve_table_match(
         for tid in target_table_ids
     }
 
-    matches: list[str] = []
     for raw_candidate in source_candidates:
         candidate = apply_alias_map(raw_candidate, alias_map)
-        for normalized_target, table_id in target_by_normalized.items():
-            if candidate == normalized_target or normalized_target.endswith(
-                f".{candidate}"
-            ):
-                matches.append(table_id)
 
-    unique_matches = sorted(set(matches))
-    if len(unique_matches) == 1:
-        return unique_matches[0], "resolved"
-    if len(unique_matches) > 1:
-        return None, "ambiguous"
+        exact = [
+            table_id
+            for normalized_target, table_id in target_by_normalized.items()
+            if candidate == normalized_target
+        ]
+        exact_unique = sorted(set(exact))
+        if len(exact_unique) == 1:
+            return exact_unique[0], "resolved"
+        if len(exact_unique) > 1:
+            return None, "ambiguous"
+
+        suffix = [
+            table_id
+            for normalized_target, table_id in target_by_normalized.items()
+            if normalized_target.endswith(f".{candidate}")
+        ]
+        suffix_unique = sorted(set(suffix))
+        if len(suffix_unique) == 1:
+            return suffix_unique[0], "resolved"
+        if len(suffix_unique) > 1:
+            return None, "ambiguous"
+
     return None, "unresolved"
 
 

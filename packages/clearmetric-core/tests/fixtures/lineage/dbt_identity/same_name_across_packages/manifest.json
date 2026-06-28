@@ -1,0 +1,27 @@
+{
+  "metadata": {
+    "project_name": "cross_package"
+  },
+  "nodes": {
+    "model.pkg_a.orders": {
+      "resource_type": "model",
+      "package_name": "pkg_a",
+      "name": "orders",
+      "schema": "analytics",
+      "database": "db_a",
+      "compiled_code": "select 1 as id",
+      "depends_on": { "nodes": [] },
+      "columns": { "id": { "name": "id" } }
+    },
+    "model.pkg_b.orders": {
+      "resource_type": "model",
+      "package_name": "pkg_b",
+      "name": "orders",
+      "schema": "analytics",
+      "database": "db_b",
+      "compiled_code": "select 2 as id",
+      "depends_on": { "nodes": [] },
+      "columns": { "id": { "name": "id" } }
+    }
+  }
+}

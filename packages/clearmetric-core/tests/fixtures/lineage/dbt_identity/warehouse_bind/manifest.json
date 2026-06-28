@@ -1,0 +1,32 @@
+{
+  "metadata": {
+    "project_name": "warehouse_bind"
+  },
+  "nodes": {
+    "model.bind_case.orders_mart": {
+      "resource_type": "model",
+      "package_name": "bind_case",
+      "name": "orders_mart",
+      "alias": "orders",
+      "schema": "public",
+      "database": "db1",
+      "compiled_code": "select id from {{ ref('raw_orders') }}",
+      "depends_on": {
+        "nodes": ["seed.bind_case.raw_orders"]
+      },
+      "columns": {
+        "id": { "name": "id" }
+      }
+    },
+    "seed.bind_case.raw_orders": {
+      "resource_type": "seed",
+      "package_name": "bind_case",
+      "name": "raw_orders",
+      "schema": "public",
+      "database": "db1",
+      "columns": {
+        "id": { "name": "id" }
+      }
+    }
+  }
+}

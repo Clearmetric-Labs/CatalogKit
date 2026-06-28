@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-from clearmetric.core import normalize_identifier
+from clearmetric.core import leaf_name, normalize_identifier
 
 from .errors import LineageInputError
 from .sql_analyzer import list_table_references
@@ -24,6 +24,14 @@ class ProjectDataset:
     dependency_names: tuple[str, ...]
     declared_columns: tuple[str, ...]
     evidence_file: str | None
+    unique_id: str | None = None
+    package_name: str | None = None
+    manifest_name: str | None = None
+    alias: str | None = None
+    database: str | None = None
+    schema_name: str | None = None
+    relation_name: str | None = None
+    resource_type: str | None = None
 
 
 @dataclass(frozen=True)
@@ -93,54 +101,58 @@ def _load_manifest_project(path: Path) -> ProjectInput:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         raise LineageInputError(f"Manifest is not valid JSON: {path}") from exc
+    if not isinstance(payload, dict):
+        raise LineageInputError(f"Manifest root must be an object: {path}")
     raw_nodes = payload.get("nodes")
     if not isinstance(raw_nodes, dict):
         raise LineageInputError(f"Manifest is missing a nodes object: {path}")
 
+    node_payloads = _collect_manifest_node_payloads(payload)
+    unique_id_to_identity = _build_unique_id_to_identity(node_payloads)
+
     datasets: dict[str, ProjectDataset] = {}
     models_total = 0
     models_with_compiled_sql = 0
-    for node_payload in raw_nodes.values():
-        if not isinstance(node_payload, dict):
-            raise LineageInputError(
-                f"Manifest contains a non-object node payload: {path}"
-            )
+    for unique_id, node_payload in node_payloads.items():
         resource_type = str(node_payload.get("resource_type") or "").strip().lower()
-        name = str(node_payload.get("name") or "").strip()
-        if not name:
+        if resource_type not in {"model", "seed", "source"}:
             continue
-
+        identity = unique_id_to_identity[unique_id]
+        dbt_fields = _dbt_metadata_fields(node_payload, unique_id=unique_id)
         if resource_type == "model":
             models_total += 1
             sql = _read_compiled_sql(path, node_payload)
             models_with_compiled_sql += 1
-            depends_on: list[str] = []
-            for dependency in node_payload.get("depends_on", {}).get("nodes", []):
-                normalized_dependency = _normalize_dependency_name(dependency)
-                if normalized_dependency:
-                    depends_on.append(normalized_dependency)
-            datasets[name] = ProjectDataset(
-                name=name,
+            depends_on = _resolve_manifest_dependencies(
+                node_payload,
+                unique_id_to_identity=unique_id_to_identity,
+            )
+            datasets[identity] = ProjectDataset(
+                name=identity,
                 kind="local",
                 sql=sql,
-                dependency_names=tuple(depends_on),
+                dependency_names=depends_on,
                 declared_columns=_columns_from_manifest_node(node_payload),
                 evidence_file=_compiled_path_label(node_payload),
+                **dbt_fields,
             )
-        elif resource_type in {"seed", "source"}:
-            datasets[name] = ProjectDataset(
-                name=name,
+        else:
+            datasets[identity] = ProjectDataset(
+                name=identity,
                 kind="root",
                 sql=None,
                 dependency_names=(),
                 declared_columns=_columns_from_manifest_node(node_payload),
                 evidence_file=None,
+                **dbt_fields,
             )
 
     if not datasets:
         raise LineageInputError(f"Manifest produced no usable datasets: {path}")
 
-    project_name = str(payload.get("metadata", {}).get("project_name") or "").strip()
+    datasets = _ensure_root_dependencies(datasets)
+
+    project_name = _manifest_project_name(payload)
     label = project_name or path.parent.name
     compile_report = ManifestCompileReport(
         models_total=models_total,
@@ -155,6 +167,169 @@ def _load_manifest_project(path: Path) -> ProjectInput:
     )
 
 
+def _collect_manifest_node_payloads(payload: dict) -> dict[str, dict]:
+    collected: dict[str, dict] = {}
+    for section in ("nodes", "sources"):
+        section_payload = payload.get(section)
+        if section_payload is None and section == "sources":
+            continue
+        if not isinstance(section_payload, dict):
+            raise LineageInputError(f"Manifest {section!r} section must be an object")
+        for unique_id, node_payload in section_payload.items():
+            if not isinstance(node_payload, dict):
+                raise LineageInputError(
+                    f"Manifest {section!r} entry {unique_id!r} must be an object"
+                )
+            collected[str(unique_id)] = node_payload
+    return collected
+
+
+def _manifest_project_name(payload: dict) -> str:
+    metadata = payload.get("metadata", {})
+    if metadata is None:
+        return ""
+    if not isinstance(metadata, dict):
+        raise LineageInputError("Manifest metadata must be an object")
+    return str(metadata.get("project_name") or "").strip()
+
+
+def _build_unique_id_to_identity(node_payloads: dict[str, dict]) -> dict[str, str]:
+    unique_id_to_identity: dict[str, str] = {}
+    identity_to_unique_id: dict[str, str] = {}
+    for unique_id, node_payload in node_payloads.items():
+        resource_type = str(node_payload.get("resource_type") or "").strip().lower()
+        if resource_type not in {"model", "seed", "source"}:
+            continue
+        identity = resolve_dbt_dataset_identity(node_payload)
+        existing = identity_to_unique_id.get(identity)
+        if existing is not None and existing != unique_id:
+            raise LineageInputError(f"Duplicate dbt dataset identity {identity!r}")
+        unique_id_to_identity[unique_id] = identity
+        identity_to_unique_id[identity] = unique_id
+    return unique_id_to_identity
+
+
+def resolve_dbt_dataset_identity(node_payload: dict) -> str:
+    relation_name = str(node_payload.get("relation_name") or "").strip()
+    if relation_name:
+        return normalize_identifier(relation_name)
+    database = str(node_payload.get("database") or "").strip()
+    schema = str(node_payload.get("schema") or "").strip()
+    alias = str(node_payload.get("alias") or "").strip()
+    name = str(node_payload.get("name") or "").strip()
+    if database and schema and alias:
+        return normalize_identifier(f"{database}.{schema}.{alias}")
+    if schema and alias:
+        return normalize_identifier(f"{schema}.{alias}")
+    if alias:
+        return normalize_identifier(alias)
+    if database and schema and name:
+        return normalize_identifier(f"{database}.{schema}.{name}")
+    if schema and name:
+        return normalize_identifier(f"{schema}.{name}")
+    if name:
+        return normalize_identifier(name)
+    raise LineageInputError("dbt manifest node is missing a usable identity")
+
+
+def dbt_aspect_for_dataset(dataset: ProjectDataset) -> dict[str, str] | None:
+    if dataset.unique_id is None:
+        return None
+    aspect = {
+        "unique_id": dataset.unique_id,
+        "package_name": dataset.package_name or "",
+        "name": dataset.manifest_name or leaf_name(dataset.name),
+        "alias": dataset.alias or "",
+        "database": dataset.database or "",
+        "schema": dataset.schema_name or "",
+        "relation_name": dataset.relation_name or "",
+        "resource_type": dataset.resource_type or "",
+    }
+    return {key: value for key, value in aspect.items() if value}
+
+
+def _dbt_metadata_fields(
+    node_payload: dict, *, unique_id: str
+) -> dict[str, str | None]:
+    return {
+        "unique_id": unique_id,
+        "package_name": _optional_string(node_payload.get("package_name")),
+        "manifest_name": _optional_string(node_payload.get("name")),
+        "alias": _optional_string(node_payload.get("alias")),
+        "database": _optional_string(node_payload.get("database")),
+        "schema_name": _optional_string(node_payload.get("schema")),
+        "relation_name": _optional_string(node_payload.get("relation_name")),
+        "resource_type": _optional_string(node_payload.get("resource_type")),
+    }
+
+
+def _optional_string(value: object) -> str | None:
+    text = str(value or "").strip()
+    return text or None
+
+
+def _resolve_manifest_dependencies(
+    node_payload: dict,
+    *,
+    unique_id_to_identity: dict[str, str],
+) -> tuple[str, ...]:
+    depends_on: list[str] = []
+    for dependency_unique_id in _manifest_dependency_ids(node_payload):
+        resolved = unique_id_to_identity.get(dependency_unique_id)
+        if resolved is None:
+            if dependency_unique_id.startswith("source."):
+                resolved = normalize_identifier(dependency_unique_id.split(".")[-1])
+            else:
+                raise LineageInputError(
+                    f"Unresolved dbt dependency {dependency_unique_id!r}"
+                )
+        depends_on.append(resolved)
+    return tuple(depends_on)
+
+
+def _manifest_dependency_ids(node_payload: dict) -> tuple[str, ...]:
+    depends_on = node_payload.get("depends_on", {})
+    if depends_on is None:
+        return ()
+    if not isinstance(depends_on, dict):
+        raise LineageInputError("Manifest depends_on must be an object")
+    nodes = depends_on.get("nodes", [])
+    if nodes is None:
+        return ()
+    if not isinstance(nodes, list):
+        raise LineageInputError("Manifest depends_on.nodes must be a list")
+
+    dependency_ids: list[str] = []
+    for dependency in nodes:
+        if not isinstance(dependency, str):
+            raise LineageInputError("Manifest dependency ids must be strings")
+        dependency_unique_id = dependency.strip()
+        if dependency_unique_id:
+            dependency_ids.append(dependency_unique_id)
+    return tuple(dependency_ids)
+
+
+def _ensure_root_dependencies(
+    datasets: dict[str, ProjectDataset],
+) -> dict[str, ProjectDataset]:
+    updated = dict(datasets)
+    for dataset in list(updated.values()):
+        if dataset.kind != "local":
+            continue
+        for dependency_name in dataset.dependency_names:
+            if dependency_name in updated:
+                continue
+            updated[dependency_name] = ProjectDataset(
+                name=dependency_name,
+                kind="root",
+                sql=None,
+                dependency_names=(),
+                declared_columns=(),
+                evidence_file=None,
+            )
+    return updated
+
+
 def _read_compiled_sql(manifest_path: Path, node_payload: dict) -> str:
     compiled_code = str(node_payload.get("compiled_code") or "").strip()
     if compiled_code:
@@ -166,10 +341,6 @@ def _read_compiled_sql(manifest_path: Path, node_payload: dict) -> str:
     compiled_path = str(node_payload.get("compiled_path") or "").strip()
     if compiled_path:
         candidate = _resolve_manifest_relative_path(manifest_path, compiled_path)
-        if not candidate.is_file():
-            raise LineageInputError(
-                f"Manifest compiled_path does not exist for {node_payload.get('name')!r}: {candidate}"
-            )
         sql = candidate.read_text(encoding="utf-8").strip()
         if sql:
             return sql
@@ -203,20 +374,21 @@ def _resolve_manifest_relative_path(manifest_path: Path, relative_path: str) -> 
 
 def _columns_from_manifest_node(node_payload: dict) -> tuple[str, ...]:
     columns = node_payload.get("columns", {})
-    if not isinstance(columns, dict):
+    if columns is None:
         return ()
-    return tuple(
-        str(column_payload.get("name") or "").strip()
-        for column_payload in columns.values()
-        if str(column_payload.get("name") or "").strip()
-    )
+    if not isinstance(columns, dict):
+        raise LineageInputError("Manifest columns must be an object")
 
-
-def _normalize_dependency_name(unique_id: str) -> str | None:
-    parts = str(unique_id or "").strip().split(".")
-    if len(parts) < 3:
-        return None
-    return parts[-1]
+    column_names: list[str] = []
+    for column_name, column_payload in columns.items():
+        if not isinstance(column_payload, dict):
+            raise LineageInputError(
+                f"Manifest column entry {column_name!r} must be an object"
+            )
+        name = str(column_payload.get("name") or "").strip()
+        if name:
+            column_names.append(name)
+    return tuple(column_names)
 
 
 def _load_sql_folder_project(path: Path, *, dialect: str) -> ProjectInput:

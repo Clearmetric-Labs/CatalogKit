@@ -26,10 +26,12 @@ from clearmetric.graph import dataset_from_location
 from sqlglot.lineage import Node as SqlglotLineageNode
 from sqlglot.lineage import lineage
 
+from .coverage import EXPANDED_STAR_CODE
 from .errors import LineageContractError, LineageInputError
-from .loaders import ProjectDataset, ProjectInput
+from .loaders import ProjectDataset, ProjectInput, dbt_aspect_for_dataset
 from .models import LineageMap, LineageSummary
 from .sql_analyzer import (
+    StarExpansionPolicy,
     analyze_sql_statement,
     bare_star_column_upstream,
     filter_value_lineage_refs,
@@ -140,6 +142,8 @@ def _add_dataset_node(nodes_by_id: dict[str, Node], dataset: ProjectDataset) -> 
     dataset_id = table_id(dataset.name)
     if dataset_id in nodes_by_id:
         return
+    dbt_aspect = dbt_aspect_for_dataset(dataset)
+    aspects = {"dbt": dbt_aspect} if dbt_aspect else None
     nodes_by_id[dataset_id] = Node(
         id=dataset_id,
         kind="table",
@@ -147,6 +151,7 @@ def _add_dataset_node(nodes_by_id: dict[str, Node], dataset: ProjectDataset) -> 
         qualified_name=dataset.name,
         schema=schema_name(dataset.name),
         evidence=_dataset_evidence(dataset),
+        aspects=aspects,
     )
 
 
@@ -270,14 +275,6 @@ def _add_lineage_edges(
         cte_name_set = statement_analysis.cte_names
         aliased_table_star = uses_aliased_table_star(statement_analysis)
         has_select_star = has_select_star_projection(statement_analysis)
-        if has_select_star:
-            _emit_column_warning(
-                warnings,
-                code="select_star",
-                dataset=dataset,
-                column_name=None,
-                message="SELECT * was detected; output mapping may stay warning-rich.",
-            )
         star_policy = (
             star_expansion_policy(statement_analysis, project=project)
             if has_select_star
@@ -548,7 +545,62 @@ def _add_lineage_edges(
                 )
             )
             state.columns_with_edges.add(normalized_output)
+    if has_select_star:
+        _emit_select_star_outcome_warning(
+            warnings,
+            dataset=dataset,
+            state=state,
+            star_policy=star_policy,
+        )
     return state
+
+
+def _emit_select_star_outcome_warning(
+    warnings: list[Warning],
+    *,
+    dataset: ProjectDataset,
+    state: DatasetResolutionState,
+    star_policy: StarExpansionPolicy | None,
+) -> None:
+    expanded_successfully = (
+        star_policy is None
+        and bool(state.columns_with_edges)
+        and not state.columns_star_suppressed
+    )
+    has_unresolved_star = any(
+        warning.code == "unresolved_star_source"
+        and warning.location
+        and (
+            warning.location == f"{dataset.name}.*"
+            or warning.location.startswith(f"{dataset.name}.")
+        )
+        for warning in warnings
+    )
+    if expanded_successfully and not has_unresolved_star:
+        _emit_column_warning(
+            warnings,
+            code=EXPANDED_STAR_CODE,
+            dataset=dataset,
+            column_name=None,
+            message=(
+                f"SELECT * was expanded from declared upstream columns for "
+                f"{dataset.name!r}."
+            ),
+        )
+        return
+    if not any(
+        warning.code == "select_star"
+        and warning.subject_id is None
+        and warning.location == f"{dataset.name}.*"
+        for warning in warnings
+    ):
+        _emit_column_warning(
+            warnings,
+            code="select_star",
+            dataset=dataset,
+            column_name=None,
+            message="SELECT * was detected; output mapping may stay warning-rich.",
+        )
 
 
 def _reconcile_column_coverage(
@@ -913,7 +965,8 @@ def _stamp_derivation(
             for code in codes
         ):
             return "failed", "low"
-        if codes:
+        material = codes - {EXPANDED_STAR_CODE}
+        if material:
             return "partial", "medium"
         return default, "high"
 

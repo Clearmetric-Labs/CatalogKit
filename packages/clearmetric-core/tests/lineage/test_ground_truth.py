@@ -22,6 +22,10 @@ def _all_probes() -> list[Probe]:
     return probes
 
 
+def test_ground_truth_probe_count_is_v1_floor():
+    assert len(_all_probes()) >= 30
+
+
 @pytest.mark.parametrize(
     "probe",
     _all_probes(),

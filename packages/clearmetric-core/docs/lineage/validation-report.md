@@ -30,7 +30,7 @@ Only fully enumerated, independently checked truth sets should be committed.
 
 ### Ground-truth summary
 
-- Total committed probes: `15`
+- Total committed probes: `30+` (CI enforces `>= 30` via `test_ground_truth_probe_count_is_v1_floor`)
 - False negatives: `0`
 - False positives: `0`
 - Exact downstream impact is now committed for:

@@ -6,12 +6,12 @@ probes:
   - column:raw_orders.id
   expected_downstream: []
   expected_warnings:
-  - code: select_star
+  - code: select_star_expanded
     dataset: report
 - selection: report.amount
   expected_upstream:
   - column:raw_orders.amount
   expected_downstream: []
   expected_warnings:
-  - code: select_star
+  - code: select_star_expanded
     dataset: report

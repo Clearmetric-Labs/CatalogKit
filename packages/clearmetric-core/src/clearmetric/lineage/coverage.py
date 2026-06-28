@@ -17,6 +17,9 @@ from clearmetric.graph import (
 
 from .loaders import ProjectInput
 
+CONSERVATIVE_STAR_CODES = frozenset({"select_star", "unresolved_star_source"})
+EXPANDED_STAR_CODE = "select_star_expanded"
+
 
 class ColumnResolution(str, Enum):
     RESOLVED = "resolved"
@@ -206,7 +209,7 @@ def _datasets_with_select_star_warning(artifact: CatalogArtifact) -> set[str]:
     return {
         dataset_from_location(warning.location)
         for warning in artifact.warnings
-        if warning.code == "select_star"
+        if warning.code in CONSERVATIVE_STAR_CODES
         and warning.subject_id is None
         and warning.location
     }

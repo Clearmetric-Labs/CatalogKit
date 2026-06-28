@@ -33,6 +33,25 @@ def test_broken_sql_marks_derivation_failed():
     assert broken_table.derivation.confidence == "low"
 
 
+def test_select_star_with_schema_expansion_is_complete_not_partial():
+    case_root = ADVERSARIAL_ROOT / "select_star_with_schema"
+    artifact = build_catalog_artifact(case_root / "manifest.json", dialect="postgres")
+    assert any(warning.code == "select_star_expanded" for warning in artifact.warnings)
+    assert not any(warning.code == "select_star" for warning in artifact.warnings)
+    report_table = next(node for node in artifact.nodes if node.id == "table:report")
+    assert report_table.derivation is not None
+    assert report_table.derivation.status == "complete"
+    assert report_table.derivation.confidence == "high"
+    report_columns = [
+        node for node in artifact.nodes if node.id.startswith("column:report.")
+    ]
+    assert report_columns
+    assert all(
+        node.derivation is not None and node.derivation.status == "complete"
+        for node in report_columns
+    )
+
+
 def test_select_star_cases_are_partial_not_complete():
     case_root = ADVERSARIAL_ROOT / "select_star_no_schema"
     artifact = build_catalog_artifact(case_root, dialect="postgres")

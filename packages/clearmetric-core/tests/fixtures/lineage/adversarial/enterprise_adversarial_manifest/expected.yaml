@@ -119,7 +119,7 @@ derives_from:
   - column:users.user_id
 warnings:
 - dataset: adv_01_select_star
-  code: select_star
+  code: select_star_expanded
 - dataset: adv_02_qualified_star
   code: select_star
 - dataset: adv_03_union

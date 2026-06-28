@@ -4,4 +4,4 @@ derives_from:
   - [column:report.id, column:raw_orders.id]
   - [column:report.amount, column:raw_orders.amount]
 warnings:
-  - {code: select_star, dataset: report}
+  - {code: select_star_expanded, dataset: report}

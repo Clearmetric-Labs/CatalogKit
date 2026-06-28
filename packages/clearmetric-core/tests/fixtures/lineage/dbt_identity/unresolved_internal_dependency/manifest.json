@@ -1,0 +1,19 @@
+{
+  "metadata": {
+    "project_name": "unresolved_dep"
+  },
+  "nodes": {
+    "model.unresolved.report": {
+      "resource_type": "model",
+      "package_name": "unresolved",
+      "name": "report",
+      "compiled_code": "select 1 as id",
+      "depends_on": {
+        "nodes": ["model.unresolved.missing_model"]
+      },
+      "columns": {
+        "id": { "name": "id" }
+      }
+    }
+  }
+}

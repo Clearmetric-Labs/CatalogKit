@@ -1,0 +1,34 @@
+{
+  "metadata": {
+    "project_name": "source_dependency"
+  },
+  "sources": {
+    "source.source_case.shopify.orders": {
+      "resource_type": "source",
+      "package_name": "source_case",
+      "name": "orders",
+      "schema": "shopify",
+      "database": "warehouse",
+      "identifier": "orders",
+      "columns": {
+        "id": { "name": "id" }
+      }
+    }
+  },
+  "nodes": {
+    "model.source_case.stg_orders": {
+      "resource_type": "model",
+      "package_name": "source_case",
+      "name": "stg_orders",
+      "schema": "analytics",
+      "database": "warehouse",
+      "compiled_code": "select id from {{ source('shopify', 'orders') }}",
+      "depends_on": {
+        "nodes": ["source.source_case.shopify.orders"]
+      },
+      "columns": {
+        "id": { "name": "id" }
+      }
+    }
+  }
+}

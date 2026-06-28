@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.1 - 2026-06-28
+
+### Fixed (V1 hardening)
+
+- **Identity tier precedence** — `resolve_table_match()` checks exact matches before suffix bridging per candidate tier; fully-qualified references resolve when two databases share `schema.table`
+- **`SELECT *` warning honesty** — expanded stars emit `select_star_expanded` and no longer mark derivation `partial`; conservative stars remain `select_star` / `unresolved_star_source`
+- **dbt relation identity** — two-pass manifest resolver with `unique_id → identity` mapping, dbt aspects on table nodes, and sources indexed from the manifest `sources` key
+
+### Added
+
+- **Identity regression tests** — production-path candidate lists and two-database `attach_warehouse_bindings` coverage
+- **dbt identity fixtures** — alias, cross-package, cross-schema, warehouse bind, source dependency, and error cases
+- **Ground-truth probe floor** — CI enforces `>= 30` probes
+
+### Docs
+
+- **Limitations** — star expansion requires declared upstream columns, not inferred SQL-folder schemas
+
 ## 0.9.0 - 2026-06-28
 
 ### Added (ClearMetric Core V1 compiler foundation)
@@ -10,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - **Compile diagnostics** — stderr summary with `derives_from` counts and zero-lineage warning via `format_compile_diagnostics()`
 - **Self-contained examples** — `examples/lineage-demo` and `examples/catalog-demo` replace `wedge-jaffle`
 - **Intent gate** — `enabled_sources.intent` requires `CM_EXPERIMENTAL=1`
-- **Identity binding** — warehouse qualified names include database; partial dbt binding with ambiguity refusal
+- **Identity binding** — warehouse identity binding preserves database-qualified names and refuses ambiguous suffix matches
 - **Path security** — manifest-relative loaders reject traversal escapes
 - **Impact JSON** — `traversed_edges` populated on downstream/upstream traversal
 - **Lineage corpus** — 30+ verified ground-truth probes; `SELECT *` expansion when upstream columns are known

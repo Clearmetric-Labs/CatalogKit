@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "project_name": "cross_schema_alias"
+  },
+  "nodes": {
+    "model.cross.orders_a": {
+      "resource_type": "model",
+      "package_name": "cross",
+      "name": "orders_a",
+      "alias": "orders",
+      "schema": "schema_a",
+      "database": "warehouse",
+      "compiled_code": "select 1 as id",
+      "depends_on": { "nodes": [] },
+      "columns": { "id": { "name": "id" } }
+    },
+    "model.cross.orders_b": {
+      "resource_type": "model",
+      "package_name": "cross",
+      "name": "orders_b",
+      "alias": "orders",
+      "schema": "schema_b",
+      "database": "warehouse",
+      "compiled_code": "select 2 as id",
+      "depends_on": { "nodes": [] },
+      "columns": { "id": { "name": "id" } }
+    }
+  }
+}

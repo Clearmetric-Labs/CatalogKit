@@ -187,7 +187,7 @@ are matched against that namespace via candidate expansion and optional aliases.
 Every cross-graph `feeds` edge carries `match_status`:
 
 - `resolved` — exactly one warehouse `table:` match
-- `ambiguous` — multiple warehouse matches; first sorted match kept, status flagged
+- `ambiguous` — multiple warehouse matches; no binding is applied and a `warehouse_bind_ambiguous` warning is emitted
 - `unresolved` — no match; edge retained with best-guess `source_id`, not dropped
 
 ### Alias map contract
