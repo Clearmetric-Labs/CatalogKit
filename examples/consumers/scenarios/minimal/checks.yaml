@@ -1,0 +1,16 @@
+cases:
+  - id: catalog_has_asset_kinds
+    artifact: catalog
+    expect_node_kinds:
+      - table
+      - column
+  - id: catalog_has_orders_amount
+    artifact: catalog
+    expect_node_exists:
+      - column:orders.amount
+  - id: impact_selection_resolves
+    impact: orders.amount_upstream
+    expect_selection_id: column:orders.amount
+  - id: impact_reports_source_disagreement
+    impact: orders.amount_upstream
+    expect_warning_code: source_disagreement

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearmetric.dev/spec/consumer-envelope.schema.json",
+  "title": "ClearMetric Consumer Emit Envelope",
+  "description": "Wrapper for consumer-lane compile formats from emitters/envelope.py. Valid only when bundle.manifest declares lane=consumer for the artifact.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "version",
+    "identity",
+    "node_count",
+    "edge_count",
+    "payload"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "const": "1"
+    },
+    "identity": {
+      "type": "string",
+      "minLength": 1
+    },
+    "node_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "edge_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

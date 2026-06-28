@@ -129,6 +129,8 @@ python -m pip install -e "packages/clearmetric-core[dev,runtime,release]"
 python -m pytest -v packages/clearmetric-core/tests tests/
 ```
 
+**Learn by notebook:** [examples/notebooks/](examples/notebooks/README.md) — interactive walkthroughs of the wedge, compile formats, consumer bundles, and backbone lab.
+
 Contributions require the [CLA](CLA.md).
 
 </details>

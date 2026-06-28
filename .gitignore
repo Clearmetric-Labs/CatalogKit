@@ -89,3 +89,9 @@ findings.json
 prototypes/
 scratch/
 sandbox/
+.ipynb_checkpoints/
+
+# Consumer bundles (committed minimal fixture only)
+examples/consumers/bundles/*
+!examples/consumers/bundles/minimal/
+!examples/consumers/bundles/minimal/**

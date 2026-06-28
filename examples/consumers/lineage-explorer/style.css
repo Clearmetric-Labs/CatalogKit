@@ -1,0 +1,19 @@
+@import url("../catalog-viewer/style.css");
+
+.impact-select {
+  margin-bottom: 1rem;
+  padding: 0.35rem 0.5rem;
+}
+
+.related-list {
+  list-style: none;
+  padding: 0;
+}
+
+.related-list li {
+  padding: 0.15rem 0;
+}
+
+.related-list a {
+  color: inherit;
+}

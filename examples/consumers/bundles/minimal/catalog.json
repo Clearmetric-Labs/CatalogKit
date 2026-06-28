@@ -1,0 +1,1357 @@
+{
+  "version": "1",
+  "nodes": [
+    {
+      "id": "column:customers.customer_id",
+      "kind": "column",
+      "name": "customer_id",
+      "qualified_name": "customers.customer_id",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.customer_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customers.customer_lifetime_value",
+      "kind": "column",
+      "name": "customer_lifetime_value",
+      "qualified_name": "customers.customer_lifetime_value",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "customers.customer_lifetime_value",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.customer_lifetime_value",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "customers",
+          "column": "customer_lifetime_value"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:customers.first_name",
+      "kind": "column",
+      "name": "first_name",
+      "qualified_name": "customers.first_name",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.first_name",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customers.first_order",
+      "kind": "column",
+      "name": "first_order",
+      "qualified_name": "customers.first_order",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.first_order",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customers.last_name",
+      "kind": "column",
+      "name": "last_name",
+      "qualified_name": "customers.last_name",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.last_name",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customers.most_recent_order",
+      "kind": "column",
+      "name": "most_recent_order",
+      "qualified_name": "customers.most_recent_order",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.most_recent_order",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:customers.number_of_orders",
+      "kind": "column",
+      "name": "number_of_orders",
+      "qualified_name": "customers.number_of_orders",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers.number_of_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.amount",
+      "kind": "column",
+      "name": "amount",
+      "qualified_name": "orders.amount",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "orders.amount",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "orders",
+          "column": "amount"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:orders.bank_transfer_amount",
+      "kind": "column",
+      "name": "bank_transfer_amount",
+      "qualified_name": "orders.bank_transfer_amount",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.bank_transfer_amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.coupon_amount",
+      "kind": "column",
+      "name": "coupon_amount",
+      "qualified_name": "orders.coupon_amount",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.coupon_amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.credit_card_amount",
+      "kind": "column",
+      "name": "credit_card_amount",
+      "qualified_name": "orders.credit_card_amount",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.credit_card_amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.customer_id",
+      "kind": "column",
+      "name": "customer_id",
+      "qualified_name": "orders.customer_id",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.customer_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.gift_card_amount",
+      "kind": "column",
+      "name": "gift_card_amount",
+      "qualified_name": "orders.gift_card_amount",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.gift_card_amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.order_date",
+      "kind": "column",
+      "name": "order_date",
+      "qualified_name": "orders.order_date",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.order_date",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.order_id",
+      "kind": "column",
+      "name": "order_id",
+      "qualified_name": "orders.order_id",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.order_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:orders.status",
+      "kind": "column",
+      "name": "status",
+      "qualified_name": "orders.status",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders.status",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_customers.first_name",
+      "kind": "column",
+      "name": "first_name",
+      "qualified_name": "raw_customers.first_name",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_customers.first_name",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_customers",
+          "column": "first_name"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "text",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_customers.id",
+      "kind": "column",
+      "name": "id",
+      "qualified_name": "raw_customers.id",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_customers.id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_customers",
+          "column": "id"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_customers.last_name",
+      "kind": "column",
+      "name": "last_name",
+      "qualified_name": "raw_customers.last_name",
+      "evidence": [],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_orders.amount",
+      "kind": "column",
+      "name": "amount",
+      "qualified_name": "raw_orders.amount",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_orders.amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_orders",
+          "column": "amount"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_orders.id",
+      "kind": "column",
+      "name": "id",
+      "qualified_name": "raw_orders.id",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_orders.id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_orders",
+          "column": "id"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_orders.order_date",
+      "kind": "column",
+      "name": "order_date",
+      "qualified_name": "raw_orders.order_date",
+      "evidence": [],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_orders.status",
+      "kind": "column",
+      "name": "status",
+      "qualified_name": "raw_orders.status",
+      "evidence": [],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_orders.user_id",
+      "kind": "column",
+      "name": "user_id",
+      "qualified_name": "raw_orders.user_id",
+      "evidence": [],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_payments.amount",
+      "kind": "column",
+      "name": "amount",
+      "qualified_name": "raw_payments.amount",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_payments.amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_payments",
+          "column": "amount"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_payments.id",
+      "kind": "column",
+      "name": "id",
+      "qualified_name": "raw_payments.id",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_payments.id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_payments",
+          "column": "id"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:raw_payments.order_id",
+      "kind": "column",
+      "name": "order_id",
+      "qualified_name": "raw_payments.order_id",
+      "evidence": [],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:raw_payments.payment_method",
+      "kind": "column",
+      "name": "payment_method",
+      "qualified_name": "raw_payments.payment_method",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_payments.payment_method",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_payments",
+          "column": "payment_method"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "text",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:stg_customers.customer_id",
+      "kind": "column",
+      "name": "customer_id",
+      "qualified_name": "stg_customers.customer_id",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_customers.customer_id",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_customers.sql",
+          "expression": "stg_customers.customer_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_customers",
+          "column": "customer_id"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:stg_customers.first_name",
+      "kind": "column",
+      "name": "first_name",
+      "qualified_name": "stg_customers.first_name",
+      "evidence": [
+        {
+          "file": "compiled/stg_customers.sql",
+          "expression": "stg_customers.first_name",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_customers.last_name",
+      "kind": "column",
+      "name": "last_name",
+      "qualified_name": "stg_customers.last_name",
+      "evidence": [
+        {
+          "file": "compiled/stg_customers.sql",
+          "expression": "stg_customers.last_name",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_orders.customer_id",
+      "kind": "column",
+      "name": "customer_id",
+      "qualified_name": "stg_orders.customer_id",
+      "evidence": [
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "stg_orders.customer_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_orders.order_date",
+      "kind": "column",
+      "name": "order_date",
+      "qualified_name": "stg_orders.order_date",
+      "evidence": [
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "stg_orders.order_date",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_orders.order_id",
+      "kind": "column",
+      "name": "order_id",
+      "qualified_name": "stg_orders.order_id",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_orders.order_id",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "stg_orders.order_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_orders",
+          "column": "order_id"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:stg_orders.status",
+      "kind": "column",
+      "name": "status",
+      "qualified_name": "stg_orders.status",
+      "evidence": [
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "stg_orders.status",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_payments.amount",
+      "kind": "column",
+      "name": "amount",
+      "qualified_name": "stg_payments.amount",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_payments.amount",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "stg_payments.amount",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_payments",
+          "column": "amount"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "data_type": "number",
+          "nullable": null,
+          "ordinal_position": null,
+          "comment": null
+        }
+      }
+    },
+    {
+      "id": "column:stg_payments.order_id",
+      "kind": "column",
+      "name": "order_id",
+      "qualified_name": "stg_payments.order_id",
+      "evidence": [
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "stg_payments.order_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_payments.payment_id",
+      "kind": "column",
+      "name": "payment_id",
+      "qualified_name": "stg_payments.payment_id",
+      "evidence": [
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "stg_payments.payment_id",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "column:stg_payments.payment_method",
+      "kind": "column",
+      "name": "payment_method",
+      "qualified_name": "stg_payments.payment_method",
+      "evidence": [
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "stg_payments.payment_method",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "id": "table:customers",
+      "kind": "table",
+      "name": "customers",
+      "qualified_name": "customers",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "customers",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/customers.sql",
+          "expression": "customers",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "customers"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:orders",
+      "kind": "table",
+      "name": "orders",
+      "qualified_name": "orders",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "orders",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/orders.sql",
+          "expression": "orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "orders"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:raw_customers",
+      "kind": "table",
+      "name": "raw_customers",
+      "qualified_name": "raw_customers",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_customers",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_customers"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:raw_orders",
+      "kind": "table",
+      "name": "raw_orders",
+      "qualified_name": "raw_orders",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_orders"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:raw_payments",
+      "kind": "table",
+      "name": "raw_payments",
+      "qualified_name": "raw_payments",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "raw_payments",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "raw_payments"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:stg_customers",
+      "kind": "table",
+      "name": "stg_customers",
+      "qualified_name": "stg_customers",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_customers",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_customers.sql",
+          "expression": "stg_customers",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_customers"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:stg_orders",
+      "kind": "table",
+      "name": "stg_orders",
+      "qualified_name": "stg_orders",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_orders",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "stg_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_orders"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    },
+    {
+      "id": "table:stg_payments",
+      "kind": "table",
+      "name": "stg_payments",
+      "qualified_name": "stg_payments",
+      "evidence": [
+        {
+          "file": "/Users/jonkim/Local Docs/Development/clearmetric-labs/ClearMetric-Core/packages/clearmetric-core/tests/fixtures/wedge/jaffle_warehouse_schema.json",
+          "expression": "stg_payments",
+          "confidence": "high"
+        },
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "stg_payments",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "complete",
+        "confidence": "high",
+        "source": "information_schema",
+        "errors": []
+      },
+      "bindings": [
+        {
+          "warehouse": "jaffle",
+          "table": "stg_payments"
+        }
+      ],
+      "aspects": {
+        "warehouse_metadata": {
+          "database": null,
+          "schema": null
+        }
+      }
+    }
+  ],
+  "edges": [
+    {
+      "kind": "depends_on",
+      "source_id": "table:customers",
+      "target_id": "table:stg_customers",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "stg_customers",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:customers",
+      "target_id": "table:stg_orders",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "stg_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:customers",
+      "target_id": "table:stg_payments",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/customers.sql",
+          "expression": "stg_payments",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:orders",
+      "target_id": "table:stg_orders",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "stg_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:orders",
+      "target_id": "table:stg_payments",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/orders.sql",
+          "expression": "stg_payments",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:stg_customers",
+      "target_id": "table:raw_customers",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/stg_customers.sql",
+          "expression": "raw_customers",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:stg_orders",
+      "target_id": "table:raw_orders",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/stg_orders.sql",
+          "expression": "raw_orders",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    },
+    {
+      "kind": "depends_on",
+      "source_id": "table:stg_payments",
+      "target_id": "table:raw_payments",
+      "label": "depends_on",
+      "confidence": "high",
+      "evidence": [
+        {
+          "file": "compiled/stg_payments.sql",
+          "expression": "raw_payments",
+          "confidence": "high"
+        }
+      ],
+      "derivation": {
+        "status": "partial",
+        "confidence": "medium",
+        "source": "dbt_manifest",
+        "errors": []
+      }
+    }
+  ],
+  "warnings": []
+}

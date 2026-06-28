@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.8.0 - 2026-06-28
+
+### Added (Consumer MVP Bundle)
+
+- **Bundle contract** — `spec/consumer-bundle.schema.json`, `impact-output.schema.json`, `consumer-envelope.schema.json`; validation in `clearmetric.core.validate`
+- **Bundle builder** — `scripts/consumers/build_bundle.py` with `project` and `prebuilt` scenario modes
+- **Consumer examples** — committed minimal admin-lane bundle, vanilla `catalog-viewer` and `lineage-explorer`, shared `artifact-kit.mjs`
+- **Corpus checks** — declarative `checks.yaml` runner under `tests/consumers/`
+- **CLI helper** — `clearmetric.cli.runner.run_cm` (shared by tests and bundle builder)
+- **Learning notebooks** — `examples/notebooks/` walkthroughs for wedge, formats, impact, bundles, and backbone lab
+
+### Changed
+
+- **CI** — consumer artifact-kit node tests, consumer pytest slice, repository boundary checks for viewer/build_bundle imports
+- **Wedge test helpers** — delegate subprocess invocations to `cli.runner`
+
+### Docs
+
+- [examples/consumers/README.md](examples/consumers/README.md), [examples/notebooks/README.md](examples/notebooks/README.md), updated [docs/e2e-readiness.md](docs/e2e-readiness.md)
+
 ## 0.7.1 - 2026-06-28
 
 ### Fixed (Backbone boundary QA — experimental lab, wedge outputs stable)

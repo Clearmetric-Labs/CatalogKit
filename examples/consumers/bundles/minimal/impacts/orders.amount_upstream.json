@@ -1,0 +1,14 @@
+{
+  "selection": "orders.amount",
+  "selection_id": "column:orders.amount",
+  "related_ids": [],
+  "warnings": [
+    {
+      "code": "source_disagreement",
+      "message": "Sources disagree on derivation for 'column:orders.amount': complete/high vs partial/medium",
+      "location": null,
+      "subject_id": "column:orders.amount"
+    }
+  ],
+  "derivation": []
+}

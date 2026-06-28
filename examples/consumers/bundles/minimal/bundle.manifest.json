@@ -1,0 +1,27 @@
+{
+  "schema_version": "1",
+  "scenario_id": "minimal",
+  "label": "Wedge jaffle fixture",
+  "artifacts": {
+    "graph": {
+      "path": "graph.json",
+      "kind": "catalog-artifact",
+      "lane": "admin"
+    },
+    "catalog": {
+      "path": "catalog.json",
+      "kind": "catalog-artifact",
+      "lane": "admin"
+    },
+    "impacts": {
+      "orders.amount_upstream": {
+        "path": "impacts/orders.amount_upstream.json",
+        "selection": "orders.amount",
+        "direction": "upstream"
+      }
+    }
+  },
+  "defaults": {
+    "impact_key": "orders.amount_upstream"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearmetric.dev/spec/impact-output.schema.json",
+  "title": "ClearMetric Impact CLI Output",
+  "description": "Exact JSON payload emitted by cm impact --format json via emitters/impact.py",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["selection", "selection_id", "related_ids", "warnings", "derivation"],
+  "properties": {
+    "selection": {
+      "type": "string",
+      "minLength": 1
+    },
+    "selection_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "related_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/warning" }
+    },
+    "derivation": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/derivation_entry" }
+    }
+  },
+  "$defs": {
+    "warning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1 },
+        "message": { "type": "string", "minLength": 1 },
+        "location": { "type": ["string", "null"] },
+        "subject_id": { "type": ["string", "null"] }
+      }
+    },
+    "derivation_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "edge": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["complete", "partial", "failed", "skipped"]
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      },
+      "oneOf": [
+        { "required": ["id", "status", "confidence"] },
+        { "required": ["edge", "status", "confidence"] }
+      ]
+    }
+  }
+}

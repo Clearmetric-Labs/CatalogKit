@@ -66,7 +66,17 @@ from .models import (
 )
 from .project import ClearMetricProject, load_project_aliases, load_project_config
 from .serialize import render_json
-from .validate import load_artifact_file, validate_artifact_dict, validate_project_dict
+from .validate import (
+    load_artifact_file,
+    load_bundle_manifest_file,
+    load_impact_output_file,
+    validate_artifact_dict,
+    validate_bundle_artifact_file,
+    validate_bundle_manifest_dict,
+    validate_consumer_envelope_dict,
+    validate_impact_output_dict,
+    validate_project_dict,
+)
 
 __all__ = [
     "__version__",
@@ -101,6 +111,8 @@ __all__ = [
     "filter_warnings_for_ids",
     "leaf_name",
     "load_artifact_file",
+    "load_bundle_manifest_file",
+    "load_impact_output_file",
     "load_project_aliases",
     "load_project_config",
     "load_table_alias_map",
@@ -125,6 +137,10 @@ __all__ = [
     "table_id",
     "TraversalResult",
     "validate_artifact_dict",
+    "validate_bundle_artifact_file",
+    "validate_bundle_manifest_dict",
+    "validate_consumer_envelope_dict",
+    "validate_impact_output_dict",
     "validate_project_dict",
     "visual_id",
     "warehouse_table_fqn_candidates",

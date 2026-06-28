@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://clearmetric.dev/spec/consumer-bundle.schema.json",
+  "title": "ClearMetric Consumer Bundle Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "scenario_id", "label", "artifacts", "defaults"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1"
+    },
+    "scenario_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1
+    },
+    "provenance": {
+      "type": "string"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["graph", "catalog", "impacts"],
+      "properties": {
+        "graph": { "$ref": "#/$defs/artifact_ref" },
+        "catalog": { "$ref": "#/$defs/artifact_ref" },
+        "impacts": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": { "$ref": "#/$defs/impact_ref" }
+        }
+      }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact_key"],
+      "properties": {
+        "impact_key": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  },
+  "$defs": {
+    "artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "kind", "lane"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "const": "catalog-artifact"
+        },
+        "lane": {
+          "type": "string",
+          "enum": ["admin", "consumer"]
+        },
+        "identity": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "if": {
+        "properties": { "lane": { "const": "consumer" } },
+        "required": ["lane"]
+      },
+      "then": {
+        "required": ["identity"]
+      }
+    },
+    "impact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "selection", "direction"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "selection": {
+          "type": "string",
+          "minLength": 1
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["upstream", "downstream"]
+        }
+      }
+    }
+  }
+}

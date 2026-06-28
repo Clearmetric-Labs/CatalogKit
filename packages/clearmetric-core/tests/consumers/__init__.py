@@ -1,0 +1,1 @@
+"""Consumer bundle corpus tests."""

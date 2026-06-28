@@ -1,0 +1,4 @@
+scenarios:
+  - id: minimal
+    ci: true
+    bundle_dir: ../bundles/minimal

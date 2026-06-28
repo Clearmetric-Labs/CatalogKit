@@ -70,6 +70,13 @@ jobs:
             tests/test_cross_package_artifacts.py \
             tests/test_module_independence.py
 
+      - name: Run consumer bundle tests
+        run: |
+          node --test examples/consumers/shared/test-artifact-kit.mjs
+          python -m pytest -v \
+            packages/clearmetric-core/tests/consumers/ \
+            packages/clearmetric-core/tests/core/test_consumer_schemas.py
+
       - name: Lineage trust gate
         run: |
           python -m pytest -v \

@@ -1,0 +1,15 @@
+id: _template
+label: Template scenario (copy to create a new scenario)
+mode: project
+project_dir: ../../../wedge-jaffle
+outputs:
+  - compile_format: json
+    out: graph.json
+  - compile_format: catalog
+    out: catalog.json
+impacts:
+  - selection: orders.amount
+    direction: upstream
+    manifest_key: orders.amount_upstream
+    out: impacts/orders.amount_upstream.json
+checks: checks.yaml

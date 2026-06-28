@@ -1,0 +1,10 @@
+cases:
+  - id: example_node_kinds
+    artifact: catalog
+    expect_node_kinds:
+      - table
+      - column
+  - id: example_impact_includes
+    impact: orders.amount_upstream
+    expect_related_includes:
+      - column:orders.amount

@@ -328,3 +328,53 @@ def _has_banned_prefix(module_name: str) -> bool:
         module_name == prefix or module_name.startswith(f"{prefix}.")
         for prefix in PROPRIETARY_IMPORT_PREFIXES
     )
+
+
+CONSUMERS_ROOT = REPO_ROOT / "examples" / "consumers"
+BUILD_BUNDLE = REPO_ROOT / "scripts" / "consumers" / "build_bundle.py"
+_BANNED_BUILD_BUNDLE_IMPORTS = (
+    "clearmetric.emitters",
+    "clearmetric.projection",
+    "clearmetric.policy",
+    "clearmetric.runtime",
+)
+_BANNED_CONSUMER_STRINGS = (
+    "policy.gate",
+    "apply_policy",
+    "require_allow",
+    "CM_EXPERIMENTAL",
+)
+
+
+def test_consumer_viewers_do_not_embed_policy_or_python():
+    violations: list[str] = []
+    for path in CONSUMERS_ROOT.rglob("*"):
+        if path.suffix not in {".mjs", ".html", ".css"}:
+            continue
+        if "bundles/" in str(path):
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "clearmetric." in text or "from clearmetric" in text or "import clearmetric" in text:
+            violations.append(f"{path}: imports clearmetric Python modules")
+        for banned in _BANNED_CONSUMER_STRINGS:
+            if banned in text:
+                violations.append(f"{path}: contains {banned!r}")
+    assert violations == []
+
+
+def test_build_bundle_import_boundary():
+    tree = ast.parse(BUILD_BUNDLE.read_text(encoding="utf-8"), filename=str(BUILD_BUNDLE))
+    violations: list[str] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for alias in node.names:
+                for banned in _BANNED_BUILD_BUNDLE_IMPORTS:
+                    if alias.name == banned or alias.name.startswith(f"{banned}."):
+                        violations.append(f"import {alias.name}")
+        if isinstance(node, ast.ImportFrom) and node.module:
+            for banned in _BANNED_BUILD_BUNDLE_IMPORTS:
+                if node.module == banned or node.module.startswith(f"{banned}."):
+                    violations.append(f"from {node.module} import ...")
+            if node.module.startswith("clearmetric.graph"):
+                violations.append(f"from {node.module} import ...")
+    assert violations == []

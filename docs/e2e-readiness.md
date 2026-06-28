@@ -33,6 +33,18 @@ Pipeline shape for every consumer:
 select → gate → apply_policy → emit
 ```
 
+## Consumer MVP Bundle (0.8.x)
+
+Implemented under [`examples/consumers/`](../examples/consumers/README.md):
+
+- Versioned **bundle contract** (`bundle.manifest.json` + JSON schemas)
+- Scenario registry + `scripts/consumers/build_bundle.py`
+- Committed **minimal** admin-lane bundle (wedge-jaffle fixture)
+- Vanilla **catalog-viewer** and **lineage-explorer** (no build step, no browser policy)
+- **Corpus checks** via `checks.yaml` + `tests/consumers/checks_runner.py` (Track C instrument)
+
+Apps bind to the manifest and declared lanes — not to jaffle, GitLab, or any scenario id in code.
+
 ## Deferred: robust e2e matrix
 
 Build when example apps exist to drive scenarios:
@@ -43,18 +55,18 @@ Build when example apps exist to drive scenarios:
 
 Run lab tests with `CM_EXPERIMENTAL=1`. Keep wedge regression without experimental env.
 
-## Deferred: example consumer applications
+## Deferred: additional consumer apps
 
-Thin apps under `examples/consumers/` — **zero** duplicated policy/projection logic:
+| App | Status |
+|-----|--------|
+| `catalog-viewer` | **Shipped** — admin `catalog` bundle |
+| `lineage-explorer` | **Shipped** — manifest impact keys, flat list v0 |
+| `bi-minimal` | Deferred — query execution / runtime trust |
+| `ai-host` | Deferred — lab `ai-context`, adoption gate |
+| docs emitter | Deferred |
 
-| App | Input | UI job |
-|-----|-------|--------|
-| `bi-minimal` | `compile --format frontend-contract --identity X` | Bind SQL + render table |
-| `catalog-viewer` | `compile --format consumer-catalog --identity X` | Browse enveloped nodes |
-| `ai-host` | `compile --format ai-context --identity X` | Feed payload to BYO LLM |
-| `lineage-explorer` | `graph.json` + ungated `impact` | Visualize traversal |
-
-Each app calls one CLI command or `emit_compile` — no reimplementation of gate or projection.
+Lab consumer bundles (`consumer-catalog`, `frontend-contract`, `ai-context`) remain
+`CM_EXPERIMENTAL=1` scenario recipes — not public README promise.
 
 ## Deferred: resolver corpus
 
@@ -62,4 +74,5 @@ Graph correctness on messy real SQL is a **parallel track**, not gated by this c
 
 ## Stop condition
 
-After this checkpoint: next work is example apps + e2e OR resolver corpus — not more substrate rewrites.
+After Consumer MVP Bundle: use **prebuilt external scenarios** + `checks.yaml` for
+resolver/track-C work — not more substrate rewrites unless a missing primitive is exposed.
