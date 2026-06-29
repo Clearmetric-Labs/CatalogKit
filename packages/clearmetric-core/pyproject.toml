@@ -55,6 +55,7 @@ release = [
     "twine>=5.1.1",
 ]
 docs = [
+    "mkdocs>=1.6",
     "mkdocs-gitbook>=0.0.1",
     "pymdown-extensions>=10.0",
 ]
