@@ -82,7 +82,7 @@ cm clean
 cm contract graph.json
 ```
 
-## Dev wiki
+## Docs site
 
 Regenerate the CLI reference when `clearmetric.cli` help text changes:
 

@@ -1,6 +1,6 @@
 # ClearMetric
 
-> **v1 docs:** [`docs/public-architecture.md`](docs/public-architecture.md) · [`docs/vision.md`](docs/vision.md) · [`docs/limitations.md`](docs/limitations.md) · [`docs/uncertainty.md`](docs/uncertainty.md)
+> **v1 docs:** [ClearMetric Core Docs](https://clearmetric-labs.github.io/ClearMetric-Core/) · [`docs/public-architecture.md`](docs/public-architecture.md) · [`docs/validation/what-works.md`](docs/validation/what-works.md) · [`docs/reference/lineage-limitations.md`](docs/reference/lineage-limitations.md)
 
 **The analytics backbone. One canonical, queryable, governed graph of your entire analytics
 layer — compiled from the SQL, dbt, and warehouse metadata you already have — that you can

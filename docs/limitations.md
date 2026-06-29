@@ -1,24 +1,13 @@
-# Limitations (v1)
+# Limitations
 
-ClearMetric Core v1 is a **local compiler**, not a live metadata platform.
+This file remains for repo links. **Do not maintain a second limitations manual here.**
 
-## Resolution
+Use the docs site instead:
 
-- Column lineage depends on parseable compiled SQL and known upstream schemas.
-- Bare `SELECT *` expands only when exactly one resolvable source has known columns; joins and unknown schemas suppress expansion.
-- Star expansion requires a declared upstream column set (seed, source, warehouse metadata, or dbt `columns:`), not columns inferred from upstream SQL-folder models.
-- UNION branches and some set operations emit `unresolved_lineage` rather than inventing positional merges.
-- Warehouse binding uses qualified names and suffix matching; ambiguous unqualified names refuse to bind.
+- [What works today](validation/what-works.md) — practical trust boundaries
+- [SQL support and limits](validation/sql-limits.md) — pointer to the resolver spec
+- [Check lineage yourself](validation/check-lineage.md)
+- [Help test on real projects](validation/help-test.md)
+- [Lineage support and limits](reference/lineage-limitations.md) — canonical SQL resolver spec
 
-## Identity
-
-- dbt ↔ warehouse binding is **partial**: database/schema/name alignment with ambiguity refusal.
-- Two tables with the same unqualified name in different databases must not cross-impact via suffix bridge alone.
-
-## Scope
-
-- No live warehouse or dbt Cloud connector — local JSON and artifacts only.
-- Intent/metrics ingestion requires `CM_EXPERIMENTAL=1`.
-- Lab formats (`consumer-catalog`, `frontend-contract`, `ai-context`, `cm query`, `cm serve`) are experimental.
-
-Detailed SQL patterns: [`reference/lineage-limitations.md`](reference/lineage-limitations.md).
+Browse the full manual: [ClearMetric Core Docs](https://clearmetric-labs.github.io/ClearMetric-Core/)

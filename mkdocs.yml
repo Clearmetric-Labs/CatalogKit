@@ -1,4 +1,4 @@
-site_name: ClearMetric Core Dev Wiki
+site_name: ClearMetric Core Docs
 site_url: https://clearmetric-labs.github.io/ClearMetric-Core/
 repo_url: https://github.com/ClearMetric-Labs/ClearMetric-Core
 edit_uri: edit/main/docs/
@@ -8,25 +8,39 @@ strict: true
 
 validation:
   nav:
-    # info: warn fails mkdocs --strict on orphan pages; info keeps CI green for doc churn
+    # warn fails strict on orphan contributor files (vision.md, etc.)
     omitted_files: info
   links:
     unrecognized_links: warn
     absolute_links: warn
 
 nav:
-  - Home: index.md
-  - Development: development.md
-  - Architecture: public-architecture.md
-  - Limits: limitations.md
-  - Contract: reference/contract.md
-  - Lineage Limits: reference/lineage-limitations.md
-  - CLI Reference: reference/cli.md
-  - Roadmaps:
-      - V1 Boundary: v1-boundary.md
-      - Adoption Gate: adoption-gate.md
-      - Future Roadmap: future-roadmap-gated.md
-      - Backbone V2 Roadmap: backbone-v2-roadmap.md
+  - Start:
+      - What is ClearMetric Core?: index.md
+      - What it does today: current-scope.md
+      - Project status: status.md
+  - Getting Started:
+      - Install: getting-started/install.md
+      - Five-minute demo: getting-started/five-minute-demo.md
+      - Run on your own project: getting-started/your-project.md
+      - Understanding the outputs: getting-started/outputs.md
+  - Concepts:
+      - The canonical graph: concepts/canonical-graph.md
+      - Canonical IDs and bindings: concepts/canonical-ids.md
+      - Derived state and confidence: concepts/derived-state.md
+  - Validation:
+      - What works today: validation/what-works.md
+      - SQL support and limits: validation/sql-limits.md
+      - Check lineage yourself: validation/check-lineage.md
+      - Help test on real projects: validation/help-test.md
+  - Reference:
+      - CLI reference: reference/cli.md
+      - Artifact contract: reference/contract.md
+      - Input and output formats: reference/io-formats.md
+  - Contributing:
+      - Development: development.md
+      - Architecture: public-architecture.md
+  - Roadmap: roadmap.md
 
 theme:
   name: material

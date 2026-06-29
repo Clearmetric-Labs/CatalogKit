@@ -24,7 +24,7 @@ Warehouse metadata is a **local INFORMATION_SCHEMA JSON export** — not a live 
 
 If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …`
 
-> **Status:** early development (0.x). Pin your versions. **Dev wiki:** [clearmetric-labs.github.io/ClearMetric-Core](https://clearmetric-labs.github.io/ClearMetric-Core/) · Architecture: [`docs/public-architecture.md`](docs/public-architecture.md) · limits: [`docs/limitations.md`](docs/limitations.md)
+> **Status:** early development (0.x). Pin your versions. **Docs:** [clearmetric-labs.github.io/ClearMetric-Core](https://clearmetric-labs.github.io/ClearMetric-Core/) · Architecture: [`docs/public-architecture.md`](docs/public-architecture.md) · [Validation](https://clearmetric-labs.github.io/ClearMetric-Core/validation/what-works/)
 
 ## Features
 
@@ -32,7 +32,7 @@ If `cm` is occupied on your PATH: `python -m clearmetric.cli --project-dir . …
 - **One graph** — warehouse, dbt, and SQL merged with physical bindings on lineage nodes
 - **Catalog** — `compile --format catalog` for table/column/model nodes
 - **OpenLineage** — `compile --format openlineage` for interop with DataHub, Marquez, etc.
-- **Cleaner + security floor** — structural checks and schema drift warnings; compile fails closed on security policy errors (see [`docs/limitations.md`](docs/limitations.md))
+- **Cleaner + security floor** — structural checks and schema drift warnings; compile fails closed on security policy errors (see [Validation docs](https://clearmetric-labs.github.io/ClearMetric-Core/validation/what-works/))
 
 ## Quickstart
 
@@ -99,8 +99,8 @@ One install (`pip install clearmetric-core`) — Python subpackages, not separat
 Static analysis for SQL/dbt lineage; warehouse **metadata exports** only in the public CLI.
 ClearMetric does not connect to live warehouses or execute production queries. On star-heavy
 SQL (`SELECT *` without schema), ClearMetric flags what it cannot resolve. See
-[`docs/limitations.md`](docs/limitations.md) and
-[lineage limitations](docs/reference/lineage-limitations.md).
+[Validation](https://clearmetric-labs.github.io/ClearMetric-Core/validation/what-works/) and
+[lineage limitations](docs/reference/lineage-limitations.md). Full manual on the [Docs site](https://clearmetric-labs.github.io/ClearMetric-Core/).
 
 ## Feedback
 
@@ -120,7 +120,7 @@ ClearMetric Core is one package at `packages/clearmetric-core`. See
 [`docs/public-architecture.md`](docs/public-architecture.md) for v1 scope and
 [`clearmetric-architecture.md`](clearmetric-architecture.md) for the full historical design.
 
-**Docs:** [dev wiki](https://clearmetric-labs.github.io/ClearMetric-Core/) · [public architecture](docs/public-architecture.md) · [vision](docs/vision.md) · [limitations](docs/limitations.md) · [contract](docs/reference/contract.md) · [contributing](CONTRIBUTING.md)
+**Docs:** [ClearMetric Core Docs](https://clearmetric-labs.github.io/ClearMetric-Core/) · [public architecture](docs/public-architecture.md) · [contract](docs/reference/contract.md) · [contributing](CONTRIBUTING.md)
 
 **Local development**
 
