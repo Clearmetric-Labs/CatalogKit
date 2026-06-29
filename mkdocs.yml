@@ -44,8 +44,8 @@ nav:
 
 theme: gitbook
 
-plugins:
-  - search
+# GitBook theme ships broken search UI when mkdocs search plugin is enabled.
+plugins: []
 
 markdown_extensions:
   - admonition
