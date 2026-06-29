@@ -4,17 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## 0.9.2 - 2026-06-29
+
+### Added
+
+- **Docs site** — adoption-focused ClearMetric Core Docs on GitHub Pages (Validation nav, generated CLI reference)
+- **CLI** — export `build_parser()` for docs generation and tooling
+- **Example notebooks** — Colab-ready 01–05 curriculum with `_notebook_setup.py`, centralized `_paths.py`, and `scripts/verify_notebooks.py`
+- **lineage-demo** — Shopify-style warehouse export (22 tables) with unchanged impact ground truth
+
 ### Changed
 
-- **lineage-demo** — realistic Shopify-style warehouse export (22 tables) + SQL pipeline; notebooks fetch from GitHub when not in a clone
-- **Example notebooks** — intentional 01–05 curriculum, Colab-ready `_notebook_setup.py` bootstrap, centralized `_paths.py` asset manifests, raw → standardize teaching flow
-- **Notebook verification** — `scripts/verify_notebooks.py` smoke-tests 01–05 locally and in Colab-sim mode (`--colab-sim --skip-pip`)
+- **Docs theme** — GitBook (`mkdocs-gitbook`) instead of Material
+- **lineage-demo** — notebooks fetch fixtures from GitHub when not in a clone
 
 ### Removed
 
 - **`examples/notebooks/_preview.py`** and **`_bootstrap.py`**
 - **`examples/consumers/projects/lineage-sql-folder/`** duplicate route
 - Shopify dbt source from lineage-demo (use catalog-demo for dbt + warehouse)
+- In-package `docs/contract.md` and `docs/lineage/limitations.md` (canonical copies live under repo `docs/reference/`)
 
 ## 0.9.1 - 2026-06-28
 
