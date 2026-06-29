@@ -50,5 +50,4 @@ plugins:
 markdown_extensions:
   - admonition
   - pymdownx.superfences
-  - toc:
-      permalink: true
+  - toc
