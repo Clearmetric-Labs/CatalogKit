@@ -153,8 +153,8 @@ def load_setup_module(start: Path | None = None) -> ModuleType:
     return _exec_setup_module(_resolve_setup_file(start))
 
 
-def format_notebook_setup_cell(setup_call: str, imports: str, body: str) -> str:
-    """Build notebook cell 1 from the same bootstrap functions notebooks import at runtime."""
+def format_notebook_bootstrap_cell(setup_call: str) -> str:
+    """Build notebook cell 1: pip install + path bootstrap only (imports go in cell 2)."""
     import inspect
 
     paths = _load_paths_module(Path(__file__).resolve().parent / "_paths.py")
@@ -182,6 +182,9 @@ def format_notebook_setup_cell(setup_call: str, imports: str, body: str) -> str:
         "from types import ModuleType\n\n"
         f"{''.join(helper_sources)}"
         f"_exec_setup_module(_resolve_setup_file()).setup_notebook({setup_call})\n"
-        f"{imports}\n"
-        f"{body}\n"
     )
+
+
+def format_notebook_setup_cell(setup_call: str, imports: str, body: str) -> str:
+    """Build a single setup cell (legacy); prefer bootstrap cell + separate imports cell."""
+    return format_notebook_bootstrap_cell(setup_call) + f"{imports}\n{body}\n"

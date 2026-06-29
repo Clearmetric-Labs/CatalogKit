@@ -22,7 +22,7 @@ def _load_notebook_setup_module():
     return module
 
 
-NOTEBOOK_SETUP = _load_notebook_setup_module().format_notebook_setup_cell
+NOTEBOOK_SETUP = _load_notebook_setup_module().format_notebook_bootstrap_cell
 
 
 def md(text: str) -> dict:
@@ -59,9 +59,15 @@ def nb(*cells) -> dict:
     }
 
 
-def setup(setup_args: str, imports: str, body: str) -> dict:
-    cell = NOTEBOOK_SETUP(setup_call=setup_args, imports=imports, body=body)
-    return code(cell)
+def bootstrap(setup_args: str) -> dict:
+    return code(NOTEBOOK_SETUP(setup_call=setup_args))
+
+
+def setup(imports: str, body: str) -> dict:
+    text = imports.strip()
+    if "\nfrom " in text and "\n\nfrom " not in text:
+        text = text.replace("\nfrom ", "\n\nfrom ", 1)
+    return code(f"{text}\n\n{body}\n")
 
 
 def write(name: str, notebook: dict) -> None:
@@ -82,8 +88,8 @@ def main() -> None:
                 "Next: [02 compile formats](02_compile_formats.ipynb) · "
                 "[03 impact analysis](03_impact_analysis.ipynb)"
             ),
+            bootstrap(""),
             setup(
-                "",
                 "from _paths import lineage_demo_project, show_raw_sources",
                 'PROJECT_DIR = lineage_demo_project()\nprint(f"project: {PROJECT_DIR}")',
             ),
@@ -162,8 +168,8 @@ def main() -> None:
                 "| `text` | Human-readable summary |\n\n"
                 "Assumes you read **01** for raw → standardize context."
             ),
+            bootstrap(""),
             setup(
-                "",
                 "import json\nfrom _paths import lineage_demo_project",
                 "PROJECT_DIR = lineage_demo_project()",
             ),
@@ -256,8 +262,8 @@ def main() -> None:
                 "| `orders_base.amount` | mid-pipeline column | downstream | 2 columns |\n\n"
                 "Downstream from the sink column is **empty** — that is correct, not an error."
             ),
+            bootstrap(""),
             setup(
-                "",
                 "import json\nfrom _paths import lineage_demo_project",
                 "PROJECT_DIR = lineage_demo_project()",
             ),
@@ -332,8 +338,8 @@ def main() -> None:
                 "Viewers run locally via `python -m http.server` — see "
                 "[consumers README](../consumers/README.md). In Colab we inspect bundle JSON in-notebook."
             ),
+            bootstrap(""),
             setup(
-                "",
                 "import json\nfrom _paths import (\n"
                 "    build_bundle_script,\n"
                 "    consumer_bundle_dir,\n"
@@ -432,8 +438,8 @@ def main() -> None:
                 "(`consumer-catalog`, `frontend-contract`, `ai-context`) gated by RBAC policy.\n\n"
                 "Requires `clearmetric-core[runtime]` for DuckDB query cells."
             ),
+            bootstrap('extras="runtime"'),
             setup(
-                'extras="runtime"',
                 "import json\nfrom _paths import backbone_lab_project",
                 'os.environ["CM_EXPERIMENTAL"] = "1"\n'
                 "PROJECT_DIR = backbone_lab_project()\n"

@@ -26,7 +26,7 @@ Colab-simulation (no local clone): `CM_NOTEBOOK_SKIP_PIP=1 python scripts/verify
 
 The verify script seeds the GitHub mirror cache from your checkout before changing cwd, so PR CI can exercise the Colab path without waiting for `main` to update.
 
-Maintainers regenerate notebook cells from `scripts/generate_notebooks.py` (setup cell source comes from `_notebook_setup.format_notebook_setup_cell`).
+Maintainers regenerate notebook cells from `scripts/generate_notebooks.py` (bootstrap cell from `_notebook_setup.format_notebook_bootstrap_cell`).
 
 ## Curriculum
 
